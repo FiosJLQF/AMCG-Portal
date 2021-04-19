@@ -5,10 +5,15 @@ const express = require("express");
 const router = express.Router();
 const { auth, requiresAuth } = require('express-openid-connect');
 require("dotenv").config();  // load all ".env" variables into "process.env" for use
-const { UserProfiles } = require('../models/sequelize.js');
+const { sequelize, Op } = require('sequelize');
+const { UserProfiles, UserPermissionsActive, AirportsTable, AirportsCurrent,
+        AISContentTypeCategories, LFOwnerTypeCategories, NationalRegions
+    } = require('../models/sequelize.js');
 const methodOverride = require('method-override');  // allows PUT and other non-standard methods
 router.use(methodOverride('_method')); // allows use of the PUT/DELETE method extensions
-const jsFx = require('../public/js/foa_node_fx');
+const jsFx = require('../scripts/foa_node_fx');
+const { check, validationResult, body } = require('express-validator');
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Auth0 Configuration
@@ -31,10 +36,13 @@ router.use(
 // Routes Definitions
 ///////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // "GET" Routes (Read data)
-////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
+////////////////////////////////////////
+// If the user has not yet been granted any permissions
+////////////////////////////////////////
 router.get('/newuser', requiresAuth(), async (req, res) => {
     try {
 
@@ -50,130 +58,169 @@ router.get('/newuser', requiresAuth(), async (req, res) => {
     }
 });
 
- router.get('/', requiresAuth(), async (req, res) => {
-     try {
+////////////////////////////////////////
+// The main switchboard
+////////////////////////////////////////
+router.get('/', requiresAuth(), async (req, res) => {
+    try {
 
-         let errorCode = 0;
-         let actionRequested = '';
-         let statusMessage = '';
+        // general variables
+        let errorCode = 0;
+        let actionRequested = '';
+        let statusMessage = '';
+        // SELECT object options
+        let nationalRegionsDDL = []; // list of all options for the State/Province/Territory/etc SELECT object
+        let aisContentTypeCategoriesDDL = []; // list of all AIS Content Type Categories for the SELECT object
+        let matchingAirports = ''; // array of all matching airports
+        // airport search criteria
+        let searchAirportID = '';
+        let searchAirportName = '';
+        let searchAirportCity = '';
+        let searchAirportNationalRegion = '';
+        let matchingAirportsCount;
+        // specific options requested
+        let airportIDRequested = '';
+        let selectedAirportID = ''; // LFID for selected airport
+        let selectedAirport = []; // details for selected airport
+        let aisContentTypeRequested = '';
+        let selectedAISContentType = ''; // AIS page to display
 
-         // Get the current user's profile
-         const userProfiles = await UserProfiles.findAll( { where: { Username: req.oidc.user.email }});
-         console.log(`userProfile: ${userProfiles.length}`);
-         if ( userProfiles.length === 0 ) {
-             res.redirect(`/switchboard/newuser`);
-         };
+        ////////////////////////////////////////////////////
+        // Validate any query string parameters
+        ////////////////////////////////////////////////////
 
-//         // Get the list of active permissions for the user
-//         const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: userProfiles[0].UserID }});
+        // Were any search criteria present?
+        if ( req.query['searchairportid'] !== undefined ) {
+            searchAirportID = req.query['searchairportid'];
+            console.log(`querystring['searchairportid']: ${searchAirportID}`);
+            if ( searchAirportID !== '' ) {
+              // validate the requested Airport ID
+// ToDo:  Validate the Airport ID exists
+            };
+        };
+        if ( req.query['searchairportname'] !== undefined ) {
+            searchAirportName = req.query['searchairportname'];
+            console.log(`querystring['searchairportname']: ${searchAirportName}`);
+            if ( searchAirportName !== '' ) {
+              // validate the requested Airport Name
+// ToDo:  Validate the Airport Name contains only valid characters
+            };
+        };
+        if ( req.query['searchairportcity'] !== undefined ) {
+            searchAirportCity = req.query['searchairportcity'];
+            console.log(`querystring['searchairportcity']: ${searchAirportCity}`);
+            if ( searchAirportCity !== '' ) {
+              // validate the requested Airport City
+// ToDo:  Validate the Airport City contains only valid characters
+            };
+        };
+        if ( req.query['searchairportnationalregion'] !== undefined ) {
+            searchAirportNationalRegion = req.query['searchairportnationalregion'];
+            console.log(`querystring['searchairportnationalregion']: ${searchAirportNationalRegion}`);
+            if ( searchAirportNationalRegion !== '' ) {
+              // validate the requested Airport National Region
+// ToDo:  Validate the Airport National Region exists
+            };
+        };
 
-//         ////////////////////////////////////////////////////
-//         //  Sponsors Information (DDL, Add Sponsor, Default Sponsor, etc.)
-//         ////////////////////////////////////////////////////
+        // If a requested "airportid" is blank, redirect to the generic Switchboard page
+        if ( req.query['airportid'] !== undefined ) {
+            airportIDRequested = req.query['airportid'];
+            console.log(`querystring['airportid']: ${airportIDRequested}`);
+            if ( airportIDRequested === '' ) {
+// ToDo:  Log the error
+                res.redirect('/switchboard');
+            } else {  // validate the requested Airport ID
+// ToDo:  Validate the Airport ID
+               // The requested airport has been validated
+               selectedAirportID = airportIDRequested;
+            };
+        };
 
-//         // Can the user see the sponsors select object?  If so, load the Sponsors available to the current user.
-//         const userPermissionsSponsorDDL = userPermissionsActive.rows.filter( permission => permission.ObjectName === 'switchboard-sponsors');
-//         let userCanReadSponsors = false;
-//         let userPermissionsSponsors = [];
-//         let sponsorsAllDDL = [];
-//         let sponsorID = '';
-//         if ( userPermissionsSponsorDDL.length > 0 && userPermissionsSponsorDDL[0].CanRead ) {
-//             userCanReadSponsors = true;
-//             userPermissionsSponsors = userPermissionsActive.rows.filter( permission => permission.ObjectName === 'sponsors');
-//             if ( userPermissionsSponsors.length > 0 && userPermissionsSponsors[0].CanRead ) {
-//                 if ( userPermissionsSponsors[0].ObjectValues === '*' ) {
-//                     sponsorsAllDDL = await SponsorsAllDDLTest.findAndCountAll({});
-//                 } else {
-//                     sponsorsAllDDL = await SponsorsAllDDLTest.findAndCountAll({ where: { optionid: userPermissionsSponsors[0].ObjectValues } });
-//                     sponsorID = userPermissionsSponsors[0].ObjectValues; // Set the Sponsor ID to the only one Sponsor the User has permission to see
-//                 };
-//             } else {  // The user can see the Sponsors DDL, but has no Sponsors assigned to them - hide the DDL
-//                 userCanReadSponsors = false;
-//             };
-//         };
-//         console.log(`userCanReadSponsors: ${userCanReadSponsors}`);
+        // If a requested "aiscontenttype" is blank, redirect to the default "General Information" page
+        if ( req.query['aiscontenttype'] !== undefined ) {
+            aisContentTypeRequested = req.query['aiscontenttype'];
+            console.log(`querystring['aiscontenttype']: ${aisContentTypeRequested}`);
+            if ( aisContentTypeRequested === '' ) {
+                aisContentTypeRequested = '801001'; // default "General Information" page
+            } else {  // validate the requested Airport ID
+// ToDo:  Validate the AIS Content Type
+            };
+        };
 
-//         // If a SponsorID was provided in the querystring, or the User only has access to one Sponsor, find the Sponsor's details
-//         let sponsorDetails = [];
-//         let userCanReadSponsor = false;
-//         let userCanUpdateSponsor = false;
-//         let userCanDeleteSponsor = false;
-//         if ( req.query['sponsorid'] ) {  // If a Sponsor ID was provided in the query string, use that value
-//             if ( req.query['sponsorid'] == 0 ) {  // If Sponsor ID is "0", redirect to the generic Switchboard page
-//                 res.redirect('/switchboard');
-//             } else {
-//                 sponsorID = req.query['sponsorid'];
-//             };
-//         };
-//         if ( sponsorID !== '' ) {
-//             // Does the requested Sponsor exist? Retrieve the Sponsor's details from the database.
-//             sponsorDetails = await SponsorsTableTest.findAll({ where: { SponsorID: sponsorID }});
-//             if ( typeof sponsorDetails[0] === 'undefined' ) {  // Sponsor ID does not exist
-//                 console.log('908');
-//                 errorCode = 908;  // Unknown Sponsor
-//                 console.log(`errorcode = ${errorCode}`);
-//                 return res.render( 'error', {
-//                     errorCode: errorCode,
-//                     userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
-//                 });
-//             };
+        ////////////////////////////////////////////////////
+        // Retrieve options for add/edit form DDLs
+        ////////////////////////////////////////////////////
 
-//             // Does the User have permission to see/edit/delete this Sponsor?
-//             if ( sponsorID === userPermissionsSponsors[0].ObjectValues || userPermissionsSponsors[0].ObjectValues === '*' ) {
-//                 userCanReadSponsor = userPermissionsSponsors[0].CanRead;
-//                 console.log(`userCanReadSponsor: ${userCanReadSponsor}`);
-//                 userCanUpdateSponsor = userPermissionsSponsors[0].CanUpdate;
-//                 console.log(`userCanUpdateSponsor: ${userCanUpdateSponsor}`);
-//                 userCanDeleteSponsor = userPermissionsSponsors[0].CanDelete;
-//                 console.log(`userCanDeleteSponsor: ${userCanDeleteSponsor}`);
-//             } else {  // User does not have permission to read Sponsor's data - trap and log error
-//                 console.log('909');
-//                 errorCode = 909;  // Unknown Sponsor
-//                 console.log(`errorcode = ${errorCode}`);
-//                 return res.render( 'error', {
-//                         errorCode: errorCode,
-//                         userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
-//                 });
-//             };
-//         };
+        // Airport Search Objects
+        // -- National Regions DDL
+        nationalRegionsDDL = await NationalRegions.findAndCountAll({});
+        console.log(`nationalRegions Count: ${nationalRegionsDDL.count}`);
+        // -- AIS Content Types (data mgmt forms)
+        aisContentTypeCategoriesDDL = await AISContentTypeCategories.findAndCountAll({});
+        console.log(`aisContentTypeCategories Count: ${aisContentTypeCategoriesDDL.count}`);
+        if ( req.body.searchAISContentTypeCategories === undefined ) {
+            selectedAISContentType = '801001'; // default to the General Airport Information page
+        } else {
+// ToDo: VALIDATE THE DATA UPON SUBMITTAL!!
+            selectedAISContentType = aisContentTypeRequested;
+        };
+        console.log(`selected AIS Content Type: ${selectedAISContentType}`);
 
-//         // Can the user create new sponsors?
-//         let userCanCreateSponsors = false;
-//         if ( userCanReadSponsors && userPermissionsSponsorDDL[0].CanCreate ) {
-//             userCanCreateSponsors = true;
-//         };
+        // Data Mgmt Forms
+        // -- General Information (GIAI)
+        let lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+        console.log(`lfOwnerTypeCategories Count: ${lfOwnerTypeCategoriesDDL.count}`);
 
-//         // Retrieve options for DDLs
-//         const sponsorTypeCategoriesDDL = await SponsorTypeCategoriesDDL.findAndCountAll({});
 
-//         ////////////////////////////////////////////////////
-//         //  Scholarships Information (DDL, Add Scholarship, etc.)
-//         ////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////
+        // Get the current user's profile and permissions
+        ////////////////////////////////////////////////////
+        const userProfiles = await UserProfiles.findAll( { where: { Username: req.oidc.user.email }});
+        console.log(`userProfile: ${userProfiles.length}`);
+        if ( userProfiles.length === 0 ) {
+            res.redirect(`/switchboard/newuser`);
+        };
 
-//         // Can the user see the scholarships select object?  If so, load the Scholarships available to the current user.
-//         let userCanReadScholarships = false;
-//         let userPermissionsScholarshipDDL = [];
-//         let scholarshipsDDL = [];
-//         if (userPermissionsSponsorDDL.length > 0 && userPermissionsSponsorDDL[0].CanRead ) { // Only load scholarships if the user can see Sponsors
-//             userPermissionsScholarshipDDL = userPermissionsActive.rows.filter( permission => permission.ObjectName === 'switchboard-scholarships');
-//             if ( userPermissionsScholarshipDDL.length > 0 && userPermissionsScholarshipDDL[0].CanRead ) {  // If the User can see the Scholarships DDL, show it
-//                 userCanReadScholarships = true;
-// //                console.log(`sponsorID for scholarships DDL: ${sponsorID}`);
-//                 if ( sponsorID !== '' ) {  // If a single Sponsor ID is assigned, load the Scholarships for that Sponsor
-//                     scholarshipsDDL = await ScholarshipsAllDDLTest.findAndCountAll({ where: { SponsorID: sponsorID } });
-//                 } else {  // Load a blank row of data
-//                     scholarshipsDDL = await ScholarshipsAllDDLTest.findAndCountAll({ where: { SponsorID: -1 } });
-//                 };
-//             };
-//         };
-// //        console.log(`userCanReadScholarships: ${userCanReadScholarships}`);
-// //        console.log(`active scholarships for the Sponsor: ${scholarshipsDDL.count}`);
+        // Get the list of active permissions for the user
+        const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: userProfiles[0].UserID }});
 
-//         // Can the user create new scholarships?
-//         let userCanCreateScholarships = false;
-//         if ( userCanReadScholarships && userPermissionsScholarshipDDL[0].CanCreate ) {
-//             userCanCreateScholarships = true;
-//         };
+        ////////////////////////////////////////////////////
+        //  AIS/Airport Permissions and Details (DDLs, CRUD, etc.)
+        ////////////////////////////////////////////////////
+        const {
+            userCanReadAISMenu, userCanReadAirports, userCanCreateAirports,
+            airportID, airportDetails, doesAirportExist,
+            userCanReadAirport, userCanUpdateAirport, userCanDeleteAirport
+        } = await jsFx.getAISPermissionsForUser( userPermissionsActive, selectedAirportID );
+    //    console.log(`user can use AIS: ${userCanReadAISMenu}`);
+    //    console.log(`user can read airports: ${userCanReadAirports}`);
+    //    console.log(`user can create airports: ${userCanCreateAirports}`);
+    //    console.log(`airportID returned: ${airportID}`);
+    //    console.log(`userCanReadAirport: ${userCanReadAirport}`);
+    //    console.log(`userCanUpdateAirport: ${userCanUpdateAirport}`);
+    //    console.log(`userCanDeleteAirport: ${userCanDeleteAirport}`);
+
+        // Does the requested Airport exist (if requested)?
+        console.log(`doesAirportExist: (${doesAirportExist})`);
+        if ( !doesAirportExist ) {  // Airport ID does not exist
+// ToDo:  Log the error
+            errorCode = 908;  // Unknown Airport
+            return res.render( 'error', {
+                errorCode: errorCode,
+                userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+            });
+        };
+
+//        // Does the User have permission to see/edit/delete this Sponsor?
+//        if ( !userCanReadAirport ) { // User does not have permission to read Airport's data - trap and log error
+//    // ToDo:  Log the error
+//            errorCode = 909;  // Unknown Airport
+//            return res.render( 'error', {
+//                errorCode: errorCode,
+//                userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+//            });
+//        };
 
 //         ////////////////////////////////////////////////////
 //         //  Users Information (DDL, Add User, etc.)
@@ -218,112 +265,218 @@ router.get('/newuser', requiresAuth(), async (req, res) => {
 //             };
 //         };
 
-//         ////////////////////////////////////////////////////
-//         // Process any querystring "status message"
-//         ////////////////////////////////////////////////////
-//         if ( req.query['status'] === 'sponsorupdatesuccess' ) {
-//             statusMessage = 'Sponsor was updated.';
+         ////////////////////////////////////////////////////
+         // Process any querystring "status message"
+         ////////////////////////////////////////////////////
+         if ( req.query['status'] === 'airportupdatesuccess' ) {
+             statusMessage = 'Airport was updated.';
 //         } else if ( req.query['status'] === 'sponsordeletesuccess' ) {
 //             statusMessage = 'Sponsor was deleted.';
 //         } else if ( req.query['status'] === 'sponsorcreatesuccess' ) {
 //             statusMessage = 'Sponsor was added.';
-//         } else {
-//             statusMessage = '';
-//         };
+         } else {
+             statusMessage = '';
+         };
 
-         ////////////////////////////////////////////////////
-         // Render the page
-         ////////////////////////////////////////////////////
-         return res.render('switchboard', {
-             // Admin data
-             errorCode,
-             actionRequested,
-             statusMessage,
-             // User data
-             user: req.oidc.user,
-             userName: ( req.oidc.user == null ? '' : req.oidc.user.name ),
-//             // Main Menu Data
-//             userCanReadSponsors,
-//             sponsorsAllDDL,
-//             userCanCreateSponsors,
-//             sponsorTypeCategoriesDDL,
-//             userCanReadScholarships,
-//             scholarshipsDDL,
-//             userCanCreateScholarships,
-//             userCanReadUsers,
-//             usersAllDDL,
-//             userCanCreateUsers,
-//             userID: '',
-//             // Sponsor Details data
-//             sponsorID,
-//             sponsorDetails,
-//             userCanReadSponsor, userCanUpdateSponsor, userCanDeleteSponsor,
-//             // Scholarship Details data
-//             scholarshipID,
-         })
-     } catch(err) {
-         console.log('Error:' + err);
-     }
- });
+        ////////////////////////////////////////////////////
+        // Get the matching airports (if requested)
+// ToDo:  Abstract this into a function
+        ////////////////////////////////////////////////////
+        if ( searchAirportID !== '' || searchAirportName !== '' || searchAirportCity !== '' || searchAirportNationalRegion !== '' ) {
+            if ( searchAirportID !== '' ) {
+                matchingAirports = await AirportsCurrent.findAndCountAll({ 
+                    where: { LFLocationID_FAA: searchAirportID.toUpperCase() }
+                });
+            } else if ( searchAirportName !== '' ) {
+                matchingAirports = await AirportsCurrent.findAndCountAll({
+                    where: { LFName_FAA: { [Op.like]: '%' + searchAirportName.toUpperCase() + '%' }}
+                });
+            } else if ( searchAirportCity !== '' && searchAirportNationalRegion === '' ) {
+                matchingAirports = await AirportsCurrent.findAndCountAll({
+                    where: { LFCityName_FAA: { [Op.like]: '%' + searchAirportCity.toUpperCase() + '%' }}
+                });
+            } else if ( searchAirportNationalRegion !== '' && searchAirportCity === '') {
+                matchingAirports = await AirportsCurrent.findAndCountAll({
+                    where: { LFStateName_FAA: searchAirportNationalRegion.toUpperCase() }
+                });
+            } else if ( searchAirportNationalRegion !== '' && searchAirportCity !== '') {
+                matchingAirports = await AirportsCurrent.findAndCountAll({
+                    where: { LFCityName_FAA: { [Op.like]: '%' + searchAirportCity.toUpperCase() + '%' },
+                             LFStateName_FAA: searchAirportNationalRegion.toUpperCase() }
+                });
+            };
+            matchingAirportsCount = matchingAirports.count;
+            if ( matchingAirports.count === 1 ) { // if only one matching airport, default to that airport
+                res.redirect('/switchboard?airportid=' + matchingAirports.rows[0].LFLocationID_FAA);
+            };
+            console.log(`matching Airports: ${matchingAirports.count}`);
+            console.log(`matchingAirportID: ${selectedAirportID}`);
+        } else if ( selectedAirportID !== "" ) {  // a requested aiport was submitted (and validated)
+            matchingAirports = await AirportsCurrent.findAndCountAll({ 
+                where: { LFLocationID_FAA: selectedAirportID.toUpperCase() }
+            });
+            selectedAirport = matchingAirports.rows[0];
+            actionRequested = 'editairport';
+            };
+        console.log(`selectedAirportID: ${selectedAirportID}`);
+        console.log(`selectedAirport: ${selectedAirport}`);
+
+        ////////////////////////////////////////////////////
+        // Render the page
+        ////////////////////////////////////////////////////
+        console.log('Rendering Switchboard');
+        return res.render('switchboard', {
+            // Admin data
+//             errorCode,
+            actionRequested,
+            statusMessage,
+            // User data
+            user: req.oidc.user,
+            userName: ( req.oidc.user == null ? '' : req.oidc.user.name ),
+            // Menu item permissions
+            userCanReadAISMenu,
+            userCanReadAirports,
+            userCanCreateAirports,
+            // Search results
+            nationalRegionsDDL,
+            matchingAirports,
+            matchingAirportsCount,
+            aisContentTypeCategoriesDDL,
+            selectedAirport,
+            selectedAirportID,
+            userCanUpdateAirport,
+            selectedAISContentType,
+            // Data Mgmt DDLs
+            lfOwnerTypeCategoriesDDL,
+            // Airport CRUD Information
+            airportID // Used???
+        });
+    } catch(err) {
+        console.log('Error:' + err);
+    }
+});
 
 
 ////////////////////////////////////////
-// "POST" Routes (Add new data recordes)
+// "POST" Routes (Add new data records; search for data)
 ////////////////////////////////////////
 
-// router.post('/sponsoradd', requiresAuth(), async (req, res) => {
+router.post('/searchAIS', requiresAuth(),
+    [
+//        check('sponsorName')
+//            .isLength( { min: 3, max: 100 } ).withMessage('Sponsor Name should be 3 to 100 characters.')
+    ],
 
-//     // Reformat the SELECT options into a pipe-delimited array for storage
-//     const sponsorTypesFormatted = jsFx.convertOptionsToDelimitedString(req.body.sponsorTypes, "|", "0");
+    async (req, res) => {
 
-//     // Add the new data to the database in a new record, and return the newly-generated [SponsorID] value
-//     const newSponsor = new SponsorsTableTest( {
-//         SponsorName: req.body.sponsorName,
-//         SponsorDescription: req.body.sponsorDescription,
-//         SponsorWebsite: req.body.sponsorWebsite,
-//         SponsorLogo: req.body.sponsorLogo,
-//         SponsorContactFName: req.body.sponsorContactFName,
-//         SponsorContactLName: req.body.sponsorContactLName,
-//         SponsorContactEmail: req.body.sponsorContactEmail,
-//         SponsorContactTelephone: req.body.sponsorContactTelephone,
-//         SponsorType: sponsorTypesFormatted
-//     });
-//     await newSponsor.save();
-//     res.redirect(`/switchboard?sponsorid=${newSponsor.SponsorID}&status=sponsorcreatesuccess`);
-// });
+    console.log('searchAIS route entered');
+
+    ////////////////////////////////////////////////////
+    // Environmental Variables
+    ////////////////////////////////////////////////////
+        let errorCode = '';
+    let actionRequested = '';
+    let statusMessage = '';
+    let selectedAirportID = ''; // LFID for selected airport
+    let selectedAirport = []; // details for selected airport
+    let selectedAISContentType = ''; // AIS page to display
+
+    ////////////////////////////////////////////////////
+    // Validate the input
+    ////////////////////////////////////////////////////
+    const validationErrors = validationResult(req);
+
+    ////////////////////////////////////////////////////
+    // If invalid data, log errors and return generic error to client
+    ////////////////////////////////////////////////////
+    if ( !validationErrors.isEmpty() ) {
+
+// ToDo:  Replicate the GET render code above, including parameters prep work
+
+        return res.status(400).json(validationErrors.array());
+
+    } else {
+
+        ////////////////////////////////////////////////////
+        // Get the matching airports
+        ////////////////////////////////////////////////////
+        let matchingAirports = await AirportsCurrent.findAndCountAll({ where: { LFLocationID_FAA: req.body.searchAISLFID.toUpperCase() } });
+        console.log(`matching Airports: ${matchingAirports.count}`);
+        if ( matchingAirports.count === 1 ) { // if only one matching airport, default to that airport
+            selectedAirport = matchingAirports.rows[0];
+            selectedAirportID = matchingAirports.rows[0].LFLocationID_FAA;
+            actionRequested = 'editairport';
+
+        };
+        console.log(`selectedAirportID: ${selectedAirportID}`);
+
+        ////////////////////////////////////////////////////
+        // Retrieve options for add/edit form DDLs
+        ////////////////////////////////////////////////////
+        let lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+        console.log(`lfOwnerTypeCategories Count: ${lfOwnerTypeCategoriesDDL.count}`);
+        let aisContentTypeCategoriesDDL = await AISContentTypeCategories.findAndCountAll({});
+        console.log(`aisContentTypeCategories Count: ${aisContentTypeCategoriesDDL.count}`);
+        if ( req.body.searchAISContentTypeCategories === undefined ) {
+            selectedAISContentType = '801001'; // default to the General Airport Information page
+        } else {
+// ToDo: VALIDATE THE DATA UPON SUBMITTAL!!
+            selectedAISContentType = req.body.searchAISContentTypeCategories;
+        };
+        console.log(`selected AIS Content Type: ${selectedAISContentType}`);
+
+        ////////////////////////////////////////////////////
+        // Render the switchboard with matching airports listed
+        ////////////////////////////////////////////////////
+        console.log(`rendering AIS Search results`);
+        return res.render('switchboard', {
+            // Admin data
+            actionRequested,
+            statusMessage,
+            // User data
+            user: req.oidc.user,
+            userName: ( req.oidc.user == null ? '' : req.oidc.user.name ),
+            // Search results
+            matchingAirports,
+            aisContentTypeCategoriesDDL,
+            selectedAirport,
+            selectedAirportID,
+            userCanUpdateAirport: true,
+            selectedAISContentType,
+            // Data Mgmt DDLs
+            lfOwnerTypeCategoriesDDL
+        });
+    };
+});
 
 
 ////////////////////////////////////////
 // "PUT" Routes (Update data)
 ////////////////////////////////////////
 
-// router.put('/sponsorupdate', requiresAuth(), async (req, res) => {
+router.put('/airportupdategiai', requiresAuth(), async (req, res) => {
 
-//     // Reformat the SELECT options into a pipe-delimited array for storage
-//     const sponsorTypesFormatted = jsFx.convertOptionsToDelimitedString(req.body.sponsorTypes, "|", "0");
-// //    console.log(`sponsorTypesFormattedUDF: ${sponsorTypesFormatted}`);
+    // Get a pointer to the current record
+// ToDo:  Verify airport ID !
+    const airportRecord = await AirportsTable.findOne( {
+        where: { LFLocationID: req.body.airportIDToUpdate }
+    });
+    console.log(`airportIDToUpdate: ${airportRecord.LFLocationID}`)
 
-//     // Get a pointer to the current record
-//     const sponsorRecord = await SponsorsTableTest.findOne( {
-//         where: { SponsorID: req.body.sponsorIDToUpdate }
-//     });
-// //    console.log(`sponsorRecordToUpdate: ${sponsorRecord.SponsorID}`);
-
-//     // Update the database record with the new data
-//     await sponsorRecord.update( {
-//         SponsorName: req.body.sponsorName,
-//         SponsorDescription: req.body.sponsorDescription,
-//         SponsorWebsite: req.body.sponsorWebsite,
-//         SponsorLogo: req.body.sponsorLogo,
-//         SponsorContactFName: req.body.sponsorContactFName,
-//         SponsorContactLName: req.body.sponsorContactLName,
-//         SponsorContactEmail: req.body.sponsorContactEmail,
-//         SponsorContactTelephone: req.body.sponsorContactTelephone,
-//         SponsorType: sponsorTypesFormatted
-//     }).then( () => {
-//         res.redirect(`/switchboard?sponsorid=${sponsorRecord.SponsorID}&status=sponsorupdatesuccess`);
-//     });
-// });
+    // Update the database record with the new data
+    await airportRecord.update( {
+        LFWebsite: req.body.airportWebsite,
+        LFEmail: req.body.airportEmail,
+        LFNotes: req.body.airportNotes,
+        LFOwnerFax: req.body.sponsorFax,
+        LFOwnerEmail: req.body.sponsorEmail,
+        LFOwnerType: req.body.sponsorType,
+        LFOwnerLogoFilename: req.body.sponsorLogoFilename,
+        LFOwnerNotes: req.body.sponsorNotes
+    }).then( () => {
+        res.redirect(`/switchboard?airportid=${airportRecord.LFLocationID}&status=airportupdatesuccess`);
+    });
+});
 
 
 ////////////////////////////////////////

@@ -1,8 +1,8 @@
 <% layout('layouts/boilerplate') %>
 <%- include('partials/splashbar_switchboard') %>
 
-<div class="container pagetitle" align="center">
-  Switchboard
+<div class="container pagetitle">
+  <div id="pageTitle">Switchboard</div>
   <hr class="pagetitlebreak">
 </div>
 
@@ -14,6 +14,19 @@
 
     <!-- Left-hand Panel: Main Content Menu -->
     <%- include('partials/menu_main') %>
+
+    <!-- Right-hand Panel: Content -->
+    <% if ( selectedAirportID !== '' ) { %>
+      <% if ( selectedAISContentType === '801001' ) { %>
+        <%- include('partials/ais_giai') %>
+      <% } else if ( selectedAISContentType === '801002' ) { %>
+          <%- include('partials/ais_gigb') %>
+      <% } else { %>  <!-- no specific AIS Content requested, so show the "home" page -->
+        <%- include('partials/ais_giai') %>
+      <% } %>
+    <% } else { %>
+      <%- include('partials/switchboard_home') %>
+    <% } %>
 
   </div>    <!-- End row 1 DIV     -->
 

@@ -1,0 +1,388 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+    <% } %>
+
+    <!-- The data entry form container -->
+    <form action="/switchboard/airportupdategiai?_method=PUT" method="POST" id="airportGIAIData">
+
+      <input type="hidden" id="airportIDToUpdate" name="airportIDToUpdate"><br>
+
+      <label class="data-mgmt-col-title" id="airportInformationBlock">Airport Information</label></span><br>
+
+      <!-- Airport Name -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="airportName" class="data-mgmt">Airport Name (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="airportName" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="airportName" name="airportName" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="airportNameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Airport Address -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="airportAddress" class="data-mgmt">Street Address (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="airportAddress" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="airportAddress" name="airportAddress" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="airportAddressErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Airport City/State/Zip -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="airportCSZ" class="data-mgmt">City / State / Zip (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="airportCSZ" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="airportCSZ" name="airportCSZ" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="airportCSZErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Airport Website -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="airportWebsite" class="data-mgmt">Website:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="airportWebsite" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="airportWebsite" name="airportWebsite" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="airportWebsiteErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Airport Email -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="airportEmail" class="data-mgmt">Email:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="airportEmail" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="airportEmail" name="airportEmail" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="airportEmailErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Airport Notes -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="airportNotes" class="data-mgmt">Notes:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="airportNotes" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <textarea id="airportNotes" name="airportNotes" class="data-mgmt"></textarea><br>
+            <span class="data-mgmt-error" id="airportNotesErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <br>
+      <label class="data-mgmt-col-title" id="ownerInformationBlock">Sponsor (Owner) Information</label></span><br>
+
+      <!-- Sponsor Name -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorName" class="data-mgmt">Sponsor Name (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorName" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="sponsorName" name="sponsorName" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="sponsorNameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor Address -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorAddress" class="data-mgmt">Street Address (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorAddress" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="sponsorAddress" name="sponsorAddress" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="sponsorAddressErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor City/State/Zip -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorCSZ" class="data-mgmt">City / State / Zip (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorCSZ" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="sponsorCSZ" name="sponsorCSZ" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="sponsorCSZErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor Telephone -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorTelephone" class="data-mgmt">Telephone (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorTelephone" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="sponsorTelephone" name="sponsorTelephone" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="sponsorTelephoneErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor FaxX -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorFax" class="data-mgmt">Fax:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorFax" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="sponsorFax" name="sponsorFax" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="sponsorFaxErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor Email -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorEmail" class="data-mgmt">Email:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorEmail" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="sponsorEmail" name="sponsorEmail" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="sponsorEmailErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor Type -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorType" class="data-mgmt">Type:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorType" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <select id="sponsorType" name="sponsorType" class="data-mgmt-single"></select><br>
+            <span class="data-mgmt-error" id="sponsorTypeErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor Logo Filename -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorLogoFilename" class="data-mgmt">Logo (File Location):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorLogoFilename" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="sponsorLogoFilenameDisplay" name="sponsorLogoFilenameDisplay" class="data-mgmt-text-third">
+            <input type="file" id="sponsorLogoFilename" name="sponsorLogoFilename" class="data-mgmt-half"><br>
+            <span class="data-mgmt-error" id="sponsorLogoFilenameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Sponsor Notes -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="sponsorNotes" class="data-mgmt">Notes:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="sponsorNotes" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <textarea id="sponsorNotes" name="sponsorNotes" class="data-mgmt"></textarea><br>
+            <span class="data-mgmt-error" id="sponsorNotesErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+    </form>
+    <div><br>
+      <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
+        <button class="data-mgmt" form="airportGIAIData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+    </div><br><br>
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Set the page title
+  document.getElementById("pageTitle").innerText = "Switchboard - Airport/Sponsor Information";
+  // Set the instructions
+  document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Load the SELECT objects with the available options
+  var owtRows = <%- JSON.stringify(lfOwnerTypeCategoriesDDL.rows) %>;
+  loadSelectOptionsList("sponsorType", "(Not Selected)", 0, owtRows);
+
+  // Is an aiport being edited?
+  <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
+    // Set the current values
+    document.getElementById('airportIDToUpdate').value = "<%- selectedAirport.LFLocationID_FAA %>";
+    document.getElementById('airportName').value = "<%- selectedAirport.LFName_FAA %>";
+    document.getElementById('airportName').disabled = true;
+    document.getElementById('airportAddress').value = "<%- selectedAirport.LFAddress_FAA %>";
+    document.getElementById('airportAddress').disabled = true;
+    document.getElementById('airportCSZ').value = "<%- selectedAirport.LFAddressCSZ_FAA %>";
+    document.getElementById('airportCSZ').disabled = true;
+    document.getElementById('airportWebsite').value = "<%- selectedAirport.LFWebsite %>";
+    document.getElementById('airportEmail').value = "<%- selectedAirport.LFEmail %>";
+    document.getElementById('airportNotes').value = "<%- selectedAirport.LFNotes %>";
+    document.getElementById('sponsorName').value = "<%- selectedAirport.LFOwnerName_FAA %>";
+    document.getElementById('sponsorName').disabled = true;
+    document.getElementById('sponsorAddress').value = "<%- selectedAirport.LFOwnerAddress_FAA %>";
+    document.getElementById('sponsorAddress').disabled = true;
+    document.getElementById('sponsorCSZ').value = "<%- selectedAirport.LFOwnerAddressCSZ_FAA %>";
+    document.getElementById('sponsorCSZ').disabled = true;
+    document.getElementById('sponsorTelephone').value = "<%- selectedAirport.LFOwnerPhone_FAA %>";
+    document.getElementById('sponsorTelephone').disabled = true;
+    document.getElementById('sponsorFax').value = "<%- selectedAirport.LFOwnerFax %>";
+    document.getElementById('sponsorEmail').value = "<%- selectedAirport.LFOwnerEmail %>";
+    document.getElementById('sponsorType').value =  "<%- selectedAirport.LFOwnerType %>";
+    document.getElementById('sponsorLogoFilenameDisplay').disabled = true;
+    if ( "<%- selectedAirport.LFOwnerLogoFilename %>" === '' ) {
+      document.getElementById('sponsorLogoFilenameDisplay').value = "(None)";
+    } else {
+      document.getElementById('sponsorLogoFilenameDisplay').value = "<%- selectedAirport.LFOwnerLogoFilename %>";
+    };
+    document.getElementById('sponsorNotes').value = "<%- selectedAirport.LFOwnerNotes %>";
+
+    // Disable the controls (and change the instruction) if the user does not have permission to update AIS data.
+    if ( <%- !userCanUpdateAirport %> ) {
+      document.getElementById('airportInstructions').innerText = "Review the entries below.";
+      document.getElementById('airportWebsite').disabled = true;
+      document.getElementById('airportEmail').disabled = true;
+      document.getElementById('airportNotes').disabled = true;
+      document.getElementById('sponsorFax').disabled = true;
+      document.getElementById('sponsorEmail').disabled = true;
+      document.getElementById('sponsorType').disabled = true;
+      document.getElementById('sponsorLogoFilename').disabled = true;
+      document.getElementById('sponsorNotes').disabled = true;
+    };
+  <% } %>
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  //////////////////////////////////////////////////////////////////////
+  function validateData() {
+    var dataAreValid = true;  // test for errors below
+
+    //////////////////////////////////////////////////
+    // Airport General Email
+    //////////////////////////////////////////////////
+    var airportEmail = document.getElementById("airportEmail").value;
+    var airportEmailErrors = document.getElementById("airportEmailErrors");
+    airportEmailErrors.innerText = '';  // reset value
+    // Email must be propertly formatted, if present
+    if ( airportEmail.length !== 0 ) {
+      if ( !/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(airportEmail) ) {
+        airportEmailErrors.innerText += "Airport Contact Email must be a proper email address. ";
+      };
+    };
+    // Were errors found?
+    if ( airportEmailErrors.innerText.length === 0 ) {
+      airportEmailErrors.style.display = "none";
+    } else {
+      airportEmailErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Sponsor Contact Email
+    //////////////////////////////////////////////////
+    var sponsorEmail = document.getElementById("sponsorEmail").value;
+    var sponsorEmailErrors = document.getElementById("sponsorEmailErrors");
+    sponsorEmailErrors.innerText = '';  // reset value
+    // Email must be propertly formatted, if present
+    if ( sponsorEmail.length !== 0 ) {
+      // Email must be properly formatted
+      if ( !/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(sponsorEmail) ) {
+        sponsorEmailErrors.innerText += "Sponsor (Owner) Email must be a proper email address. ";
+      };
+    };
+    // Were errors found?
+    if ( sponsorEmailErrors.innerText.length === 0 ) {
+      sponsorEmailErrors.style.display = "none";
+    } else {
+      sponsorEmailErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // If no errors, submit the changes
+    //////////////////////////////////////////////////
+    return dataAreValid;
+
+  };
+
+</script>

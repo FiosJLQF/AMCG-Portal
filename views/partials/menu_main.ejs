@@ -11,4 +11,203 @@
   </div><br>
   -->
   
+  <% if ( userCanReadAISMenu ) { %>
+
+    <!-- Airport Information System (AIS) -->
+    Airport Information System (AIS): <button type="button" class="btn btn-default button-small"
+        onclick="toggleSearchCriteriaInputBlock(
+            document.querySelector('#filterAISIcon'),
+            document.querySelector('#filterAISInputBlock'),
+            document.querySelector('#filterAISInput'), '')">
+        <i id="filterAISIcon" class="fas fa-chevron-down expand-filter chevrons"></i>
+    </button><br>
+    <div id="filterAISInputBlock" class="filter-input-subblock">
+      <div class="searchInstructions">&nbsp;&nbsp;&nbsp;(Enter criteria and click "Search".)</div>
+<!--      <form action="/switchboard/searchAIS" method="POST" id="searchAIS"> -->
+        <div class="col-3 data-mgmt-label">
+          <label for="searchAISLFID" class="data-mgmt-mainmenu">Airport ID:</label>
+        </div>
+        <input type="text" id="searchAISLFID" name="searchAISLFID" class="filter-input filter_textbox"><br>
+        <span class="data-mgmt-error" id="searchAISLFIDErrors"></span>
+        <div class="col-3 data-mgmt-label">
+          <label for="searchAISName" class="data-mgmt-mainmenu">Airport Name:</label>
+        </div>
+        <input type="text" id="searchAISName" name="searchAISName" class="filter-input filter_textbox"><br>
+        <div class="col-3 data-mgmt-label">
+          <label for="searchAISCity" class="data-mgmt-mainmenu">Airport City:</label>
+        </div>
+        <input type="text" id="searchAISCity" name="searchAISCity" class="filter-input filter_textbox"><br>
+        <div class="col-3 data-mgmt-label">
+          <label for="searchAISNationalRegion" class="data-mgmt-mainmenu">Airport State/Province/Territory:</label>
+        </div>
+        <select id="searchAISNationalRegion" name="searchAISNationalRegion" class="filter-select"></select><br>
+        <div style="text-align:left">
+          <button class="btn btn-default button-search" onclick="findAirports();">
+            <img src="/img/imgMagnifyingGlass.png" alt="Magnifying Glass" style="width:35px;" class="img-responsive">
+              Search
+          </button>
+        </div>
+        <div class="col-3 ais-search-label">
+          <span class="ais-sharedline">
+            <span class="ais-search-sharedline">Matching Airport(s):</span>
+            <span class="float-right ais-search-alert-sharedline" id="searchAISMatchingAirportsCount"></span>
+          </span>
+        </div>
+        <select id="searchAISMatches" class="filter-select" onchange="gotoAirport(this.value)"></select><br>
+        <div class="col-3 data-mgmt-label">
+          <label for="searchAISContentTypeCategories" class="data-mgmt">AIS Content Page:</label>
+        </div>
+        <select id="searchAISContentTypeCategories" name="searchAISContentTypeCategories" class="filter-select"
+            onchange="gotoAISContentType(this.value)"></select><br>
+<!--      </form> -->
+  </div>
+  <% } %>  <!-- End AIS menu block -->
+
+
 </div>  <!-- End column 1 DIV -->
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  toggleSearchCriteriaInputBlock(
+    document.querySelector('#filterAISIcon'),
+    document.querySelector('#filterAISInputBlock'),
+    document.querySelector('#filterAISInput'), '');
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Loading any SELECT objects and set their value (default or requested)
+  //////////////////////////////////////////////////////////////////////
+
+  // National Regions SELECT options
+  var regRows = <%- JSON.stringify(nationalRegionsDDL.rows) %>;
+  loadSelectOptionsList("searchAISNationalRegion", "(Not Selected)", 0, regRows, "");
+
+//  alert('matching Airports count: <%= matchingAirportsCount %>');
+  // Matching Airports SELECT configuration
+  <% if ( matchingAirportsCount > 0 ) { %> // if any matching airports were passed to the page, load the DDL
+    <% if ( matchingAirportsCount == 1 ) { %> 
+      document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> match)";
+    <% } else { %>
+      document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> matches)";
+    <% } %>      
+    var lfsRows = <%- JSON.stringify(matchingAirports.rows) %>;
+    var lfsCount = <%= matchingAirportsCount %>;
+    loadSelectOptionsList("searchAISMatches", "(Not Selected)", 0, lfsRows, "");
+    // if a particular airport was selected, load it
+    <% if ( selectedAirportID !== '' ) { %>
+      document.getElementById("searchAISMatches").value = "<%= selectedAirportID %>";
+    <% } %>
+    // if there is only one matching airport, disable the SELECT object
+    <% if ( matchingAirports.count === 1 ) { %>
+      document.getElementById("searchAISMatches").disabled = true;
+    <% } %>       // Load the AIS Content Types
+    var actRows = <%- JSON.stringify(aisContentTypeCategoriesDDL.rows) %>;
+    loadSelectOptionsList("searchAISContentTypeCategories", "(Not Selected)", 0, actRows, "<%= selectedAISContentType %>");
+  <% } else { %>  // either no search requested, or no matching airports found
+    <% if ( matchingAirportsCount == 0 ) { %> 
+      document.getElementById("searchAISMatchingAirportsCount").innerText = "(no matches)";
+    <% } %>
+    document.getElementById("searchAISMatches").disabled = true;
+    document.getElementById("searchAISContentTypeCategories").disabled = true;
+  <% } %>
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Find matching airports
+  //////////////////////////////////////////////////////////////////////
+  function findAirports() {
+
+//    alert('finding matching airports');
+    var criteriaAreValid = validateAISSearchData();
+//    alert('search criteria are valid:' + criteriaAreValid);
+
+    if ( criteriaAreValid ) {
+      var criteriaAirportID = document.getElementById('searchAISLFID').value;
+      var criteriaAirportName = document.getElementById('searchAISName').value;
+      var criteriaAirportCity = document.getElementById('searchAISCity').value;
+      var criteriaAirportNationalRegionSELECT = document.getElementById('searchAISNationalRegion');
+      var criteriaAirportNationalRegion = criteriaAirportNationalRegionSELECT.options[criteriaAirportNationalRegionSELECT.selectedIndex].text;
+      if ( criteriaAirportNationalRegionSELECT.value === "0" ) {
+        criteriaAirportNationalRegion = '';
+      };
+
+      location.href = '/switchboard?searchairportid=' + criteriaAirportID + '&searchairportname=' + criteriaAirportName +
+                      '&searchairportcity=' + criteriaAirportCity + '&searchairportnationalregion=' + criteriaAirportNationalRegion;
+    };
+  };
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  //////////////////////////////////////////////////////////////////////
+  function validateAISSearchData() {
+
+    var dataAreValid = true;  // test for errors below
+//    alert('checking search criteria');
+
+    var criteriaAirportID = document.getElementById('searchAISLFID').value;
+    var criteriaAirportIDErrors = document.getElementById("searchAISLFIDErrors");
+    criteriaAirportIDErrors.innerText = '';  // reset value
+    var criteriaAirportName = document.getElementById('searchAISName').value;
+    var criteriaAirportCity = document.getElementById('searchAISCity').value;
+    var criteriaAirportNationalRegion = document.getElementById('searchAISNationalRegion').value;
+
+//    alert('AirportID length: '+criteriaAirportID.length);
+//    alert('Airport Name length: '+criteriaAirportName.length);
+//    alert('Airport City length: '+criteriaAirportCity.length);
+//    alert('Airport State length: '+criteriaAirportNationalRegion.length);
+//    alert('Airport State selected value: '+criteriaAirportNationalRegion);
+    //////////////////////////////////////////////////
+    // At least one criteria must be selected
+    //////////////////////////////////////////////////
+    if ( criteriaAirportID.length === 0 && criteriaAirportName.length === 0
+         && criteriaAirportCity.length === 0 && criteriaAirportNationalRegion === "0" ) {
+          criteriaAirportIDErrors.innerText = "At least one criteria must be selected.";
+    };
+//    alert('Errors so far: (' + criteriaAirportIDErrors.innerText + ')');
+    if ( criteriaAirportIDErrors.innerText.length === 0 ) {  // no error so far
+      criteriaAirportIDErrors.style.display = "none";
+    } else {
+      criteriaAirportIDErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+
+    //////////////////////////////////////////////////
+    // If no errors, add the Sponsor
+    //////////////////////////////////////////////////
+//    alert(`Search criteria are valid: ${dataAreValid}`);
+    return dataAreValid;
+
+  };
+
+  //////////////////////////////////////////////////////////////////////
+  // Redirect the user to the selected Airport's General Info page
+  //////////////////////////////////////////////////////////////////////
+  function gotoAirport(selectedAirportID) {
+    var newURL = '';
+    if ( selectedAirportID == 0 ) {
+      newURL = '/switchboard';
+    } else {
+      newURL = '/switchboard?airportid=' + selectedAirportID;
+    }
+    location.href=newURL;
+  };
+
+  //////////////////////////////////////////////////////////////////////
+  // Redirect the user to the AIS Content Type for the current Airport
+  //////////////////////////////////////////////////////////////////////
+  function gotoAISContentType(selectedAISContentType) {
+    alert('AIS Content Type changed to ' + selectedAISContentType);
+    var newURL = '';
+    if ( selectedAISContentType !== '' ) {
+      newURL = '/switchboard/searchAIS?airportid=' + "<%= selectedAirportID %>" +
+               '&aiscontenttype=' + selectedAISContentType;
+      location.href=newURL;
+    };
+  };
+
+</script>

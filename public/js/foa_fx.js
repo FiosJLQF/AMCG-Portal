@@ -26,11 +26,13 @@ function loadSelectOptionsList(selectEl, notSelectedText, notSelectedValue, opti
     const selectElement = document.querySelector("#" + selectEl);
     
     // create and add the "(Not Selected)" default option
-    const optNotSelected = document.createElement("option");
-    optNotSelected.textContent = notSelectedText;
-    optNotSelected.value = notSelectedValue;
-    selectElement.appendChild(optNotSelected);
-    optNotSelected.selected = true;
+    if ( notSelectedText.length !== 0 ) {
+        const optNotSelected = document.createElement("option");
+        optNotSelected.textContent = notSelectedText;
+        optNotSelected.value = notSelectedValue;
+        selectElement.appendChild(optNotSelected);
+        optNotSelected.selected = true;
+    };
 
     // add options
     optionsArr.forEach( function(option, ind) {
@@ -58,18 +60,18 @@ function toggleSearchCriteriaInputBlock(elIcon, elBlock, elInput, statusToSet) {
         elIcon.classList.remove("fa-chevron-down");
         elIcon.classList.add("fa-chevron-up");
     } else {
-        if (elInput !== "") {
-            switch (elInput.nodeName.toLowerCase()) {
-                case "input":
-                    elInput.value = "";
-                    break;
-                case "select":
-                    elInput.value = 0;
-                    break;
-               default:
-                elInput.value = "";
-            };
-        };
+        // if (elInput !== "") {
+        //     switch (elInput.nodeName.toLowerCase()) {
+        //         case "input":
+        //             elInput.value = "";
+        //             break;
+        //         case "select":
+        //             elInput.value = 0;
+        //             break;
+        //        default:
+        //         elInput.value = "";
+        //     };
+        // };
         elBlock.style.display = "none";
         elIcon.classList.remove("fa-chevron-up");
         elIcon.classList.add("fa-chevron-down");

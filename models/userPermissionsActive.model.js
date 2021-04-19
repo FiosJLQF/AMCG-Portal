@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 module.exports = (sequelize, DataTypes) => {
-    const UserPermissionsActive = sequelize.define('vwWebsiteUserPermissionsActiveTest', {
+    const UserPermissionsActive = sequelize.define('vwWebsiteUserPermissionsActive', {
         UserID: {
             type: DataTypes.INTEGER,
             primaryKey: true
@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         CanUpdate:      DataTypes.BOOLEAN,
         CanDelete:      DataTypes.BOOLEAN,
     }, {
+    schema: 'amcgportal',
     freezeTableName: true,  // don't have Sequelize automatically pluralize the table name
     timestamps: false,  // don't add the timestamp attributes (updatedAt, createdAt)
     });

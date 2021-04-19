@@ -33,6 +33,10 @@ span.float-right {
   float: right;
 }
 
+label.float-right {
+  float: right;
+}
+
 hr {
     display: block;
     height: 1px;
@@ -160,6 +164,7 @@ select.single-choice {
     color: var(--amcg-blue);
     font-weight: bold;
     padding: 0px 5px 0px 0px;
+    text-align: center;
  }
 
 .custom-toggler.navbar-toggler {
@@ -256,9 +261,9 @@ select.single-choice {
   width: 98%;
 }
 
-.filter_select {
-  font-size: 0.875em;
+.filter-select {
   width: 98%;
+  height: 24px;
 }
 
 .filter-option {
@@ -619,4 +624,10 @@ td.amcg_main_td {
   font-size: 40px;
   text-align: center;
   color: var(--amcg-blue);
+}
+
+.filter-input-subblock {
+  display: none;
+  margin-left: 0.75em;
+  font-size: 14px;
 }

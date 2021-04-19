@@ -35,6 +35,17 @@ div.data-mgmt-label {
   margin-right: 2px;
 }
 
+div.ais-search-label {
+  width: 300px;
+  margin-right: 2px;
+}
+
+div.data-mgmt-sublabel {
+  width: 200px;
+  margin-right: 2px;
+  margin-left: 10px;
+}
+
 div.data-mgmt-required {
   width: 5px;
   margin: 0px;
@@ -44,10 +55,13 @@ div.data-mgmt-required {
 div.data-mgmt-value {
   margin-left: 5px;
   padding: 0px;
+  width: 699px;
 }
 
 label.data-mgmt-col-title {
   margin-bottom: 5px;
+  font-size: 1.125em;
+  font-weight: bold;
 }
 
 label.form-status {
@@ -67,6 +81,50 @@ label.data-mgmt {
   width: 200px;
   vertical-align: top;
   padding-top: 5px;
+}
+
+label.data-mgmt-display {
+  display: inline-block;
+  width: 300px;
+  vertical-align: top;
+  padding-top: 5px;
+}
+
+span.ais-search-sharedline {
+/*  display: inline; */
+  width: 150px;
+  vertical-align: top;
+  padding-top: 5px;
+}
+
+/*
+label.ais-search-general {
+  display: inline;
+  vertical-align: top;
+  padding-top: 5px;
+  width: 100%;
+}
+*/
+
+label.data-mgmt-mainmenu {
+  display: inline-block;
+  width: 300px;
+  vertical-align: top;
+  padding-top: 5px;
+}
+
+label.data-mgmt-alert {
+  display: inline-block;
+  vertical-align: top;
+  color: var(--amcg-red);
+}
+
+span.ais-search-alert-sharedline {
+  display: inline;
+  vertical-align: top;
+  color: var(--amcg-red);
+  width: 100px;
+  text-align: right;
 }
 
 label.data-mgmt-instruction {
@@ -94,14 +152,32 @@ span.data-mgmt-error {
   margin-top: 5px;
   color: red;
 }
+
+span.ais-sharedline {
+  width: 100%;
+  display: inline;
+}
   
-  input.data-mgmt-text {
+/*
+input.data-mgmt-file {
+  display: inline-block;
+  width: 350px;
+  line-height: 1.00;
+}
+*/
+
+input.data-mgmt-text {
   width: 680px;
   line-height: 1.00;
 }
 
-input.data-mgmt-text-short {
-  width: 450px;
+input.data-mgmt-text-half {
+  width: 340px;
+  line-height: 1.00;
+}
+
+input.data-mgmt-text-third {
+  width: 225px;
   line-height: 1.00;
 }
 
@@ -121,3 +197,9 @@ select.data-mgmt-multiple {
   padding: 0px;
 }
 
+select.data-mgmt-single {
+  font-size: 0.875em;
+  width: 680px;
+  padding: 0px;
+  height: 24px;
+}
