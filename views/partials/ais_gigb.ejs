@@ -1,0 +1,368 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+    <% } %>
+
+    <!-- The data entry form container -->
+    <form action="/switchboard/airportupdategigb?_method=PUT" method="POST" id="airportGIGBData">
+
+      <input type="hidden" id="airportIDToUpdate" name="airportIDToUpdate"><br>
+
+      <label class="data-mgmt-col-title" id="governingBodyBlock">Governing Body Information</label></span><br>
+
+      <!-- Governing Body Name -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="governingBodyName" class="data-mgmt">Governing Body Name:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="governingBodyName" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="governingBodyName" name="governingBodyName" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="governingBodyNameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Member Count -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="governingBodyMemberCount" class="data-mgmt">Member Count:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="governingBodyMemberCount" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="governingBodyMemberCount" name="governingBodyMemberCount" class="data-mgmt-text-quarter"><br>
+            <span class="data-mgmt-error" id="governingBodyMemberCountErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Term -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="governingBodyTerm" class="data-mgmt">Term:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="governingBodyTerm" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="governingBodyTerm" name="governingBodyTerm" class="data-mgmt-text-quarter"><br>
+            <span class="data-mgmt-error" id="governingBodyTermErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Maximum Number of Terms -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="governingBodyTermMax" class="data-mgmt">Max. No. of Terms:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="governingBodyTermMax" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="governingBodyTermMax" name="governingBodyTermMax" class="data-mgmt-text-quarter"><br>
+            <span class="data-mgmt-error" id="governingBodyTermMaxErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Governing Body Notes -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="governingBodyNotes" class="data-mgmt">Notes:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="governingBodyNotes" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <textarea id="governingBodyNotes" name="governingBodyNotes" class="data-mgmt"></textarea><br>
+            <span class="data-mgmt-error" id="governingBodyNotesErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <br>
+      <label class="data-mgmt-col-title" id="advisoryBodyBlock">Advisory Body Information</label></span><br>
+
+      <!-- Advisory Body Name -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="advisoryBodyName" class="data-mgmt">Advisory Body Name:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="advisoryBodyName" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="advisoryBodyName" name="advisoryBodyName" class="data-mgmt-text"><br>
+            <span class="data-mgmt-error" id="advisoryBodyNameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Member Count -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="advisoryBodyMemberCount" class="data-mgmt">Member Count:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="advisoryBodyMemberCount" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="advisoryBodyMemberCount" name="advisoryBodyMemberCount" class="data-mgmt-text-quarter"><br>
+            <span class="data-mgmt-error" id="advisoryBodyMemberCountErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Term -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="advisoryBodyTerm" class="data-mgmt">Term:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="advisoryBodyTerm" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="advisoryBodyTerm" name="advisoryBodyTerm" class="data-mgmt-text-quarter"><br>
+            <span class="data-mgmt-error" id="advisoryBodyTermErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Maximum Number of Terms -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="advisoryBodyTermMax" class="data-mgmt">Max. No. of Terms:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="advisoryBodyTermMax" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="advisoryBodyTermMax" name="advisoryBodyTermMax" class="data-mgmt-text-quarter"><br>
+            <span class="data-mgmt-error" id="advisoryBodyTermMaxErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- advisory Body Notes -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="advisoryBodyNotes" class="data-mgmt">Notes:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="advisoryBodyNotes" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <textarea id="advisoryBodyNotes" name="advisoryBodyNotes" class="data-mgmt"></textarea><br>
+            <span class="data-mgmt-error" id="advisoryBodyNotesErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+    </form>
+    <div><br>
+      <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
+        <button class="data-mgmt" form="airportGIGBData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+    </div><br><br>
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Set the page title
+  document.getElementById("pageTitle").innerText = "Switchboard - Governing/Advisory Body Information";
+  // Set the instructions
+  document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Is an aiport being edited?
+  <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
+    // Set the current values
+    document.getElementById('airportIDToUpdate').value = "<%- selectedAirport.LFLocationID_FAA %>";
+    document.getElementById('governingBodyName').value = "<%- selectedAirport.LFGovBodyName %>";
+    document.getElementById('governingBodyMemberCount').value = "<%- selectedAirport.LFGovBodyMemberCount %>";
+    document.getElementById('governingBodyTerm').value = "<%- selectedAirport.LFGovBodyTerm %>";
+    document.getElementById('governingBodyTermMax').value = "<%- selectedAirport.LFGovBodyTermMax %>";
+    document.getElementById('governingBodyNotes').value = "<%- selectedAirport.LFGovBodyNotes %>";
+    document.getElementById('advisoryBodyName').value = "<%- selectedAirport.LFAdvBodyName %>";
+    document.getElementById('advisoryBodyMemberCount').value = "<%- selectedAirport.LFAdvBodyMemberCount %>";
+    document.getElementById('advisoryBodyTerm').value = "<%- selectedAirport.LFAdvBodyTerm %>";
+    document.getElementById('advisoryBodyTermMax').value = "<%- selectedAirport.LFAdvBodyTermMax %>";
+    document.getElementById('advisoryBodyNotes').value = "<%- selectedAirport.LFAdvBodyNotes %>";
+
+    // Disable the controls (and change the instruction) if the user does not have permission to update AIS data.
+    if ( <%- !userCanUpdateAirport %> ) {
+      document.getElementById('airportInstructions').innerText = "Review the entries below.";
+      document.getElementById('governingBodyName').disabled = true;
+      document.getElementById('governingBodyMemberCount').disabled = true;
+      document.getElementById('governingBodyTerm').disabled = true;
+      document.getElementById('governingBodyTermMax').disabled = true;
+      document.getElementById('governingBodyNotes').disabled = true;
+      document.getElementById('advisoryBodyName').disabled = true;
+      document.getElementById('advisoryBodyMemberCount').disabled = true;
+      document.getElementById('advisoryBodyTerm').disabled = true;
+      document.getElementById('advisoryBodyTermMax').disabled = true;
+      document.getElementById('advisoryBodyNotes').disabled = true;
+    };
+  <% } %>
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  //////////////////////////////////////////////////////////////////////
+  function validateData() {
+    var dataAreValid = true;  // test for errors below
+
+    //////////////////////////////////////////////////
+    // Governing Body - Member Count
+    //////////////////////////////////////////////////
+    var governingBodyMemberCount = document.getElementById("governingBodyMemberCount").value;
+    var governingBodyMemberCountErrors = document.getElementById("governingBodyMemberCountErrors");
+    governingBodyMemberCountErrors.innerText = '';  // reset value
+    // Value must be a positive integer, if present
+    if ( governingBodyMemberCount.length !== 0 ) {
+      if ( !(/^\d+$/.test(governingBodyMemberCount)) ) { // not an integer
+        governingBodyMemberCountErrors.innerText += "Governing Body Member Count must be a valid integer. ";
+      };
+    };
+    // Were errors found?
+    if ( governingBodyMemberCountErrors.innerText.length === 0 ) {
+      governingBodyMemberCountErrors.style.display = "none";
+    } else {
+      governingBodyMemberCountErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Governing Body - Term
+    //////////////////////////////////////////////////
+    var governingBodyTerm = document.getElementById("governingBodyTerm").value;
+    var governingBodyTermErrors = document.getElementById("governingBodyTermErrors");
+    governingBodyTermErrors.innerText = '';  // reset value
+    // Value must be a positive integer, if present
+    if ( governingBodyTerm.length !== 0 ) {
+      if ( !(/^\d+$/.test(governingBodyTerm)) ) { // not an integer
+        governingBodyTermErrors.innerText += "Governing Body Term must be a valid integer. ";
+      };
+    };
+    // Were errors found?
+    if ( governingBodyTermErrors.innerText.length === 0 ) {
+      governingBodyTermErrors.style.display = "none";
+    } else {
+      governingBodyTermErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Governing Body - Maximum Number of Terms
+    //////////////////////////////////////////////////
+    var governingBodyTermMax = document.getElementById("governingBodyTermMax").value;
+    var governingBodyTermMaxErrors = document.getElementById("governingBodyTermMaxErrors");
+    governingBodyTermMaxErrors.innerText = '';  // reset value
+    // Value must be a positive integer, if present
+    if ( governingBodyTermMax.length !== 0 ) {
+      if ( !(/^\d+$/.test(governingBodyTermMax)) ) { // not an integer
+        governingBodyTermMaxErrors.innerText += "Governing Body Max. No. of Terms must be a valid integer. ";
+      };
+    };
+    // Were errors found?
+    if ( governingBodyTermMaxErrors.innerText.length === 0 ) {
+      governingBodyTermMaxErrors.style.display = "none";
+    } else {
+      governingBodyTermMaxErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Advisory Body - Member Count
+    //////////////////////////////////////////////////
+    var advisoryBodyMemberCount = document.getElementById("advisoryBodyMemberCount").value;
+    var advisoryBodyMemberCountErrors = document.getElementById("advisoryBodyMemberCountErrors");
+    advisoryBodyMemberCountErrors.innerText = '';  // reset value
+    // Value must be a positive integer, if present
+    if ( advisoryBodyMemberCount.length !== 0 ) {
+      if ( !(/^\d+$/.test(advisoryBodyMemberCount)) ) { // not an integer
+        advisoryBodyMemberCountErrors.innerText += "Advisory Body Member Count must be a valid integer. ";
+      };
+    };
+    // Were errors found?
+    if ( advisoryBodyMemberCountErrors.innerText.length === 0 ) {
+      advisoryBodyMemberCountErrors.style.display = "none";
+    } else {
+      advisoryBodyMemberCountErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Advisory Body - Term
+    //////////////////////////////////////////////////
+    var advisoryBodyTerm = document.getElementById("advisoryBodyTerm").value;
+    var advisoryBodyTermErrors = document.getElementById("advisoryBodyTermErrors");
+    advisoryBodyTermErrors.innerText = '';  // reset value
+    // Value must be a positive integer, if present
+    if ( advisoryBodyTerm.length !== 0 ) {
+      if ( !(/^\d+$/.test(advisoryBodyTerm)) ) { // not an integer
+        advisoryBodyTermErrors.innerText += "Advisory Body Term must be a valid integer. ";
+      };
+    };
+    // Were errors found?
+    if ( advisoryBodyTermErrors.innerText.length === 0 ) {
+      advisoryBodyTermErrors.style.display = "none";
+    } else {
+      advisoryBodyTermErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Advisory Body - Maximum Number of Terms
+    //////////////////////////////////////////////////
+    var advisoryBodyTermMax = document.getElementById("advisoryBodyTermMax").value;
+    var advisoryBodyTermMaxErrors = document.getElementById("advisoryBodyTermMaxErrors");
+    advisoryBodyTermMaxErrors.innerText = '';  // reset value
+    // Value must be a positive integer, if present
+    if ( advisoryBodyTermMax.length !== 0 ) {
+      if ( !(/^\d+$/.test(advisoryBodyTermMax)) ) { // not an integer
+        advisoryBodyTermMaxErrors.innerText += "Advisory Body Max. No. of Terms must be a valid integer. ";
+      };
+    };
+    // Were errors found?
+    if ( advisoryBodyTermMaxErrors.innerText.length === 0 ) {
+      advisoryBodyTermMaxErrors.style.display = "none";
+    } else {
+      advisoryBodyTermMaxErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // If no errors, submit the changes
+    //////////////////////////////////////////////////
+    console.log(`dataAreValid: ${dataAreValid}`);
+    return dataAreValid;
+
+  };
+
+</script>

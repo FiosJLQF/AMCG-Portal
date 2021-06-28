@@ -25,6 +25,16 @@ module.exports = (sequelize, DataTypes) => {
         LFOwnerLogoFilename:   DataTypes.STRING,
 //        LFOwnerLogoURL:        DataTypes.STRING,
         LFOwnerNotes:          DataTypes.STRING,
+        LFGovBodyName:         DataTypes.STRING,
+        LFGovBodyMemberCount:  DataTypes.STRING,
+        LFGovBodyTerm:         DataTypes.STRING,
+        LFGovBodyTermMax:      DataTypes.STRING,
+        LFGovBodyNotes:        DataTypes.STRING,
+        LFAdvBodyName:         DataTypes.STRING,
+        LFAdvBodyMemberCount:  DataTypes.STRING,
+        LFAdvBodyTerm:         DataTypes.STRING,
+        LFAdvBodyTermMax:      DataTypes.STRING,
+        LFAdvBodyNotes:        DataTypes.STRING,
         // Format data for "Matching Airports" DDL
         optionid:  {
             type:  DataTypes.STRING,

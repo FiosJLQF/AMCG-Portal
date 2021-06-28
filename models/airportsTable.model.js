@@ -16,6 +16,16 @@ module.exports = (sequelize, DataTypes) => {
         LFOwnerType:                 DataTypes.STRING,
         LFOwnerLogoFilename:         DataTypes.STRING,
         LFOwnerNotes:                DataTypes.STRING,
+        LFGovBodyName:               DataTypes.STRING,
+        LFGovBodyMemberCount:        DataTypes.STRING,
+        LFGovBodyTerm:               DataTypes.STRING,
+        LFGovBodyTermMax:            DataTypes.STRING,
+        LFGovBodyNotes:              DataTypes.STRING,
+        LFAdvBodyName:               DataTypes.STRING,
+        LFAdvBodyMemberCount:        DataTypes.STRING,
+        LFAdvBodyTerm:               DataTypes.STRING,
+        LFAdvBodyTermMax:            DataTypes.STRING,
+        LFAdvBodyNotes:              DataTypes.STRING
     }, {
         schema: 'amcgportal',
         freezeTableName: true,  // don't have Sequelize automatically pluralize the table name

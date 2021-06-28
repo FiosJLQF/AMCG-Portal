@@ -40,6 +40,14 @@ sequelize.authenticate().then(() => {
 //const UsersAllDDLModel = require('./usersAllDLL.model');
 //const UsersAllDDL = UsersAllDDLModel(sequelize, DataTypes);
 
+/********************************************
+  Administrative Models
+********************************************/
+const EventLogsTableModel = require('./eventLogsTable.model');
+const EventLogsTable = EventLogsTableModel(sequelize, DataTypes);
+EventLogsTable.removeAttribute('id');  // a different, auto-populated primary key is used in the DB
+
+
 const UserPermissionsActiveModel = require('./userPermissionsActive.model');
 const UserPermissionsActive = UserPermissionsActiveModel(sequelize, DataTypes);
 UserPermissionsActive.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
@@ -88,6 +96,7 @@ module.exports = {
   // Sponsors,
   // SponsorTypeCategoriesDDL,
   // UsersAllDDL,
+  EventLogsTable,
   UserPermissionsActive,
   UserProfiles,
   NationalRegions,

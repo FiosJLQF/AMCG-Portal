@@ -85,6 +85,13 @@ router.get('/', requiresAuth(), async (req, res) => {
         let aisContentTypeRequested = '';
         let selectedAISContentType = ''; // AIS page to display
 
+// Test
+//let emailResult = jsFx.sendEmail('justjlqf@mail.com', `Test Email - Switchboard Route`,
+//    `This is a test email from the AMCG switchboard.`);
+// Test
+//let logEventResult = await jsFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
+//0, 0, 0, 'justjlqf@mail.com');
+
         ////////////////////////////////////////////////////
         // Validate any query string parameters
         ////////////////////////////////////////////////////
@@ -124,10 +131,10 @@ router.get('/', requiresAuth(), async (req, res) => {
         };
 
         // If a requested "airportid" is blank, redirect to the generic Switchboard page
-        if ( req.query['airportid'] !== undefined ) {
+        if ( req.query['airportid'] != undefined ) {
             airportIDRequested = req.query['airportid'];
             console.log(`querystring['airportid']: ${airportIDRequested}`);
-            if ( airportIDRequested === '' ) {
+            if ( airportIDRequested === '' ) { // if the querystring is blank, redirect to the main switchboard
 // ToDo:  Log the error
                 res.redirect('/switchboard');
             } else {  // validate the requested Airport ID
@@ -138,15 +145,19 @@ router.get('/', requiresAuth(), async (req, res) => {
         };
 
         // If a requested "aiscontenttype" is blank, redirect to the default "General Information" page
-        if ( req.query['aiscontenttype'] !== undefined ) {
+        if ( req.query['aiscontenttype'] != undefined ) {
             aisContentTypeRequested = req.query['aiscontenttype'];
             console.log(`querystring['aiscontenttype']: ${aisContentTypeRequested}`);
-            if ( aisContentTypeRequested === '' ) {
-                aisContentTypeRequested = '801001'; // default "General Information" page
+            if ( aisContentTypeRequested === '' ) { // if the value is blank, reset to default value
+                selectedAISContentType = '801001'; // default "General Information" page
             } else {  // validate the requested Airport ID
-// ToDo:  Validate the AIS Content Type
+// ToDo:  Validate the AIS Content Type Requested, and log errors
+
+                selectedAISContentType = aisContentTypeRequested;
             };
         };
+        console.log(`aisContentTypeRequested: ${aisContentTypeRequested}`);
+        console.log(`selected AIS Content Type: ${selectedAISContentType}`);
 
         ////////////////////////////////////////////////////
         // Retrieve options for add/edit form DDLs
@@ -159,13 +170,6 @@ router.get('/', requiresAuth(), async (req, res) => {
         // -- AIS Content Types (data mgmt forms)
         aisContentTypeCategoriesDDL = await AISContentTypeCategories.findAndCountAll({});
         console.log(`aisContentTypeCategories Count: ${aisContentTypeCategoriesDDL.count}`);
-        if ( req.body.searchAISContentTypeCategories === undefined ) {
-            selectedAISContentType = '801001'; // default to the General Airport Information page
-        } else {
-// ToDo: VALIDATE THE DATA UPON SUBMITTAL!!
-            selectedAISContentType = aisContentTypeRequested;
-        };
-        console.log(`selected AIS Content Type: ${selectedAISContentType}`);
 
         // Data Mgmt Forms
         // -- General Information (GIAI)
@@ -307,7 +311,8 @@ router.get('/', requiresAuth(), async (req, res) => {
             };
             matchingAirportsCount = matchingAirports.count;
             if ( matchingAirports.count === 1 ) { // if only one matching airport, default to that airport
-                res.redirect('/switchboard?airportid=' + matchingAirports.rows[0].LFLocationID_FAA);
+                res.redirect('/switchboard?airportid=' + matchingAirports.rows[0].LFLocationID_FAA +
+                    '&aiscontenttype=801001');
             };
             console.log(`matching Airports: ${matchingAirports.count}`);
             console.log(`matchingAirportID: ${selectedAirportID}`);
@@ -316,6 +321,7 @@ router.get('/', requiresAuth(), async (req, res) => {
                 where: { LFLocationID_FAA: selectedAirportID.toUpperCase() }
             });
             selectedAirport = matchingAirports.rows[0];
+            matchingAirportsCount = 1;
             actionRequested = 'editairport';
             };
         console.log(`selectedAirportID: ${selectedAirportID}`);
@@ -454,6 +460,9 @@ router.post('/searchAIS', requiresAuth(),
 // "PUT" Routes (Update data)
 ////////////////////////////////////////
 
+/////////////////////////
+// AIS - General/Airport Info
+/////////////////////////
 router.put('/airportupdategiai', requiresAuth(), async (req, res) => {
 
     // Get a pointer to the current record
@@ -474,7 +483,48 @@ router.put('/airportupdategiai', requiresAuth(), async (req, res) => {
         LFOwnerLogoFilename: req.body.sponsorLogoFilename,
         LFOwnerNotes: req.body.sponsorNotes
     }).then( () => {
-        res.redirect(`/switchboard?airportid=${airportRecord.LFLocationID}&status=airportupdatesuccess`);
+        res.redirect(`/switchboard?airportid=${airportRecord.LFLocationID}` +
+                     `&status=airportupdatesuccess` +
+                     `&aiscontenttype=801001`);
+    });
+});
+
+/////////////////////////
+// AIS - Governing/Advisory Body
+/////////////////////////
+router.put('/airportupdategigb', requiresAuth(), async (req, res) => {
+
+    // Get a pointer to the current record
+// ToDo:  Verify airport ID !
+    const airportRecord = await AirportsTable.findOne( {
+        where: { LFLocationID: req.body.airportIDToUpdate }
+    });
+    console.log(`airportIDToUpdate: ${airportRecord.LFLocationID}`)
+
+    // Reformat blank dates and numbers to NULL values to be updated into Postgres
+    let govBodyMemberCount = (req.body.governingBodyMemberCount === "") ? null : req.body.governingBodyMemberCount;
+    let govBodyTerm = (req.body.governingBodyTerm === "") ? null : req.body.governingBodyTerm;
+    let govBodyTermMax = (req.body.governingBodyTermMax === "") ? null : req.body.governingBodyTermMax;
+    let advBodyMemberCount = (req.body.advisoryBodyMemberCount === "") ? null : req.body.advisoryBodyMemberCount;
+    let advBodyTerm = (req.body.advisoryBodyTerm === "") ? null : req.body.advisoryBodyTerm;
+    let advBodyTermMax = (req.body.advisoryBodyTermMax === "") ? null : req.body.advisoryBodyTermMax;
+
+    // Update the database record with the new data
+    await airportRecord.update( {
+        LFGovBodyName:        req.body.governingBodyName,
+        LFGovBodyMemberCount: govBodyMemberCount,
+        LFGovBodyTerm:        govBodyTerm,
+        LFGovBodyTermMax:     govBodyTermMax,
+        LFGovBodyNotes:       req.body.governingBodyNotes,
+        LFAdvBodyName:        req.body.advisoryBodyName,
+        LFAdvBodyMemberCount: advBodyMemberCount,
+        LFAdvBodyTerm:        advBodyTerm,
+        LFAdvBodyTermMax:     advBodyTermMax,
+        LFAdvBodyNotes:       req.body.advisoryBodyNotes
+    }).then( () => {
+        res.redirect(`/switchboard?airportid=${airportRecord.LFLocationID}` +
+                     `&status=airportupdatesuccess` +
+                     `&aiscontenttype=801002`);
     });
 });
 

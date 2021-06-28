@@ -181,6 +181,11 @@ input.data-mgmt-text-third {
   line-height: 1.00;
 }
 
+input.data-mgmt-text-quarter {
+  width: 170px;
+  line-height: 1.00;
+}
+
 textarea.data-mgmt {
   width: 680px;
   height: 80px;

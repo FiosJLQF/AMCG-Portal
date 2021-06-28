@@ -87,14 +87,14 @@
 
 //  alert('matching Airports count: <%= matchingAirportsCount %>');
   // Matching Airports SELECT configuration
-  <% if ( matchingAirportsCount > 0 ) { %> // if any matching airports were passed to the page, load the DDL
+  <% if ( matchingAirportsCount > 0 ) { %> // if any matching airports were passed to the page, load the DDLs
     <% if ( matchingAirportsCount == 1 ) { %> 
       document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> match)";
     <% } else { %>
       document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> matches)";
     <% } %>      
     var lfsRows = <%- JSON.stringify(matchingAirports.rows) %>;
-    var lfsCount = <%= matchingAirportsCount %>;
+//    var lfsCount = <%= matchingAirportsCount %>;
     loadSelectOptionsList("searchAISMatches", "(Not Selected)", 0, lfsRows, "");
     // if a particular airport was selected, load it
     <% if ( selectedAirportID !== '' ) { %>
@@ -103,9 +103,11 @@
     // if there is only one matching airport, disable the SELECT object
     <% if ( matchingAirports.count === 1 ) { %>
       document.getElementById("searchAISMatches").disabled = true;
-    <% } %>       // Load the AIS Content Types
+    <% } %>
+    // Load the AIS Content Types
     var actRows = <%- JSON.stringify(aisContentTypeCategoriesDDL.rows) %>;
     loadSelectOptionsList("searchAISContentTypeCategories", "(Not Selected)", 0, actRows, "<%= selectedAISContentType %>");
+
   <% } else { %>  // either no search requested, or no matching airports found
     <% if ( matchingAirportsCount == 0 ) { %> 
       document.getElementById("searchAISMatchingAirportsCount").innerText = "(no matches)";
@@ -192,7 +194,7 @@
     if ( selectedAirportID == 0 ) {
       newURL = '/switchboard';
     } else {
-      newURL = '/switchboard?airportid=' + selectedAirportID;
+      newURL = '/switchboard?airportid=' + selectedAirportID + '&aiscontenttype=801001';
     }
     location.href=newURL;
   };
@@ -201,10 +203,10 @@
   // Redirect the user to the AIS Content Type for the current Airport
   //////////////////////////////////////////////////////////////////////
   function gotoAISContentType(selectedAISContentType) {
-    alert('AIS Content Type changed to ' + selectedAISContentType);
+//    alert('AIS Content Type changed to ' + selectedAISContentType);
     var newURL = '';
     if ( selectedAISContentType !== '' ) {
-      newURL = '/switchboard/searchAIS?airportid=' + "<%= selectedAirportID %>" +
+      newURL = '/switchboard?airportid=' + "<%= selectedAirportID %>" +
                '&aiscontenttype=' + selectedAISContentType;
       location.href=newURL;
     };

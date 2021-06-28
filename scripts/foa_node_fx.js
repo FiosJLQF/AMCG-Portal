@@ -3,9 +3,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 const pageScholarshipVolume = 15; // number of scholarships to be displayed on a page
 const pageSponsorVolume = 15; // number of sponsors to be displayed on a page
-const { UserProfiles, UserPermissionsActive, AirportsCurrent, AISContentTypeCategories,
+const { EventLogsTable, UserProfiles, UserPermissionsActive, AirportsCurrent, AISContentTypeCategories,
     LFOwnerTypeCategories, NationalRegions } = require('../models/sequelize.js');
-
+require("dotenv").config();  // load all ".env" variables into "process.env" for use
+const nodemailer = require('nodemailer');  // allows SMPT push emails to be sent
+    
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Does the user have permission to access the page?
@@ -26,6 +28,48 @@ function userPermissions(permissionsList, userID, objectName, objectValue = '') 
     };
 
 }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Create a log entry
+//////////////////////////////////////////////////////////////////////////////////////////
+async function logEvent(processName, eventObject, eventCode, eventStatus, eventDescription, eventDuration,
+    eventRows, eventUserID, sendEmailTo) {
+
+    let logEventResult = false;
+    console.log('Logging event now...');
+
+    //    async (req, res) => {
+    try {
+        console.log('Writing event to log...');
+        const newEventLog = new EventLogsTable( {
+            EventDate: Date().toString(),
+            ProcessName: processName,
+            EventObject: eventObject,
+            EventStatus: eventStatus,
+            EventDescription: eventDescription,
+            EventDuration: eventDuration,
+            EventRows: eventRows,
+            EventUserID: eventUserID,
+            EventCode: eventCode
+        });
+        await newEventLog.save();
+        console.log('Event written to log...');
+        logEventResult = true;
+        console.log('Event logged.');
+        if ( sendEmailTo.length !== 0 ) {
+            let emailResultLogSuccess = sendEmail(sendEmailTo, `Event Logged (${eventStatus})`,
+                `An event was logged for ${processName}:  ${eventDescription}`);
+        };
+    } catch (error) {
+        let emailResultError = sendEmail(process.env.EMAIL_WEBMASTER_LIST, 'Event Log Error',
+        `An error occurred logging an event: ${error}`);
+        console.log(`Event not logged (${error})`);
+        };
+
+    return logEventResult;
+
+};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +228,63 @@ async function getAISPermissionsForUser( userPermissionsActive, airportIDRequest
 };
 
 
+//////////////////////////////////////////////////////////////////////////////////////////
+// Send email
+//////////////////////////////////////////////////////////////////////////////////////////
+function sendEmail(emailRecipient, emailSubject, emailBody) {
+
+    // create message
+    var msg = {
+        to: emailRecipient,
+        from: process.env.EMAIL_SENDER,
+        subject: emailSubject,
+        text: emailBody // change to HTML once content is pre-checked
+    };
+
+    // send the message
+    // nodemailer example
+    var transporter = nodemailer.createTransport( {  // the email account to send SMTP emails
+//        service: 'smtp.fatcow.com',
+        host: 'smtp.gmail.com',
+        port: 465, // 587 without SSL
+        secure: true,
+        auth: {
+            type: 'OAuth2',
+            user: process.env.EMAIL_SENDER,
+            clientId: process.env.EMAIL_OAUTH_CLIENTID,
+            clientSecret: process.env.EMAIL_OAUTH_CLIENTSECRET,
+            refreshToken: process.env.EMAIL_OAUTH_REFRESHTOKEN
+        },
+    });
+    transporter.sendMail( msg, function (error, info) {
+        if (error) {
+            console.log(error);
+            // ToDo: log error in "events" table
+        } else {
+            console.log('Email sent: ' + info.response);
+            // ToDo: log event in "events" table
+        }
+    });
+/*
+    // sendGrid example
+    sendgrid
+      .send(msg)
+      .then((resp) => {
+        console.log('Email sent\n', resp)
+        // ToDo: log event in "events" table
+        })
+      .catch((error) => {
+        console.error(error)
+        // ToDo: log error in "events" table
+        });
+*/
+
+}; // end "sendEmail"
+
+
 module.exports = {
     convertOptionsToDelimitedString,
-    getAISPermissionsForUser
+    getAISPermissionsForUser,
+    logEvent,
+    sendEmail
 };
