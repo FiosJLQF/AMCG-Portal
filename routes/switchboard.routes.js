@@ -528,6 +528,41 @@ router.put('/airportupdategigb', requiresAuth(), async (req, res) => {
     });
 });
 
+/////////////////////////
+// AIS - Operator / Manager Info
+/////////////////////////
+router.put('/airportupdategioa', requiresAuth(), async (req, res) => {
+
+    // Get a pointer to the current record
+// ToDo:  Verify airport ID !
+    const airportRecord = await AirportsTable.findOne( {
+        where: { LFLocationID: req.body.airportIDToUpdate }
+    });
+    console.log(`airportIDToUpdate: ${airportRecord.LFLocationID}`)
+
+    // Update the database record with the new data
+    await airportRecord.update( {
+        LFOpName:                  req.body.operatorName,
+        LFOpAddress:               req.body.operatorAddress,
+        LFOpCity:                  req.body.operatorCity,
+        LFOpState:                 req.body.operatorState,
+        LFOpZip:                   req.body.operatorZip,
+        LFOpPhone:                 req.body.operatorTelephone,
+        LFOpFax:                   req.body.operatorFax,
+        LFOpEmail:                 req.body.operatorEmail,
+        LFOpType:                  req.body.operatorType,
+        LFOpNotes:                 req.body.operatorNotes,
+        LFMgrFax:                  req.body.managerFax,
+        LFMgrEmail:                req.body.managerEmail,
+        LFMgrNotes:                req.body.managerNotes,
+        LFMgrOrgChartFilename:     req.body.managerOrgChartFilename
+    }).then( () => {
+        res.redirect(`/switchboard?airportid=${airportRecord.LFLocationID}` +
+                     `&status=airportupdatesuccess` +
+                     `&aiscontenttype=801003`);
+    });
+});
+
 
 ////////////////////////////////////////
 // "DELETE" Routes (Delete data)

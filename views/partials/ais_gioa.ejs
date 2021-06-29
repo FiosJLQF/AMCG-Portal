@@ -1,0 +1,442 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+    <% } %>
+
+    <!-- The data entry form container -->
+    <form action="/switchboard/airportupdategioa?_method=PUT" method="POST" id="airportGIOAData">
+
+      <input type="hidden" id="airportIDToUpdate" name="airportIDToUpdate"><br>
+
+      <label class="data-mgmt-col-title" id="airportInformationBlock">Operator Information</label></span><br>
+
+      <!-- Operator Name -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorName" class="data-mgmt">Operator Name:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorName" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorName" name="operatorName" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-error" id="operatorNameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator Address -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorAddress" class="data-mgmt">Street Address:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorAddress" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorAddress" name="operatorAddress" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-error" id="operatorAddressErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator City -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorCity" class="data-mgmt">City:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorCity" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorCity" name="operatorCity" class="data-mgmt-text-third"><br>
+            <span class="data-mgmt-error" id="operatorCityErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator State -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorState" class="data-mgmt">State:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorState" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorState" name="operatorState" class="data-mgmt-text-third"><br>
+            <span class="data-mgmt-error" id="operatorStateErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator Zip -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorZip" class="data-mgmt">Zip:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorZip" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorZip" name="operatorZip" class="data-mgmt-text-quarter"><br>
+            <span class="data-mgmt-error" id="operatorZipErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator Telephone -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorTelephone" class="data-mgmt">Telephone:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorTelephone" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorTelephone" name="operatorTelephone" class="data-mgmt-text-third"><br>
+            <span class="data-mgmt-error" id="operatorTelephoneErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator Fax -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorFax" class="data-mgmt">Fax:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorFax" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorFax" name="operatorFax" class="data-mgmt-text-third"><br>
+            <span class="data-mgmt-error" id="operatorFaxErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator Email -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorEmail" class="data-mgmt">Email:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorEmail" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="operatorEmail" name="operatorEmail" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-error" id="operatorEmailErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator Type -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorType" class="data-mgmt">Type:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorType" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <select id="operatorType" name="operatorType" class="data-mgmt-single-third"></select><br>
+            <span class="data-mgmt-error" id="operatorTypeErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Operator Notes -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="operatorNotes" class="data-mgmt">Notes:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="operatorNotes" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <textarea id="operatorNotes" name="operatorNotes" class="data-mgmt"></textarea><br>
+            <span class="data-mgmt-error" id="operatorNotesErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <br>
+      <label class="data-mgmt-col-title" id="ownerInformationBlock">Manager Information</label></span><br>
+
+      <!-- Manager Name -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerName" class="data-mgmt">Manager Name (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerName" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="managerName" name="managerName" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-error" id="managerNameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Manager Address -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerAddress" class="data-mgmt">Street Address (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerAddress" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="managerAddress" name="managerAddress" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-error" id="managerAddressErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Manager City/State/Zip -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerCSZ" class="data-mgmt">City / State / Zip (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerCSZ" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="managerCSZ" name="managerCSZ" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-error" id="managerCSZErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Manager Telephone -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerTelephone" class="data-mgmt">Telephone (FAA):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerTelephone" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="managerTelephone" name="managerTelephone" class="data-mgmt-text-third"><br>
+            <span class="data-mgmt-error" id="managerTelephoneErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Manager Fax -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerFax" class="data-mgmt">Fax:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerFax" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="managerFax" name="managerFax" class="data-mgmt-text-third"><br>
+            <span class="data-mgmt-error" id="managerFaxErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Manager Email -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerEmail" class="data-mgmt">Email:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerEmail" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="managerEmail" name="managerEmail" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-error" id="managerEmailErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Manager Notes -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerNotes" class="data-mgmt">Notes:</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerNotes" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <textarea id="managerNotes" name="managerNotes" class="data-mgmt"></textarea><br>
+            <span class="data-mgmt-error" id="managerNotesErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Manager Org Chart Filename -->
+      <div class="flexcontainer-datamgmt">
+        <div class="row">
+          <div class="col-3 data-mgmt-sublabel">
+            <label for="managerOrgChartFilename" class="data-mgmt">Org. Chart (File Location):</label>
+          </div>
+          <div class="col-1 data-mgmt-required">
+            <label for="managerOrgChartFilename" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value">
+            <input type="text" id="managerOrgChartFilenameDisplay" name="managerOrgChartFilenameDisplay" class="data-mgmt-text-third">
+            <input type="file" id="managerOrgChartFilename" name="managerOrgChartFilename" class="data-mgmt-half"><br>
+            <span class="data-mgmt-error" id="managerOrgChartFilenameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+    </form>
+    <div><br>
+      <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
+        <button class="data-mgmt" form="airportGIOAData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+    </div><br><br>
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Set the page title
+  document.getElementById("pageTitle").innerText = "Switchboard - Operator / Airport Manager Information";
+  // Set the instructions
+  document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Load the SELECT objects with the available options
+  var owtRows = <%- JSON.stringify(lfOwnerTypeCategoriesDDL.rows) %>;
+  loadSelectOptionsList("operatorType", "(Not Selected)", 0, owtRows);
+
+  // Is an aiport being edited?
+  <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
+    // Set the current values
+    document.getElementById('airportIDToUpdate').value = "<%- selectedAirport.LFLocationID_FAA %>";
+    document.getElementById('operatorName').value = "<%- selectedAirport.LFOpName %>";
+    document.getElementById('operatorAddress').value = "<%- selectedAirport.LFOpAddress %>";
+    document.getElementById('operatorCity').value = "<%- selectedAirport.LFOpCity %>";
+    document.getElementById('operatorState').value = "<%- selectedAirport.LFOpState %>";
+    document.getElementById('operatorZip').value = "<%- selectedAirport.LFOpZip %>";
+    document.getElementById('operatorTelephone').value = "<%- selectedAirport.LFOpPhone %>";
+    document.getElementById('operatorFax').value = "<%- selectedAirport.LFOpFax %>";
+    document.getElementById('operatorEmail').value = "<%- selectedAirport.LFOpEmail %>";
+    document.getElementById('operatorType').value =  "<%- selectedAirport.LFOpType %>";
+    document.getElementById('operatorNotes').value = "<%- selectedAirport.LFOpNotes %>";
+    document.getElementById('managerName').value = "<%- selectedAirport.LFMgrName_FAA %>";
+    document.getElementById('managerName').disabled = true;
+    document.getElementById('managerAddress').value = "<%- selectedAirport.LFMgrAddress_FAA %>";
+    document.getElementById('managerAddress').disabled = true;
+    document.getElementById('managerCSZ').value = "<%- selectedAirport.LFMgrAddressCSZ_FAA %>";
+    document.getElementById('managerCSZ').disabled = true;
+    document.getElementById('managerTelephone').value = "<%- selectedAirport.LFMgrPhone_FAA %>";
+    document.getElementById('managerTelephone').disabled = true;
+    document.getElementById('managerFax').value = "<%- selectedAirport.LFMgrFax %>";
+    document.getElementById('managerEmail').value = "<%- selectedAirport.LFMgrEmail %>";
+    document.getElementById('managerNotes').value = "<%- selectedAirport.LFMgrNotes %>";
+    document.getElementById('managerOrgChartFilenameDisplay').disabled = true;
+    if ( "<%- selectedAirport.LFMgrOrgChartFilename %>" === '' ) {
+      document.getElementById('managerOrgChartFilenameDisplay').value = "(None)";
+    } else {
+      document.getElementById('managerOrgChartFilenameDisplay').value = "<%- selectedAirport.LFMgrOrgChartFilename %>";
+    };
+
+    // Disable the controls (and change the instruction) if the user does not have permission to update AIS data.
+    if ( <%- !userCanUpdateAirport %> ) {
+      document.getElementById('airportInstructions').innerText = "Review the entries below.";
+      document.getElementById('operatorName').disabled = true;
+      document.getElementById('operatorAddress').disabled = true;
+      document.getElementById('operatorCity').disabled = true;
+      document.getElementById('operatorState').disabled = true;
+      document.getElementById('operatorZip').disabled = true;
+      document.getElementById('operatorTelephone').disabled = true;
+      document.getElementById('operatorFax').disabled = true;
+      document.getElementById('operatorEmail').disabled = true;
+      document.getElementById('operatorType').disabled = true;
+      document.getElementById('operatorNotes').disabled = true;
+      document.getElementById('managerFax').disabled = true;
+      document.getElementById('managerEmail').disabled = true;
+      document.getElementById('managerNotes').disabled = true;
+      document.getElementById('managerOrgChartFilename').disabled = true;
+    };
+  <% } %>
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  //////////////////////////////////////////////////////////////////////
+  function validateData() {
+    var dataAreValid = true;  // test for errors below
+
+    //////////////////////////////////////////////////
+    // Operator Email
+    //////////////////////////////////////////////////
+    var operatorEmail = document.getElementById("operatorEmail").value;
+    var operatorEmailErrors = document.getElementById("operatorEmailErrors");
+    operatorEmailErrors.innerText = '';  // reset value
+    // Email must be propertly formatted, if present
+    if ( operatorEmail.length !== 0 ) {
+      if ( !/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(operatorEmail) ) {
+        operatorEmailErrors.innerText += "Operator Email must be a proper email address. ";
+      };
+    };
+    // Were errors found?
+    if ( operatorEmailErrors.innerText.length === 0 ) {
+      operatorEmailErrors.style.display = "none";
+    } else {
+      operatorEmailErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Manager Email
+    //////////////////////////////////////////////////
+    var managerEmail = document.getElementById("managerEmail").value;
+    var managerEmailErrors = document.getElementById("managerEmailErrors");
+    managerEmailErrors.innerText = '';  // reset value
+    // Email must be propertly formatted, if present
+    if ( managerEmail.length !== 0 ) {
+      // Email must be properly formatted
+      if ( !/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/.test(managerEmail) ) {
+        managerEmailErrors.innerText += "Manager Email must be a proper email address. ";
+      };
+    };
+    // Were errors found?
+    if ( managerEmailErrors.innerText.length === 0 ) {
+      managerEmailErrors.style.display = "none";
+    } else {
+      managerEmailErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // If no errors, submit the changes
+    //////////////////////////////////////////////////
+    return dataAreValid;
+
+  };
+
+</script>

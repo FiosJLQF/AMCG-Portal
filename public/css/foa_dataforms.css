@@ -208,3 +208,24 @@ select.data-mgmt-single {
   padding: 0px;
   height: 24px;
 }
+
+select.data-mgmt-single-half {
+  font-size: 0.875em;
+  width: 340px;
+  padding: 0px;
+  height: 24px;
+}
+
+select.data-mgmt-single-third {
+  font-size: 0.875em;
+  width: 225px;
+  padding: 0px;
+  height: 24px;
+}
+
+select.data-mgmt-single-quarter {
+  font-size: 0.875em;
+  width: 170px;
+  padding: 0px;
+  height: 24px;
+}
