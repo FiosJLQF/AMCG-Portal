@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 module.exports = (sequelize, DataTypes) => {
-    const UserProfiles = sequelize.define('vwWebsiteUserProfile', {
+    const UserProfiles = sequelize.define('vwWebsiteUserProfiles', {
         UserID:   DataTypes.INTEGER,
         Username: DataTypes.STRING
     }, {
