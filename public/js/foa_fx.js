@@ -106,7 +106,7 @@ function toggleAdvancedSearchCriteriaInputBlock(elIcon, elBlock, elInput, status
     }
 }
 
-
+/*
 //////////////////////////////////////////////////////////////////////////////////////////
 // does the user have permission to access the page?
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -126,4 +126,4 @@ function userPermissions(permissionsList, userID, objectName, objectValue = '') 
     };
 
 }
-
+*/

@@ -58,6 +58,7 @@ router.get('/newuser', requiresAuth(), async (req, res) => {
     }
 });
 
+
 ////////////////////////////////////////
 // The main switchboard
 ////////////////////////////////////////
@@ -91,6 +92,26 @@ router.get('/', requiresAuth(), async (req, res) => {
 // Test
 //let logEventResult = await jsFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
 //0, 0, 0, 'justjlqf@mail.com');
+
+        ////////////////////////////////////////////////////
+        // Get the current user's profile and permissions
+        ////////////////////////////////////////////////////
+        const userProfiles = await UserProfiles.findAll( { where: { Username: req.oidc.user.email }});
+        console.log(`userProfile: ${userProfiles.length}`);
+        if ( userProfiles.length === 0 ) {  // The new user has not yet been set up
+            // Log the event
+            let logEventResult = await jsFx.logEvent('User Profiles', 'Get Current User', 0, 'Failure', 'User not yet configured',
+                0, 0, 0, '');
+            // Redirect the user to the "New User" screen
+            res.redirect(`/switchboard/newuser`);
+        };
+        // Log the access by the Current User
+        let logEventResult = await jsFx.logEvent('Page Access', 'Switchboard', 0, 'Informational', 'User Accessed Page',
+            0, 0, userProfiles[0].UserID, '');
+        // Get the list of active permissions for the user
+        const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: userProfiles[0].UserID }});
+        console.log(`userPermissionsActive.length: ${userPermissionsActive.count}`);
+
 
         ////////////////////////////////////////////////////
         // Validate any query string parameters
@@ -159,6 +180,39 @@ router.get('/', requiresAuth(), async (req, res) => {
         console.log(`aisContentTypeRequested: ${aisContentTypeRequested}`);
         console.log(`selected AIS Content Type: ${selectedAISContentType}`);
 
+        // If a requested "userid" is blank, zero or not a number, redirect to the generic Switchboard page
+        console.log(`userid = ${req.query['userid']}`);
+        let userIDRequested = '';
+        if ( req.query['userid'] != undefined ) {  // if the querystring variable exists, check its format
+            userIDRequested = Number(req.query['userid']);
+            console.log(`userIDRequested = ${userIDRequested}`);
+            if ( userIDRequested == 0 || userIDRequested === '' || Number.isNaN(userIDRequested)) {
+                // Log the event
+                let logEventResult = await jsFx.logEvent('UserID Validation', '', 0, 'Failure',
+                    `UserID is not valid (${req.query['userid']})`,
+                    0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                // Redirect the user to the main switchboard
+                res.redirect('/switchboard');
+            };
+        };
+                
+        // If a requested "userpermissionid" is blank, zero or not a number, redirect to the generic Switchboard page
+        console.log(`userpermissionid = ${req.query['userpermissionid']}`);
+        let userPermissionIDRequested = '';
+        if ( req.query['userpermissionid'] != undefined ) {  // if the querystring variable exists, check its format
+            userPermissionIDRequested = Number(req.query['userpermissionid']);
+            console.log(`userPermissionIDRequested = ${userPermissionIDRequested}`);
+            if ( userPermissionIDRequested == 0 || userPermissionIDRequested === '' || Number.isNaN(userPermissionIDRequested)) {
+                // Log the event
+                let logEventResult = await jsFx.logEvent('UserPermissionID Validation', '', 0, 'Failure',
+                    `UserPermissionID is not valid (${req.query['userpermissionid']})`,
+                    0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                // Redirect the user to the main switchboard
+                res.redirect('/switchboard');
+            };
+        };
+                
+
         ////////////////////////////////////////////////////
         // Retrieve options for add/edit form DDLs
         ////////////////////////////////////////////////////
@@ -166,28 +220,16 @@ router.get('/', requiresAuth(), async (req, res) => {
         // Airport Search Objects
         // -- National Regions DDL
         nationalRegionsDDL = await NationalRegions.findAndCountAll({});
-        console.log(`nationalRegions Count: ${nationalRegionsDDL.count}`);
+//        console.log(`nationalRegions Count: ${nationalRegionsDDL.count}`);
         // -- AIS Content Types (data mgmt forms)
         aisContentTypeCategoriesDDL = await AISContentTypeCategories.findAndCountAll({});
-        console.log(`aisContentTypeCategories Count: ${aisContentTypeCategoriesDDL.count}`);
+//        console.log(`aisContentTypeCategories Count: ${aisContentTypeCategoriesDDL.count}`);
 
         // Data Mgmt Forms
         // -- General Information (GIAI)
         let lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
-        console.log(`lfOwnerTypeCategories Count: ${lfOwnerTypeCategoriesDDL.count}`);
+//        console.log(`lfOwnerTypeCategories Count: ${lfOwnerTypeCategoriesDDL.count}`);
 
-
-        ////////////////////////////////////////////////////
-        // Get the current user's profile and permissions
-        ////////////////////////////////////////////////////
-        const userProfiles = await UserProfiles.findAll( { where: { Username: req.oidc.user.email }});
-        console.log(`userProfile: ${userProfiles.length}`);
-        if ( userProfiles.length === 0 ) {
-            res.redirect(`/switchboard/newuser`);
-        };
-
-        // Get the list of active permissions for the user
-        const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: userProfiles[0].UserID }});
 
         ////////////////////////////////////////////////////
         //  AIS/Airport Permissions and Details (DDLs, CRUD, etc.)
@@ -208,52 +250,76 @@ router.get('/', requiresAuth(), async (req, res) => {
         // Does the requested Airport exist (if requested)?
         console.log(`doesAirportExist: (${doesAirportExist})`);
         if ( !doesAirportExist ) {  // Airport ID does not exist
-// ToDo:  Log the error
             errorCode = 908;  // Unknown Airport
+            // Log the event
+            let logEventResult = await jsFx.logEvent('AirportID Validation', `AIS Airport: ${ selectedAirportID }`,
+                errorCode, 'Failure', `AirportID does not exist`,
+                0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+            // Raise an error
             return res.render( 'error', {
                 errorCode: errorCode,
                 userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
             });
         };
 
-//        // Does the User have permission to see/edit/delete this Sponsor?
-//        if ( !userCanReadAirport ) { // User does not have permission to read Airport's data - trap and log error
-//    // ToDo:  Log the error
-//            errorCode = 909;  // Unknown Airport
-//            return res.render( 'error', {
-//                errorCode: errorCode,
-//                userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
-//            });
-//        };
+        // Does the User have permission to see/edit this Airport?
+        if ( !userCanReadAirport ) { // User does not have permission to read Airport's data - trap and log error
+            errorCode = 909;  // Unknown Airport
+            // Log the error
+            let logEventResult = await jsFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, errorCode,
+               'Failure', 'User not authorized to view airport data', 0, 0, userProfiles[0].UserID, '');
+            // Raise an error
+            return res.render( 'error', {
+                errorCode: errorCode,
+                userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+            });
+        } else {
+            // Log the access
+            let logEventResult = await jsFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 0,
+                'Success', '', 0, 0, userProfiles[0].UserID, '');
+        };
 
-//         ////////////////////////////////////////////////////
-//         //  Users Information (DDL, Add User, etc.)
-//         ////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////
+        //  Website User Data Permissions / Details (DDL, Add User, Default User, etc.)
+        ////////////////////////////////////////////////////
+        const { userCanReadUsers, userCanCreateUsers, usersAllowedDDL, userID, userDetails, doesUserExist,
+            userCanReadUser, userCanUpdateUser, userCanDeleteUser
+        } = await jsFx.getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRequested );
 
-//         // Can the user see the users select object?  If so, load the Users available to the current user
-//         const userPermissionsUserDDL = userPermissionsActive.rows.filter( permission => permission.ObjectName === 'switchboard-users');
-//         let userCanReadUsers = false;
-//         let usersAllDDL = [];
-//         if ( userPermissionsUserDDL.length > 0 && userPermissionsUserDDL[0].CanRead ) {
-//             userCanReadUsers = true;
-//             usersAllDDL = await UsersAllDDL.findAndCountAll({});
-//             console.log(`usersAllDDL: ${usersAllDDL.count}`);
-//         };
-//         console.log(`userCanReadUsers: ${userCanReadUsers}`);
+        // Does the User have access to the Users DDL?
+        if ( userCanReadUsers ) {
 
-//         // Can the user create new users?
-//         let userCanCreateUsers = false;
-//         if ( userCanReadUsers && userPermissionsUserDDL[0].CanCreate ) {
-//             userCanCreateUsers = true;
-//         };
+            // Does the requested User exist (if requested)?  If not, skip error processing
+            console.log(`doesUserExist: (${doesUserExist})`);
+            if ( !doesUserExist ) {  // User ID does not exist
+                errorCode = 928;  // Unknown User
+                // Log the event
+                let logEventResult = await jsFx.logEvent('User Access', `Website User: ${ userIDRequested }`, errorCode,
+                    'Failure', 'UserID does not exist', 0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                // Raise an error
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                });
+            };
 
-//         // If a ScholarshipID was provided in the querystring, find the Scholarship's details
-//         let scholarshipDetails = [];
-//         let scholarshipID = '';
-//         if ( req.query['scholarshipid'] ) {
-//             scholarshipID = req.query['scholarshipid'];
-// //            scholarshipDetails = await ScholarshipsTable.findAll({ where: { ScholarshipID: scholarshipID }});
-//         };
+            // Does the User have permission to see/edit/delete this User?
+            if ( !userCanReadUser ) { // User does not have permission to read User's data - trap and log error
+                errorCode = 929;  // Unknown User
+                // Log the error
+                let logEventResult = await jsFx.logEvent('Website User Access', `Website User: ${ userIDRequested }`, errorCode,
+                   'Failure', 'User not authorized to view website user data', 0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                // Raise an error
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                });
+            } else {
+                // Log the access
+                let logEventResult = await jsFx.logEvent('Content Access', `Website User: ${ userIDRequested }`, 0,
+                    'Success', '', 0, 0, userProfiles[0].UserID, '');
+            };
+        };
 
 //         ////////////////////////////////////////////////////
 //         //  Process any querystring "actions requested"
@@ -274,10 +340,6 @@ router.get('/', requiresAuth(), async (req, res) => {
          ////////////////////////////////////////////////////
          if ( req.query['status'] === 'airportupdatesuccess' ) {
              statusMessage = 'Airport was updated.';
-//         } else if ( req.query['status'] === 'sponsordeletesuccess' ) {
-//             statusMessage = 'Sponsor was deleted.';
-//         } else if ( req.query['status'] === 'sponsorcreatesuccess' ) {
-//             statusMessage = 'Sponsor was added.';
          } else {
              statusMessage = '';
          };
