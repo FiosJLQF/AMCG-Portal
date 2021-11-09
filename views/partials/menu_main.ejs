@@ -63,7 +63,41 @@
   </div>
   <% } %>  <!-- End AIS menu block -->
 
+  <br>
 
+  <% if ( userCanReadUsers ) { %>  <!-- If the current user can read the users list, show all Users menus. -->
+  <!-- User(s) -->
+  <div>
+    Users:
+    <% if ( userCanCreateUsers ) { %>  <!-- If the current user can create users, show the link. -->
+      <span id="addUser" class="float-right">
+        <a id="addUser" class="btn btn-default button-small"
+          href="/switchboard?actionrequested=adduser">Add User</a>&nbsp;</span>
+    <% } %>
+  </div>
+  <div id="filterUsersInputBlock">
+    <select id="filterUsersInput" class="single-choice" onchange="gotoUserDetails(this.value)"></select><br>
+  </div><br>  <!-- End Website Users menu block -->
+
+  <!-- User Permission(s) -->
+  <% if ( userCanReadUserPermissions ) { %>  <!-- If the current user can read the Website User's Permissions list, show it. -->
+  <div>
+    User Permissions:
+    <% if ( userCanCreateUserPermissions && userID !== '' ) { %>  <!-- If the current user can create user permissions, show the link. -->
+      <span id="addUserPermission" class="float-right">
+        <a id="addUserPermission" class="btn btn-default button-small"
+          href="/switchboard?actionrequested=adduserpermission&userid=<%=userID %>">Add User Permission</a>&nbsp;
+      </span>
+    <% } %>
+    </div>
+    <span class="searchInstructions">&nbsp;&nbsp;&nbsp;(Filtered to the User above.)</span>
+    <div id="filterUserPermissionsInputBlock">
+      <select id="filterUserPermissionsInput" class="single-choice" onchange="gotoUserPermissionDetails(this.value)"></select><br>
+    </div><br>
+  <% } %>  <!-- End Website User Permissions menu block -->
+
+  <% } %>  <!-- End Website User List & Permissions menu block -->
+  
 </div>  <!-- End column 1 DIV -->
 
 <script>
@@ -85,7 +119,6 @@
   var regRows = <%- JSON.stringify(nationalRegionsDDL.rows) %>;
   loadSelectOptionsList("searchAISNationalRegion", "(Not Selected)", 0, regRows, "");
 
-//  alert('matching Airports count: <%= matchingAirportsCount %>');
   // Matching Airports SELECT configuration
   <% if ( matchingAirportsCount > 0 ) { %> // if any matching airports were passed to the page, load the DDLs
     <% if ( matchingAirportsCount == 1 ) { %> 
@@ -115,6 +148,56 @@
     document.getElementById("searchAISMatches").disabled = true;
     document.getElementById("searchAISContentTypeCategories").disabled = true;
   <% } %>
+
+  // Load the Users List into the DDL, if the user has permission to use the DDL
+  if ( '<%= userCanReadUsers %>' === 'true' ) {
+    var usrRows = <%- JSON.stringify(usersAllowedDDL.rows) %>;
+    loadSelectOptionsList("filterUsersInput", "(Not Selected)", 0, usrRows, '<%= userID %>');
+  };
+
+  // Redirect the user to the Users Details page
+  function gotoUserDetails(selectedUserID) {
+    var newURL = '';
+    if ( selectedUserID == 0 ) {
+      newURL = '/switchboard';
+    } else {
+      newURL = 'switchboard?actionrequested=edituser&userid=' + selectedUserID;
+    }
+    location.href=newURL;
+  };
+
+  // If a User is selected, enable the "Add User Permission" link and load the User Permissions DDL
+  var ddlUsers = document.getElementById("filterUsersInput");
+  console.log('ddlUsers.value: ' + ddlUsers.value);
+  if ( ddlUsers.value !== '0' ) {
+    var perRows = <%- JSON.stringify(userPermissionsAllowedDDL.rows) %>;
+    var perCount = <%- JSON.stringify(userPermissionsAllowedDDL.count) %>;
+    if ( perCount === 0 ) {
+      loadSelectOptionsList("filterUserPermissionsInput", "(None)", 0, perRows, '');
+    } else {
+      loadSelectOptionsList("filterUserPermissionsInput", "(Not Selected)", 0, perRows, '');
+      if ( '<%= userPermissionID %>' !== '' ) {
+        document.getElementById("filterUserPermissionsInput").value = '<%= userPermissionID %>';
+      };
+    };
+  } else {
+    document.getElementById('filterUserPermissionsInput').disabled = true;
+  };
+
+  // Redirect the user to the User Permissions Details page
+  function gotoUserPermissionDetails(selectedUserPermissionID) {
+    var newURL = '';
+    if ( selectedUserPermissionID == 0 ) {
+      newURL = '/switchboard';
+    } else {
+      newURL = 'switchboard?actionrequested=edituserpermission' +
+               '&userpermissionid=' + selectedUserPermissionID + 
+               '&userid=<%= userID %>';
+    }
+    location.href=newURL;
+  };
+
+
 
 
   //////////////////////////////////////////////////////////////////////

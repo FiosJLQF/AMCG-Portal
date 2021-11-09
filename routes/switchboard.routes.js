@@ -321,6 +321,40 @@ router.get('/', requiresAuth(), async (req, res) => {
             };
         };
 
+        ////////////////////////////////////////////////////
+        //  Website User Permissions Permissions / Details (DDL, Add Permission, Default Permission, etc.)
+        ////////////////////////////////////////////////////
+        const { userCanReadUserPermissions, userCanCreateUserPermissions, userPermissionsAllowedDDL,
+            userPermissionID, userPermissionDetails, doesUserPermissionExist,
+            userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission
+        } = await jsFx.getUserPermissionsForWebsiteUserPermission( userPermissionsActive, userID, userPermissionIDRequested );
+
+        // Does the User have access to the User Permissions DDL?
+        if ( userCanReadUserPermissions ) {
+
+            // Does the requested User Permission exist (if requested)?  If not, skip error processing
+            console.log(`doesUserPermissionExist: (${doesUserPermissionExist})`);
+            if ( !doesUserPermissionExist ) {  // User ID does not exist
+// ToDo:  Log the error
+                errorCode = 938;  // Unknown User Permission
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                });
+            };
+
+            // Does the User have permission to see/edit/delete this User Permission?
+            if ( !userCanReadUserPermission ) { // Current User does not have permission to read Website User's Permission data - trap and log error
+// ToDo:  Log the error
+                errorCode = 939;  // Unknown User
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                });
+            };
+        };
+
+
 //         ////////////////////////////////////////////////////
 //         //  Process any querystring "actions requested"
 //         ////////////////////////////////////////////////////
@@ -405,6 +439,14 @@ router.get('/', requiresAuth(), async (req, res) => {
             userCanReadAISMenu,
             userCanReadAirports,
             userCanCreateAirports,
+            userCanReadUsers,
+            userCanCreateUsers,
+            usersAllowedDDL,
+            userID,
+            userCanReadUserPermissions,
+            userCanCreateUserPermissions,
+            userPermissionsAllowedDDL,
+            userPermissionID,
             // Search results
             nationalRegionsDDL,
             matchingAirports,

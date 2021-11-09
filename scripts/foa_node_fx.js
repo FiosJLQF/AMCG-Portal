@@ -3,8 +3,10 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 const pageScholarshipVolume = 15; // number of scholarships to be displayed on a page
 const pageSponsorVolume = 15; // number of sponsors to be displayed on a page
-const { EventLogsTable, UserProfiles, UserPermissionsActive, AirportsCurrent, AISContentTypeCategories,
-    LFOwnerTypeCategories, NationalRegions } = require('../models/sequelize.js');
+const { EventLogsTable, UserProfiles, UsersAllView, UsersAllDDL,
+        UserPermissionsActive, UserPermissionsAllDDL, UserPermissionsAllView,
+        AirportsCurrent, AISContentTypeCategories,
+        LFOwnerTypeCategories, NationalRegions} = require('../models/sequelize.js');
 require("dotenv").config();  // load all ".env" variables into "process.env" for use
 const nodemailer = require('nodemailer');  // allows SMPT push emails to be sent
     
@@ -276,7 +278,7 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
             userCanReadUsers = false;
         };
     };
-    console.log(`userPermissionsUserDDL.length(test): ${userPermissionsUserDDL.length}`);
+    console.log(`userPermissionsUserDDL.length: ${userPermissionsUserDDL.length}`);
     console.log(`userPermissionsUserDDL[0].CanRead: ${userPermissionsUserDDL[0].CanRead}`);
     console.log(`userCanReadUsers: ${userCanReadUsers}`);
 
@@ -289,7 +291,7 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
     if ( userIDRequested ) {
         console.log(`userIDRequested: ${userIDRequested}`);
         // Does the requested User exist? Retrieve the User's details from the database.
-        userDetails = await UsersTable.findAll({ where: { UserID: userIDRequested }});
+        userDetails = await UsersAllView.findAll({ where: { UserID: userIDRequested }});
         if ( typeof userDetails[0] === 'undefined' ) {  // User ID does not exist
             doesUserExist = false;
         } else { // User ID does exist
@@ -310,7 +312,7 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
     } else if ( userIDDefault !== 999999) { // Requested User ID does not exist - if there a default User ID
         console.log(`userIDRequested does not exist - process default User ID: ${userIDDefault}`);
         // Does the default User exist? Retrieve the User's details from the database.
-        userDetails = await UsersTable.findAll({ where: { UserID: userIDDefault }});
+        userDetails = await UsersAllView.findAll({ where: { UserID: userIDDefault }});
         if ( typeof userDetails[0] === 'undefined' ) {  // User ID does not exist
             doesUserExist = false;
         } else {
@@ -349,6 +351,7 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
 async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive, userIDRequested, userPermissionIDRequested ) {
 
     console.log(`userIDRequested at Permissions fx: ${userIDRequested}`);
+    console.log(`userPermissionIDRequested at Permissions fx: ${userPermissionIDRequested}`);
 
     // declare and set local variables
     // User Permissions (note individual website user permissions are not separated in authority; 
@@ -366,14 +369,14 @@ async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive
     let userCanDeleteUserPermission = false;
 
     // Get the list of user permissions-related permissions for the current user
-    const userPermissionsUserPermissionDDL = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID === 923009);
-
+    const userPermissionsUserPermissionDDL = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923009 );
+    
     // Can the current user view the User Permissions DDL?  What User Permissions can the current user see?
     if ( userPermissionsUserPermissionDDL.length > 0 && userPermissionsUserPermissionDDL[0].CanRead ) {
         userCanReadUserPermissions = true;
 
         // What CRUD operations can the current user perform?
-        userPermissionsUserPermissions = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID === 923008);
+        userPermissionsUserPermissions = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923008 );
         // Find the list of User Permissions the current user can see (for loading into the "User:" dropdown list)
         if ( userPermissionsUserPermissions.length > 0 && userPermissionsUserPermissions[0].CanRead ) {
             if ( userIDRequested !== '' ) { // A specific User was requested - load User Permissions for that User
@@ -408,7 +411,7 @@ async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive
     if ( userPermissionIDRequested ) {
         console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
         // Does the requested User Permission exist? Retrieve the User Permission's details from the database.
-        userPermissionDetails = await UserPermissionsAll.findAll({ where: { WebsiteUserPermissionID: userPermissionIDRequested }});
+        userPermissionDetails = await UserPermissionsAllView.findAll({ where: { WebsiteUserPermissionID: userPermissionIDRequested }});
         if ( typeof userPermissionDetails[0] === 'undefined' ) {  // User Permission ID does not exist
             doesUserPermissionExist = false;
         } else { // User Permission ID does exist
@@ -429,7 +432,7 @@ async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive
     } else if ( userPermissionIDDefault !== 999999) { // Requested User Permission ID does not exist - if there a default User Permission ID
         console.log(`userPermissionIDRequested does not exist - process default User Permission ID: ${userPermissionIDDefault}`);
         // Does the default User Permission exist? Retrieve the User Permission's details from the database.
-        userPermissionDetails = await UserPermissionsAll.findAll({ where: { WebsiteUserPermissionID: userPermissionIDDefault }});
+        userPermissionDetails = await UserPermissionsAllView.findAll({ where: { WebsiteUserPermissionID: userPermissionIDDefault }});
         if ( typeof userPermissionDetails[0] === 'undefined' ) {  // User Permission ID does not exist
             doesUserPermissionExist = false;
         } else {

@@ -22,15 +22,15 @@
     "express-openid-connect": "^2.1.0",
     "express-session": "^1.17.1",
     "express-validator": "^6.10.0",
-    "i": "^0.3.6",
+    "i": "^0.3.7",
     "method-override": "^3.0.0",
     "nodemailer": "^6.6.2",
     "passport": "^0.4.1",
     "passport-auth0": "^1.4.0",
     "pg": "^8.3.3",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^6.4.0",
-    "sequelize-cli": "^6.2.0",
-    "validator": "^13.1.17"
+    "sequelize": "^6.9.0",
+    "sequelize-cli": "^6.3.0",
+    "validator": "^13.7.0"
   }
 }

@@ -37,8 +37,6 @@ sequelize.authenticate().then(() => {
 // const SponsorTypeCategoriesDDLModel = require('./sponsortypeddl.model');
 // const SponsorTypeCategoriesDDL = SponsorTypeCategoriesDDLModel(sequelize, DataTypes);
 
-//const UsersAllDDLModel = require('./usersAllDLL.model');
-//const UsersAllDDL = UsersAllDDLModel(sequelize, DataTypes);
 
 /********************************************
   Administrative Models
@@ -48,14 +46,9 @@ const EventLogsTable = EventLogsTableModel(sequelize, DataTypes);
 EventLogsTable.removeAttribute('id');  // a different, auto-populated primary key is used in the DB
 
 
-const UserPermissionsActiveModel = require('./userPermissionsActive.model');
-const UserPermissionsActive = UserPermissionsActiveModel(sequelize, DataTypes);
-UserPermissionsActive.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
-const UserProfilesModel = require('./userProfiles.model');
-const UserProfiles = UserProfilesModel(sequelize, DataTypes);
-UserProfiles.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
+/********************************************
+  AIS / Airports Models
+********************************************/
 const AirportsTableModel = require('./airportsTable.model');
 const AirportsTable = AirportsTableModel(sequelize, DataTypes);
 AirportsTable.removeAttribute('id');  // a different, auto-populated primary key is used in the DB
@@ -77,6 +70,45 @@ const LFOwnerTypeCategories = LFOwnerTypeCategoriesModel(sequelize, DataTypes);
 LFOwnerTypeCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
 
 
+/********************************************
+  User Models
+********************************************/
+/*****************************
+  User Profiles
+*****************************/
+// Basic user profile information formatted for the "Select a User" SELECT object
+const UsersAllDDLModel = require('./usersAllDDL.model');
+const UsersAllDDL = UsersAllDDLModel(sequelize, DataTypes);
+UsersAllDDL.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+// View used to read Website User's data
+const UsersAllViewModel = require('./usersAllView.model');
+const UsersAllView = UsersAllViewModel(sequelize, DataTypes);
+UsersAllView.removeAttribute('id');  // The default [id] column is not used in this table
+// Table reference used for writing user profile data to the database
+const UsersTableModel = require('./usersTable.model');
+const UsersTable = UsersTableModel(sequelize, DataTypes);
+UsersTable.removeAttribute('id');  // The default [id] column is not used in this table
+// View used for reading user profile data
+const UserProfilesModel = require('./userProfiles.model');
+const UserProfiles = UserProfilesModel(sequelize, DataTypes);
+UserProfiles.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+/*****************************
+  User Permissions
+*****************************/
+// View used for reading all user permission data (for loading into the "Select a User Permission" SELECT object)
+const UserPermissionsAllDDLModel = require('./userPermissionsAllDDL.model');
+const UserPermissionsAllDDL = UserPermissionsAllDDLModel(sequelize, DataTypes);
+UserPermissionsAllDDL.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+// View used for reading active user permission data (for authorization checking)
+const UserPermissionsActiveModel = require('./userPermissionsActive.model');
+const UserPermissionsActive = UserPermissionsActiveModel(sequelize, DataTypes);
+UserPermissionsActive.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+// View used for reading all user permission data (for data mgmt)
+const UserPermissionsAllViewModel = require('./userPermissionsAllView.model');
+const UserPermissionsAllView = UserPermissionsAllViewModel(sequelize, DataTypes);
+UserPermissionsAllView.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
+
 /**************************************************************************************************
   Export objects
 **************************************************************************************************/
@@ -95,10 +127,17 @@ module.exports = {
   // FAAMechanicCertificateCategoriesDDL,
   // Sponsors,
   // SponsorTypeCategoriesDDL,
-  // UsersAllDDL,
+  // Administrative
   EventLogsTable,
-  UserPermissionsActive,
+  // Users
   UserProfiles,
+  UsersAllDDL,
+  UsersAllView,
+  UsersTable,
+  UserPermissionsActive,
+  UserPermissionsAllDDL,
+  UserPermissionsAllView,
+  // AIS - Airports
   NationalRegions,
   AirportsTable,
   AirportsCurrent,
