@@ -151,6 +151,7 @@ span.data-mgmt-error {
   vertical-align: top;
   margin-top: 5px;
   color: red;
+  font-size: 1em;
 }
 
 span.ais-sharedline {

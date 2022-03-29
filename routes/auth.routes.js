@@ -4,7 +4,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const querystring = require("querystring");
+const querystring = require("query-string");
 require("dotenv").config();
 
 
@@ -21,28 +21,32 @@ router.get( "/login",
   );
 
 router.get("/callback", (req, res, next) => {
-    passport.authenticate("auth0", (err, user, info) => {
+
+  console.log('Entered router.get callback');
+
+  passport.authenticate("auth0", (err, user, info) => {
+    if (err) {
+      return next(err);
+    }
+    if (!user) {
+      return res.redirect("/login");
+    }
+    req.logIn(user, (err) => {
       if (err) {
         return next(err);
       }
-      if (!user) {
-        return res.redirect("/login");
-      }
-      req.logIn(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        const returnTo = req.session.returnTo;
-        delete req.session.returnTo;
-        res.redirect(returnTo || "/switchboard");
-      });
-    })(req, res, next);
+      const returnTo = req.session.returnTo;
+      console.log(`returnTo: ${returnTo}`);
+      delete req.session.returnTo;
+      res.redirect(returnTo || "/switchboard");
+    });
+  })(req, res, next);
 });
 
 router.get("/logout", (req, res) => {
     req.logOut();
     let returnTo = req.protocol + "://" + req.hostname;
-    const port = req.connection.localPort;
+    const port = req.socket.localPort;
     if (port !== undefined && port !== 80 && port !== 443) {
       returnTo =
         process.env.NODE_ENV === "production"
@@ -56,6 +60,7 @@ router.get("/logout", (req, res) => {
       client_id: process.env.AUTH0_CLIENT_ID,
       returnTo: returnTo
     });
+    console.log(`searchString: ${searchString}`);
     logoutURL.search = searchString;
     res.redirect(logoutURL);
   });

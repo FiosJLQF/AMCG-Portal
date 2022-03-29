@@ -23,6 +23,7 @@
     </button><br>
     <div id="filterAISInputBlock" class="filter-input-subblock">
       <div class="searchInstructions">&nbsp;&nbsp;&nbsp;(Enter criteria and click "Search".)</div>
+      <span class="data-mgmt-error" id="searchAISGeneralErrors"></span>
 <!--      <form action="/switchboard/searchAIS" method="POST" id="searchAIS"> -->
         <div class="col-3 data-mgmt-label">
           <label for="searchAISLFID" class="data-mgmt-mainmenu">Airport ID:</label>
@@ -30,13 +31,15 @@
         <input type="text" id="searchAISLFID" name="searchAISLFID" class="filter-input filter_textbox"><br>
         <span class="data-mgmt-error" id="searchAISLFIDErrors"></span>
         <div class="col-3 data-mgmt-label">
-          <label for="searchAISName" class="data-mgmt-mainmenu">Airport Name:</label>
+          <label for="searchAISName" class="data-mgmt-mainmenu">Airport Name (partial name matches):</label>
         </div>
         <input type="text" id="searchAISName" name="searchAISName" class="filter-input filter_textbox"><br>
+        <span class="data-mgmt-error" id="searchAISNameErrors"></span>
         <div class="col-3 data-mgmt-label">
-          <label for="searchAISCity" class="data-mgmt-mainmenu">Airport City:</label>
+          <label for="searchAISCity" class="data-mgmt-mainmenu">Airport City (partial name matches):</label>
         </div>
         <input type="text" id="searchAISCity" name="searchAISCity" class="filter-input filter_textbox"><br>
+        <span class="data-mgmt-error" id="searchAISCityErrors"></span>
         <div class="col-3 data-mgmt-label">
           <label for="searchAISNationalRegion" class="data-mgmt-mainmenu">Airport State/Province/Territory:</label>
         </div>
@@ -231,40 +234,70 @@
   function validateAISSearchData() {
 
     var dataAreValid = true;  // test for errors below
-//    alert('checking search criteria');
 
+    // Reset all validation before rechecking
+    // General Errors
+    var criteriaGeneralErrors = document.getElementById('searchAISGeneralErrors');
+    criteriaGeneralErrors.innerText = '';
+    criteriaGeneralErrors.style.display = "none";
+    // Airport ID
     var criteriaAirportID = document.getElementById('searchAISLFID').value;
     var criteriaAirportIDErrors = document.getElementById("searchAISLFIDErrors");
-    criteriaAirportIDErrors.innerText = '';  // reset value
+    criteriaAirportIDErrors.innerText = '';
+    criteriaAirportIDErrors.style.display = "none";
+    // Airport Name
     var criteriaAirportName = document.getElementById('searchAISName').value;
+    var criteriaAirportNameErrors = document.getElementById("searchAISNameErrors");
+    criteriaAirportNameErrors.innerText = '';
+    criteriaAirportNameErrors.style.display = "none";
+    // Airport City
     var criteriaAirportCity = document.getElementById('searchAISCity').value;
+    var criteriaAirportCityErrors = document.getElementById("searchAISCityErrors");
+    criteriaAirportCityErrors.innerText = '';
+    criteriaAirportCityErrors.style.display = "none";
+    // Airport Region (State, Province, Territory)
     var criteriaAirportNationalRegion = document.getElementById('searchAISNationalRegion').value;
 
-//    alert('AirportID length: '+criteriaAirportID.length);
-//    alert('Airport Name length: '+criteriaAirportName.length);
-//    alert('Airport City length: '+criteriaAirportCity.length);
-//    alert('Airport State length: '+criteriaAirportNationalRegion.length);
-//    alert('Airport State selected value: '+criteriaAirportNationalRegion);
     //////////////////////////////////////////////////
     // At least one criteria must be selected
     //////////////////////////////////////////////////
     if ( criteriaAirportID.length === 0 && criteriaAirportName.length === 0
          && criteriaAirportCity.length === 0 && criteriaAirportNationalRegion === "0" ) {
-          criteriaAirportIDErrors.innerText = "At least one criteria must be selected.";
-    };
-//    alert('Errors so far: (' + criteriaAirportIDErrors.innerText + ')');
-    if ( criteriaAirportIDErrors.innerText.length === 0 ) {  // no error so far
-      criteriaAirportIDErrors.style.display = "none";
-    } else {
-      criteriaAirportIDErrors.style.display = "block";
+      criteriaGeneralErrors.innerText = "At least one criteria must be selected.";
+      criteriaGeneralErrors.style.display = "block";
       dataAreValid = false;
     };
 
+    //////////////////////////////////////////////////
+    // Airport ID must only be letters and numbers
+    //////////////////////////////////////////////////
+    if ( !/^[A-Za-z0-9]*$/.test(criteriaAirportID) ) {  // Airport ID contains invalid characters
+      criteriaAirportIDErrors.innerText = "Airport ID can only contain letters and numbers.";
+      criteriaAirportIDErrors.style.display = "block";
+      dataAreValid = false;
+    };                    
 
     //////////////////////////////////////////////////
-    // If no errors, add the Sponsor
+    // Airport Name must only be letters
     //////////////////////////////////////////////////
-//    alert(`Search criteria are valid: ${dataAreValid}`);
+    if ( !/^[A-Za-z]*$/.test(criteriaAirportName) ) {  // Airport Name contains invalid characters
+      criteriaAirportNameErrors.innerText = "Airport Name can only contain letters.";
+      criteriaAirportNameErrors.style.display = "block";
+      dataAreValid = false;
+    };                    
+
+    //////////////////////////////////////////////////
+    // Airport City must only be letters
+    //////////////////////////////////////////////////
+    if ( !/^[A-Za-z]*$/.test(criteriaAirportCity) ) {  // Airport City contains invalid characters
+      criteriaAirportCityErrors.innerText = "Airport City can only contain letters.";
+      criteriaAirportCityErrors.style.display = "block";
+      dataAreValid = false;
+    };                    
+
+    //////////////////////////////////////////////////
+    // Return the validation results
+    //////////////////////////////////////////////////
     return dataAreValid;
 
   };

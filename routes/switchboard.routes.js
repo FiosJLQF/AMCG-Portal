@@ -5,14 +5,21 @@ const express = require("express");
 const router = express.Router();
 const { auth, requiresAuth } = require('express-openid-connect');
 require("dotenv").config();  // load all ".env" variables into "process.env" for use
-const { sequelize, Op } = require('sequelize');
-const { UserProfiles, UserPermissionsActive, AirportsTable, AirportsCurrent,
-        AISContentTypeCategories, LFOwnerTypeCategories, NationalRegions
-    } = require('../models/sequelize.js');
+const { sequelize, Op } = require('sequelize');  // Sequelize "Operators" functions for querying
 const methodOverride = require('method-override');  // allows PUT and other non-standard methods
 router.use(methodOverride('_method')); // allows use of the PUT/DELETE method extensions
-const jsFx = require('../scripts/foa_node_fx');
+const amcgFx = require('../scripts/amcg_node_fx');
+const genericFx = require('../scripts/generic_node_fx');
 const { check, validationResult, body } = require('express-validator');
+const htmlEntities = require('html-entities');
+
+
+///////////////////////////////////////////////////////////////////////////////////
+// Data Models
+///////////////////////////////////////////////////////////////////////////////////
+const { UserProfiles, UserPermissionsActive, AirportsTable, AirportsCurrent,
+        AISContentTypeCategories, LFOwnerTypeCategories, NationalRegions
+} = require('../models/sequelize.js');
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -47,7 +54,7 @@ router.get('/newuser', requiresAuth(), async (req, res) => {
     try {
 
         // Log the request (10001 = "New User Page Redirect")
-//        const logResult = jsFx.createLogEntry(10001, req.oidc.user.name);
+//        const logResult = genericFx.createLogEntry(10001, req.oidc.user.name);
         console.log('New User!');
         return res.render('switchboard_newuser', {
             user: req.oidc.user,
@@ -65,14 +72,21 @@ router.get('/newuser', requiresAuth(), async (req, res) => {
 router.get('/', requiresAuth(), async (req, res) => {
     try {
 
-        // general variables
+        ////////////////////////////////////////////////////
+        // Set local variables
+        ////////////////////////////////////////////////////
         let errorCode = 0;
-        let actionRequested = '';
         let statusMessage = '';
+        // Current User variables
+        let userProfiles = [];
+        let currentUserID = 0;
+        let userIsDataAdmin = false;
+        // Querystring parameters
+        let actionRequested = '';
+        let matchingAirports = []; // array of all matching airports
         // SELECT object options
         let nationalRegionsDDL = []; // list of all options for the State/Province/Territory/etc SELECT object
         let aisContentTypeCategoriesDDL = []; // list of all AIS Content Type Categories for the SELECT object
-        let matchingAirports = ''; // array of all matching airports
         // airport search criteria
         let searchAirportID = '';
         let searchAirportName = '';
@@ -87,98 +101,165 @@ router.get('/', requiresAuth(), async (req, res) => {
         let selectedAISContentType = ''; // AIS page to display
 
 // Test
-//let emailResult = jsFx.sendEmail('justjlqf@mail.com', `Test Email - Switchboard Route`,
+//let emailResult = genericFx.sendEmail('justjlqf@mail.com', `Test Email - Switchboard Route`,
 //    `This is a test email from the AMCG switchboard.`);
 // Test
-//let logEventResult = await jsFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
+//let logEventResult = await genericFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
 //0, 0, 0, 'justjlqf@mail.com');
 
         ////////////////////////////////////////////////////
         // Get the current user's profile and permissions
         ////////////////////////////////////////////////////
-        const userProfiles = await UserProfiles.findAll( { where: { Username: req.oidc.user.email }});
-        console.log(`userProfile: ${userProfiles.length}`);
-        if ( userProfiles.length === 0 ) {  // The new user has not yet been set up
+        userProfiles = await UserProfiles.findAndCountAll( { where: { Username: req.oidc.user.email }});
+        console.log(`User Profiles count: ${userProfiles.count}`);
+
+        if ( userProfiles.count == 0 ) {  // The new user has not yet been set up
             // Log the event
-            let logEventResult = await jsFx.logEvent('User Profiles', 'Get Current User', 0, 'Failure', 'User not yet configured',
+            let logEventResult = await genericFx.logEvent('User Profiles', 'Get Current User', 0, 'Failure', 'User not yet configured',
                 0, 0, 0, '');
             // Redirect the user to the "New User" screen
             res.redirect(`/switchboard/newuser`);
-        };
+        };  // END: Does the User Profile exist?
+
+        // Current User exists and is configured; continue processing
+        currentUserID = userProfiles.rows[0].UserID;
         // Log the access by the Current User
-        let logEventResult = await jsFx.logEvent('Page Access', 'Switchboard', 0, 'Informational', 'User Accessed Page',
-            0, 0, userProfiles[0].UserID, '');
+        let logEventResult = await genericFx.logEvent('Page Access', 'Switchboard', 0, 'Informational', 'User Accessed Page',
+            0, 0, currentUserID, '');
         // Get the list of active permissions for the user
-        const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: userProfiles[0].UserID }});
-        console.log(`userPermissionsActive.length: ${userPermissionsActive.count}`);
+// TODO: Replace with "genericFx.checkUserPermission()"" function calls
+        const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: currentUserID }});
+        // Check to see if the current User is a "Data Admin" (AMCG web manager)
+        userIsDataAdmin = await genericFx.checkUserPermission(currentUserID, '923010', 'CanRead');
 
 
         ////////////////////////////////////////////////////
         // Validate any query string parameters
         ////////////////////////////////////////////////////
 
+        /////////////////////////
         // Were any search criteria present?
+        /////////////////////////
+        
+        // Validate the "Airport ID" search parameter, if present
         if ( req.query['searchairportid'] !== undefined ) {
-            searchAirportID = req.query['searchairportid'];
+            searchAirportID = req.query['searchairportid'].toUpperCase();
             console.log(`querystring['searchairportid']: ${searchAirportID}`);
-            if ( searchAirportID !== '' ) {
-              // validate the requested Airport ID
-// ToDo:  Validate the Airport ID exists
+            if ( searchAirportID !== '' ) {  // querystring is present
+                if ( !/^[A-Za-z0-9]*$/.test(searchAirportID) ) {  // Airport ID contains invalid characters
+                    errorCode = 908; // Invalid "Airport ID"
+                    // Log the event
+                    let logEventResult = await genericFx.logEvent('Airport ID Validation', '', 0, 'Failure',
+                        `Airport ID contains invalid characters (${searchAirportID})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                };
             };
         };
+
+        // Validate the "Airport Name" search parameter, if present
         if ( req.query['searchairportname'] !== undefined ) {
             searchAirportName = req.query['searchairportname'];
             console.log(`querystring['searchairportname']: ${searchAirportName}`);
             if ( searchAirportName !== '' ) {
-              // validate the requested Airport Name
-// ToDo:  Validate the Airport Name contains only valid characters
+                // validate the requested Airport Name
+                if ( !/^[A-Za-z]*$/.test(searchAirportName) ) {  // Airport Name contains invalid characters
+                    errorCode = 909; // Invalid "Airport Name" fragment
+                    // Log the event
+                    let logEventResult = await genericFx.logEvent('Airport Name Validation', '', 0, 'Failure',
+                        `Airport Name contains invalid characters (${searchAirportName})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                };
             };
         };
+
+        // Validate the "Airport City" search parameter, if present
         if ( req.query['searchairportcity'] !== undefined ) {
             searchAirportCity = req.query['searchairportcity'];
             console.log(`querystring['searchairportcity']: ${searchAirportCity}`);
             if ( searchAirportCity !== '' ) {
-              // validate the requested Airport City
-// ToDo:  Validate the Airport City contains only valid characters
+                // validate the requested Airport City
+                if ( !/^[A-Za-z]*$/.test(searchAirportCity) ) {  // Airport City contains invalid characters
+                    errorCode = 912; // Invalid "Airport City" fragment
+                    // Log the event
+                    let logEventResult = await genericFx.logEvent('Airport City Validation', '', 0, 'Failure',
+                        `Airport City contains invalid characters (${searchAirportCity})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                };
             };
         };
+
+        // Validate the "Airport State/Province/Territory" (aka "National Region") search parameter, if present
         if ( req.query['searchairportnationalregion'] !== undefined ) {
             searchAirportNationalRegion = req.query['searchairportnationalregion'];
             console.log(`querystring['searchairportnationalregion']: ${searchAirportNationalRegion}`);
             if ( searchAirportNationalRegion !== '' ) {
-              // validate the requested Airport National Region
-// ToDo:  Validate the Airport National Region exists
+                // validate the requested Airport National Region
+                if ( !/^[A-Za-z]*$/.test(searchAirportNationalRegion) ) {  // Airport National Region contains invalid characters
+                    errorCode = 913; // Invalid "Airport State/Province/Territory"
+                    // Log the event
+                    let logEventResult = await genericFx.logEvent('Airport National Region Validation', '', 0, 'Failure',
+                        `Airport National Region contains invalid characters (${searchAirportNationalRegion})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                };
             };
         };
 
-        // If a requested "airportid" is blank, redirect to the generic Switchboard page
+        // Validate the "Requested Airport ID" (for CRUD operations, not the Search Engine), if present
         if ( req.query['airportid'] != undefined ) {
             airportIDRequested = req.query['airportid'];
             console.log(`querystring['airportid']: ${airportIDRequested}`);
-            if ( airportIDRequested === '' ) { // if the querystring is blank, redirect to the main switchboard
-// ToDo:  Log the error
-                res.redirect('/switchboard');
-            } else {  // validate the requested Airport ID
-// ToDo:  Validate the Airport ID
-               // The requested airport has been validated
-               selectedAirportID = airportIDRequested;
+            if ( airportIDRequested !== '' ) {  // querystring is present
+                if ( !/^[A-Za-z0-9]*$/.test(airportIDRequested) ) {  // Airport ID contains invalid characters
+                    errorCode = 914; // Invalid "Requested Airport ID"
+                    // Log the event
+                    let logEventResult = await genericFx.logEvent('Airport ID Validation', '', 0, 'Failure',
+                        `Airport ID contains invalid characters (${airportIDRequested})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                } else {
+                    // The requested airport has been validated
+                    selectedAirportID = airportIDRequested;
+                };
             };
         };
 
-        // If a requested "aiscontenttype" is blank, redirect to the default "General Information" page
-        if ( req.query['aiscontenttype'] != undefined ) {
-            aisContentTypeRequested = req.query['aiscontenttype'];
+        // Validate the "AIS Content Type" search parameter, if present
+        if ( req.query['aiscontenttype'] !== undefined ) {
+            aisContentTypeRequested = req.query['aiscontenttype'].toUpperCase();
             console.log(`querystring['aiscontenttype']: ${aisContentTypeRequested}`);
-            if ( aisContentTypeRequested === '' ) { // if the value is blank, reset to default value
+            if ( aisContentTypeRequested !== '' ) {  // querystring is present
+                if ( !/^[0-9]*$/.test(aisContentTypeRequested) ) {  // AIS Content Type contains invalid characters
+                    errorCode = 915; // Invalid "AIS Content Type"
+                    // Log the event
+                    let logEventResult = await genericFx.logEvent('AIS Content Type Validation', '', 0, 'Failure',
+                        `AIS Content Type contains invalid characters (${aisContentTypeRequested})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                } else {
+                    // The requested AIS Content Type has been validated
+                    selectedAISContentType = aisContentTypeRequested;
+                };
+            } else {
+                // if the value is blank, reset to default value
                 selectedAISContentType = '801001'; // default "General Information" page
-            } else {  // validate the requested Airport ID
-// ToDo:  Validate the AIS Content Type Requested, and log errors
-
-                selectedAISContentType = aisContentTypeRequested;
             };
         };
-        console.log(`aisContentTypeRequested: ${aisContentTypeRequested}`);
-        console.log(`selected AIS Content Type: ${selectedAISContentType}`);
+
+
+
+
+
+        
 
         // If a requested "userid" is blank, zero or not a number, redirect to the generic Switchboard page
         console.log(`userid = ${req.query['userid']}`);
@@ -188,9 +269,9 @@ router.get('/', requiresAuth(), async (req, res) => {
             console.log(`userIDRequested = ${userIDRequested}`);
             if ( userIDRequested == 0 || userIDRequested === '' || Number.isNaN(userIDRequested)) {
                 // Log the event
-                let logEventResult = await jsFx.logEvent('UserID Validation', '', 0, 'Failure',
+                let logEventResult = await genericFx.logEvent('UserID Validation', '', 0, 'Failure',
                     `UserID is not valid (${req.query['userid']})`,
-                    0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                    0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Redirect the user to the main switchboard
                 res.redirect('/switchboard');
             };
@@ -204,9 +285,9 @@ router.get('/', requiresAuth(), async (req, res) => {
             console.log(`userPermissionIDRequested = ${userPermissionIDRequested}`);
             if ( userPermissionIDRequested == 0 || userPermissionIDRequested === '' || Number.isNaN(userPermissionIDRequested)) {
                 // Log the event
-                let logEventResult = await jsFx.logEvent('UserPermissionID Validation', '', 0, 'Failure',
+                let logEventResult = await genericFx.logEvent('UserPermissionID Validation', '', 0, 'Failure',
                     `UserPermissionID is not valid (${req.query['userpermissionid']})`,
-                    0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                    0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Redirect the user to the main switchboard
                 res.redirect('/switchboard');
             };
@@ -236,38 +317,16 @@ router.get('/', requiresAuth(), async (req, res) => {
         ////////////////////////////////////////////////////
         const {
             userCanReadAISMenu, userCanReadAirports, userCanCreateAirports,
-            airportID, airportDetails, doesAirportExist,
+            airportID, airportDetails, /* doesAirportExist, */
             userCanReadAirport, userCanUpdateAirport, userCanDeleteAirport
-        } = await jsFx.getAISPermissionsForUser( userPermissionsActive, selectedAirportID );
-    //    console.log(`user can use AIS: ${userCanReadAISMenu}`);
-    //    console.log(`user can read airports: ${userCanReadAirports}`);
-    //    console.log(`user can create airports: ${userCanCreateAirports}`);
-    //    console.log(`airportID returned: ${airportID}`);
-    //    console.log(`userCanReadAirport: ${userCanReadAirport}`);
-    //    console.log(`userCanUpdateAirport: ${userCanUpdateAirport}`);
-    //    console.log(`userCanDeleteAirport: ${userCanDeleteAirport}`);
-
-        // Does the requested Airport exist (if requested)?
-        console.log(`doesAirportExist: (${doesAirportExist})`);
-        if ( !doesAirportExist ) {  // Airport ID does not exist
-            errorCode = 908;  // Unknown Airport
-            // Log the event
-            let logEventResult = await jsFx.logEvent('AirportID Validation', `AIS Airport: ${ selectedAirportID }`,
-                errorCode, 'Failure', `AirportID does not exist`,
-                0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
-            // Raise an error
-            return res.render( 'error', {
-                errorCode: errorCode,
-                userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
-            });
-        };
+        } = await amcgFx.getAISPermissionsForUser( userPermissionsActive, selectedAirportID );
 
         // Does the User have permission to see/edit this Airport?
         if ( !userCanReadAirport ) { // User does not have permission to read Airport's data - trap and log error
             errorCode = 909;  // Unknown Airport
             // Log the error
-            let logEventResult = await jsFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, errorCode,
-               'Failure', 'User not authorized to view airport data', 0, 0, userProfiles[0].UserID, '');
+            let logEventResult = await genericFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, errorCode,
+               'Failure', 'User not authorized to view airport data', 0, 0, currentUserID, '');
             // Raise an error
             return res.render( 'error', {
                 errorCode: errorCode,
@@ -275,8 +334,8 @@ router.get('/', requiresAuth(), async (req, res) => {
             });
         } else {
             // Log the access
-            let logEventResult = await jsFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 0,
-                'Success', '', 0, 0, userProfiles[0].UserID, '');
+            let logEventResult = await genericFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 0,
+                'Success', '', 0, 0, currentUserID, '');
         };
 
         ////////////////////////////////////////////////////
@@ -284,7 +343,7 @@ router.get('/', requiresAuth(), async (req, res) => {
         ////////////////////////////////////////////////////
         const { userCanReadUsers, userCanCreateUsers, usersAllowedDDL, userID, userDetails, doesUserExist,
             userCanReadUser, userCanUpdateUser, userCanDeleteUser
-        } = await jsFx.getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRequested );
+        } = await genericFx.getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRequested );
 
         // Does the User have access to the Users DDL?
         if ( userCanReadUsers ) {
@@ -294,8 +353,8 @@ router.get('/', requiresAuth(), async (req, res) => {
             if ( !doesUserExist ) {  // User ID does not exist
                 errorCode = 928;  // Unknown User
                 // Log the event
-                let logEventResult = await jsFx.logEvent('User Access', `Website User: ${ userIDRequested }`, errorCode,
-                    'Failure', 'UserID does not exist', 0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                let logEventResult = await genericFx.logEvent('User Access', `Website User: ${ userIDRequested }`, errorCode,
+                    'Failure', 'UserID does not exist', 0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Raise an error
                 return res.render( 'error', {
                     errorCode: errorCode,
@@ -307,8 +366,8 @@ router.get('/', requiresAuth(), async (req, res) => {
             if ( !userCanReadUser ) { // User does not have permission to read User's data - trap and log error
                 errorCode = 929;  // Unknown User
                 // Log the error
-                let logEventResult = await jsFx.logEvent('Website User Access', `Website User: ${ userIDRequested }`, errorCode,
-                   'Failure', 'User not authorized to view website user data', 0, 0, userProfiles[0].UserID, process.env.EMAIL_WEBMASTER_LIST);
+                let logEventResult = await genericFx.logEvent('Website User Access', `Website User: ${ userIDRequested }`, errorCode,
+                   'Failure', 'User not authorized to view website user data', 0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Raise an error
                 return res.render( 'error', {
                     errorCode: errorCode,
@@ -316,8 +375,8 @@ router.get('/', requiresAuth(), async (req, res) => {
                 });
             } else {
                 // Log the access
-                let logEventResult = await jsFx.logEvent('Content Access', `Website User: ${ userIDRequested }`, 0,
-                    'Success', '', 0, 0, userProfiles[0].UserID, '');
+                let logEventResult = await genericFx.logEvent('Content Access', `Website User: ${ userIDRequested }`, 0,
+                    'Success', '', 0, 0, currentUserID, '');
             };
         };
 
@@ -327,7 +386,7 @@ router.get('/', requiresAuth(), async (req, res) => {
         const { userCanReadUserPermissions, userCanCreateUserPermissions, userPermissionsAllowedDDL,
             userPermissionID, userPermissionDetails, doesUserPermissionExist,
             userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission
-        } = await jsFx.getUserPermissionsForWebsiteUserPermission( userPermissionsActive, userID, userPermissionIDRequested );
+        } = await genericFx.getUserPermissionsForWebsiteUserPermission( userPermissionsActive, userID, userPermissionIDRequested );
 
         // Does the User have access to the User Permissions DDL?
         if ( userCanReadUserPermissions ) {
