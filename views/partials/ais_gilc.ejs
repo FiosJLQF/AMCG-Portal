@@ -1,0 +1,376 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+    <% } %>
+
+    <!-- The data entry form container -->
+    <form action="/switchboard/airportupdategilc?_method=PUT" method="POST" id="airportGILCData">
+
+      <input type="hidden" id="airportIDToUpdate" name="airportIDToUpdate"><br>
+
+      <label class="data-mgmt-col-title" id="airportInformationBlock">Location Information</label></span><br>
+
+      <!-- Latitude -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="latitude" class="data-mgmt">Latitude:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="latitude" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="latitude" name="latitude" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="latitudeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Longitude -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="longitude" class="data-mgmt">Longitude:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="longitude" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="longitude" name="longitude" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="longitudeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Elevation -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="elevation" class="data-mgmt">Elevation:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="elevation" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="elevation" name="elevation" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="elevationErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Sectional Chart -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="sectionalChart" class="data-mgmt">Sectional Chart:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="sectionalChart" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="sectionalChart" name="sectionalChart" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="sectionalChartErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- FAA Region -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="faaRegion" class="data-mgmt">FAA Region:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="faaRegion" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="faaRegion" name="faaRegion" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="faaRegionErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- FAA District Office -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="faaDistrictOffice" class="data-mgmt">FAA District Office:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="faaDistrictOffice" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="faaDistrictOffice" name="faaDistrictOffice" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="faaDistrictOfficeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Location Notes -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="locationNotes" class="data-mgmt">Notes:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="locationNotes" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <textarea id="locationNotes" name="locationNotes" class="data-mgmt-textarea"></textarea><br>
+          <span class="data-mgmt-error" id="locationNotesErrors"></span>
+        </div>
+      </div><br>
+
+      <br>
+      <label class="data-mgmt-col-title" id="ownerInformationBlock">Classification Information</label></span><br>
+
+      <!-- Ownership Type -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="ownershipType" class="data-mgmt">Ownership Type:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="ownershipType" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="ownershipType" name="ownershipType" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="ownershipTypeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Facility Use Type -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="facilityUse" class="data-mgmt">Facility Use:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="facilityUse" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="facilityUse" name="facilityUse" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="facilityUseErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Runway Category -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayCategory" class="data-mgmt">Runway Category:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayCategory" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayCategory" name="runwayCategory" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="runwayCategoryErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- System Airport -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="systemAirport" class="data-mgmt">System Airport:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="systemAirport" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <select id="systemAirport" name="systemAirport" class="data-mgmt-single-quarter">
+            <option value="">(Not Selected)</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select><br>
+          <span class="data-mgmt-error" id="systemAirportErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- System Airport IDs -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="systemAirportIDs" class="data-mgmt">System Airport ID(s):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="systemAirportIDs" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="systemAirportIDs" name="systemAirportIDs" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="systemAirportIDsErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Comps Effective Date -->
+      <div class="data-mgmt-row row">
+          <div class="col-3 data-mgmt-sublabel-col">
+            <label for="compsEffectiveDate" class="data-mgmt">Comps Effective Date:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-col">
+            <label for="compsEffectiveDate" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-col">
+            <input type="date" id="compsEffectiveDate" name="compsEffectiveDate" class="data-mgmt-date"><br>
+            <span class="data-mgmt-error" id="compsEffDateErrors"></span>
+          </div>
+      </div><br>
+
+      <!-- Comparables -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="comparables" class="data-mgmt">Comparable(s):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="comparables" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="comparables" name="comparables" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="comparablesErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Competitives -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="competitives" class="data-mgmt">Competitive(s):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="competitives" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="competitives" name="competitives" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="competitivesErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Airport Service Level -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="airportServiceLevel" class="data-mgmt">Airport Service Level:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="airportServiceLevel" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="airportServiceLevel" name="airportServiceLevel" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="airportServiceLevelErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Hub Classification -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="hubClassification" class="data-mgmt">Hub Classification:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="hubClassification" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="hubClassification" name="hubClassification" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="hubClassificationErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- GA Category -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="gaCategory" class="data-mgmt">GA Category:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="gaCategory" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="gaCategory" name="gaCategory" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="gaCategoryErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Classification Notes -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="classificationNotes" class="data-mgmt">Notes:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="classificationNotes" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <textarea id="classificationNotes" name="classificationNotes" class="data-mgmt-textarea"></textarea><br>
+          <span class="data-mgmt-error" id="classificationNotesErrors"></span>
+        </div>
+      </div><br>
+
+    </form>
+    <div><br>
+      <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
+        <button class="data-mgmt" form="airportGILCData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+    </div><br><br>
+    <hr class="bodycol2break">
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Set the page title
+  document.getElementById("pageTitle").innerText = "Switchboard - Location/Classification Information";
+  // Set the instructions
+  document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Is an aiport being edited?
+  <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
+    // Set the current values
+    document.getElementById('airportIDToUpdate').value = "<%- selectedAirport.LFLocationID_FAA %>";
+    document.getElementById('latitude').value = "<%- selectedAirport.LFLatitude %>";
+    document.getElementById('latitude').disabled = true;
+    document.getElementById('longitude').value = "<%- selectedAirport.LFLongitude %>";
+    document.getElementById('longitude').disabled = true;
+    document.getElementById('elevation').value = "<%- selectedAirport.LFElevation %>";
+    document.getElementById('elevation').disabled = true;
+    document.getElementById('sectionalChart').value = "<%- selectedAirport.LFAeroSectionalChart %>";
+    document.getElementById('sectionalChart').disabled = true;
+    document.getElementById('faaRegion').value = "<%- selectedAirport.LFFAARegionCodeDesc %>";
+    document.getElementById('faaRegion').disabled = true;
+    document.getElementById('faaDistrictOffice').value = "<%- selectedAirport.LFFAADistrictCode %>";
+    document.getElementById('faaDistrictOffice').disabled = true;
+    document.getElementById('locationNotes').value = "<%- selectedAirport.LFLocationNotes %>";
+    document.getElementById('ownershipType').value = "<%- selectedAirport.LFOwnershipTypeDesc %>";
+    document.getElementById('ownershipType').disabled = true;
+    document.getElementById('facilityUse').value = "<%- selectedAirport.LFFacilityUseDesc %>";
+    document.getElementById('facilityUse').disabled = true;
+    document.getElementById('runwayCategory').value = "<%- selectedAirport.LFLongestRunwayCategory %>";
+    document.getElementById('runwayCategory').disabled = true;
+    document.getElementById('systemAirport').value = "<%- selectedAirport.LFSystemAirport %>";
+    document.getElementById('systemAirportIDs').value = "<%- selectedAirport.LFSystemAirportIDs %>";
+    document.getElementById('compsEffectiveDate').value = "<%- selectedAirport.LFCompsEffectiveDate %>";
+    document.getElementById('comparables').value = "<%- selectedAirport.LFComparablesIDs %>";
+    document.getElementById('competitives').value = "<%- selectedAirport.LFCompetitivesIDs %>";
+    document.getElementById('airportServiceLevel').value = "<%- selectedAirport.NPIASServiceLevelDesc %>";
+    document.getElementById('airportServiceLevel').disabled = true;
+    document.getElementById('hubClassification').value = "<%- selectedAirport.NPIASHubClassificationDesc %>";
+    document.getElementById('hubClassification').disabled = true;
+    document.getElementById('gaCategory').value = "<%- selectedAirport.NPIASGACategory %>";
+    document.getElementById('gaCategory').disabled = true;
+    document.getElementById('classificationNotes').value = "<%- selectedAirport.LFClassificationNotes %>";
+
+    // Disable the controls (and change the instruction) if the user does not have permission to update AIS data.
+    if ( <%- !userCanUpdateAirport %> ) {
+      document.getElementById('airportInstructions').innerText = "Review the entries below.";
+      document.getElementById('locationNotes').disabled = true;
+      document.getElementById('systemAirport').disabled = true;
+      document.getElementById('systemAirportIDs').disabled = true;
+      document.getElementById('compsEffectiveDate').disabled = true;
+      document.getElementById('comparables').disabled = true;
+      document.getElementById('competitives').disabled = true;
+      document.getElementById('classificationNotes').disabled = true;
+    };
+  <% } %>
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  //////////////////////////////////////////////////////////////////////
+  function validateData() {
+    var dataAreValid = true;  // test for errors below
+
+    //////////////////////////////////////////////////
+    // If no errors, submit the changes
+    //////////////////////////////////////////////////
+    return dataAreValid;
+
+  };
+
+</script>

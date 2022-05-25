@@ -1,0 +1,66 @@
+@media (min-width: 992px) and (max-width: 1199px){
+
+
+  /**********************************************************/
+  /* "SEARCH" pages */
+  /**********************************************************/
+  .bodylayout1col2 {
+    width: 675px;
+  }
+/*
+  .searchresults-mainblock {
+      width: 675px;
+    }
+    .searchresults-mainblock-featured {
+      background-color: var(--amcg-blue-08);
+      width: 675px;
+    }
+    .searchresults-subblock {
+      width: 675px;
+    }
+    .searchresults-subblock-break {
+      width: 675px;
+    }
+    .searchresultscol3 {
+      width: 550px;
+    }
+    .searchresultscol3A {
+      width: 140px;
+    }
+    .searchresultscol3A.text-block {
+      width: 140px;
+    }
+    .searchresultscol3B {
+      width: 410px;
+    }
+    .searchresultscol3Bfeatured {
+      width: 290px;
+    }
+    .searchresultscol3B.text-block {
+      width: 410px;
+    }
+*/
+
+/**********************************************************/
+  /* "DATA MGMT" pages */
+  /**********************************************************/
+  .bodylayout1col2-datamgmt {
+    width: 675px;
+  }
+  div.data-mgmt-row {
+    width: 660px;
+  }
+  .data-mgmt-value-col {
+    width: 435px;
+  }
+  .data-mgmt-text {
+    width: 435px;
+  }
+  .data-mgmt-textarea {
+    width: 435px;
+  }
+  .data-mgmt-text-fifth {
+    width: 25%; /* keep at 1/4 width so dates fully display */
+  }
+
+}  

@@ -1,0 +1,70 @@
+@media (min-width: 1200px) and (max-width: 1399px){
+
+  /**********************************************************/
+  /* "SEARCH" pages */
+  /**********************************************************/
+  .bodylayout1col2 {
+    width: 855px;
+  }
+/*
+  .searchresults-mainblock {
+    width: 840px;
+  }
+  .searchresults-mainblock-featured {
+    background-color: var(--amcg-blue-08);
+    width: 840px;
+  }
+  .searchresults-subblock {
+    width: 840px;
+  }
+  .searchresults-subblock-break {
+    width: 840px;
+  }
+  .searchresultscol3 {
+    width: 715px;
+  }
+  .searchresultscol3A {
+    width: 140px;
+  }
+  .searchresultscol3A.text-block {
+    width: 140px;
+  }
+  .searchresultscol3B {
+    width: 575px;
+  }
+  .searchresultscol3Bfeatured {
+    width: 450px;
+  }
+  .searchresultscol3B.text-block {
+    width: 575px;
+  } */
+
+  /**********************************************************/
+  /* "DATA MGMT" pages */
+  /**********************************************************/
+  .bodylayout1col2-datamgmt {
+    width: 855px;
+  }
+  div.data-mgmt-row {
+    width: 840px;
+  }
+  .data-mgmt-value-col {
+    width: 615px;
+  }
+  .data-mgmt-text {
+    width: 615px;
+  }
+  .data-mgmt-text-half {
+    width: 305px;
+  }
+  .data-mgmt-textarea {
+    width: 615px;
+  }
+  select.data-mgmt-single-third {
+    width: 205px;
+  }
+  select.data-mgmt-single-quarter {
+    width: 154px;
+  }
+  
+}

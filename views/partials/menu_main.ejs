@@ -108,10 +108,18 @@
   //////////////////////////////////////////////////////////////////////
   // Configure the page
   //////////////////////////////////////////////////////////////////////
+
+  // Set the AIS Search Crteria initial display configuration
   toggleSearchCriteriaInputBlock(
     document.querySelector('#filterAISIcon'),
     document.querySelector('#filterAISInputBlock'),
     document.querySelector('#filterAISInput'), '');
+
+  // Load the Search Criteria (if post-submit)
+  document.getElementById('searchAISLFID').value = '<%= searchAirportID %>';
+  document.getElementById('searchAISName').value = '<%= searchAirportName %>';
+
+
 
 
   //////////////////////////////////////////////////////////////////////
@@ -310,7 +318,9 @@
     if ( selectedAirportID == 0 ) {
       newURL = '/switchboard';
     } else {
-      newURL = '/switchboard?airportid=' + selectedAirportID + '&aiscontenttype=801001';
+      newURL = '/switchboard?airportid=' + selectedAirportID + '&aiscontenttype=801001' +
+               '&searchairportid=' + document.getElementById('searchAISLFID').value +
+               '&searchairportname=' + document.getElementById('searchAISName').value;
     }
     location.href=newURL;
   };
@@ -323,7 +333,9 @@
     var newURL = '';
     if ( selectedAISContentType !== '' ) {
       newURL = '/switchboard?airportid=' + "<%= selectedAirportID %>" +
-               '&aiscontenttype=' + selectedAISContentType;
+               '&aiscontenttype=' + selectedAISContentType +
+               '&searchairportid=' + document.getElementById('searchAISLFID').value +
+               '&searchairportname=' + document.getElementById('searchAISName').value;
       location.href=newURL;
     };
   };

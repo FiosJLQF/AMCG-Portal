@@ -1,0 +1,69 @@
+
+/***********************************************************************************************
+ * VARIABLES                                                                                   *
+ ***********************************************************************************************/
+
+:root {
+  --amcg-blue: rgb(0,73,140);
+  --amcg-blue-50: rgb(0,73,140,.5);
+  --amcg-blue-25: rgb(0,73,140,.25);
+  --amcg-yellow: rgb(253,185,19);
+}
+
+/***********************************************************************************************
+ * Nav Bar                                                                                     *
+ ***********************************************************************************************/
+
+ .flexcontainer-nav {
+  display: flex;
+/*  width: 95%;  */ /* for full-width */
+  width: 959px; /* to match FatCow */
+  margin: 0 auto; /* to match FatCow */
+/*  flex-direction: row; */
+/*  margin-left: 5px; */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: lighter;
+}
+
+.column {
+   flex-basis: 100%;
+   flex: 1;
+}
+
+#divLogo {
+  width: 200px;
+}
+
+.navbar-logo {
+  width: 175px;
+  align-self: flex-start;
+}
+
+.navbars-wrapper {
+  flex-direction: column;
+}
+
+.navbar-login {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  height: 30px;
+  vertical-align: middle;
+  align-items: center;
+}
+
+.navitem-login {
+  font-size: .8em;
+}
+
+.navbar-main {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+/*  font-weight: bold; */
+  font-size: .85em;
+  width: 100%;
+}
+

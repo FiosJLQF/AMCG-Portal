@@ -22,8 +22,10 @@
       <% } else if ( selectedAISContentType === '801002' ) { %>
           <%- include('partials/ais_gigb') %>
       <% } else if ( selectedAISContentType === '801003' ) { %>
-            <%- include('partials/ais_gioa') %>
-        <% } else { %>  <!-- no specific AIS Content requested, so show the "home" page -->
+          <%- include('partials/ais_gioa') %>
+      <% } else if ( selectedAISContentType === '801004' ) { %>
+            <%- include('partials/ais_gilc') %>
+      <% } else { %>  <!-- no specific AIS Content requested, so show the "home" page -->
         <%- include('partials/ais_giai') %>
       <% } %>
     <% } else { %>
@@ -34,10 +36,10 @@
 
   <!-- 2nd Row of Main Body -->
   <div class="row">
-    <div id="switchboardsidemenu_footer" class="col-3 bodylayout1col1"></div>
-    <div id="scholarshipsearchresultscolumn_footer" class="col-9 bodylayout1col2">
-      <hr class="bodycol2break">
+    <div id="switchboardsidemenu_footer" class="bodylayout1col1-datamgmt"></div>
+    <div id="datamgmtform_footer" class="bodylayout1col2-datamgmt">
+      <!-- <hr class="bodycol2break"> -->
     </div>
   </div>    <!-- End row 2 DIV     -->
-
+  
 </div>      <!-- End container DIV -->

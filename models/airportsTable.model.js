@@ -39,7 +39,14 @@ module.exports = (sequelize, DataTypes) => {
         LFMgrFax:                    DataTypes.STRING,
         LFMgrEmail:                  DataTypes.STRING,
         LFMgrNotes:                  DataTypes.STRING,
-        LFMgrOrgChartFilename:       DataTypes.STRING
+        LFMgrOrgChartFilename:       DataTypes.STRING,
+        LFLocationNotes:             DataTypes.STRING,
+        LFSystemAirport:             DataTypes.STRING,
+        LFSystemAirportIDs:          DataTypes.STRING,
+        LFCompsEffectiveDate:        DataTypes.STRING,
+        LFComparablesIDs:            DataTypes.STRING,
+        LFCompetitivesIDs:           DataTypes.STRING,
+        LFClassificationNotes:       DataTypes.STRING
     }, {
         schema: 'amcgportal',
         freezeTableName: true,  // don't have Sequelize automatically pluralize the table name
