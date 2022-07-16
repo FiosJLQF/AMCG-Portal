@@ -268,11 +268,11 @@
         </div>
         <div class="col-8 data-mgmt-value-col">
           <input type="text" id="managerOrgChartFilenameDisplay" name="managerOrgChartFilenameDisplay" class="data-mgmt-text-third">
+          <input type="button" id="managerOrgChartFilenameClear" name="managerOrgChartFilenameClear" class="data-mgmt" value="Clear Filename"
+              onclick="clearOrgChartFilename();"><br>
+          <label class="label-data-mgmt-short">Change to:</label>
           <input type="file" id="managerOrgChartFilename" name="managerOrgChartFilename" class="data-mgmt-half"><br>
           <span class="data-mgmt-error" id="managerOrgChartFilenameErrors"></span>
-          <input type="checkbox" id="deleteMgrOrgChartFilename" name="deleteMgrOrgChartFilename"
-              class="data-mgmt-checkbox" value="DeleteMgrOrgChartFilename">
-          <label for="deleteMgrOrgChartFilename" class="data-mgmt">Remove Org Chart Filename</label>
         </div>
       </div><br>
 
@@ -354,6 +354,11 @@
     };
   <% } %>
 
+  // Clear the current Org Chart filename
+  function clearOrgChartFilename() {
+    document.getElementById('managerOrgChartFilenameDisplay').value = '';
+    document.getElementById('managerOrgChartFilename').value = '';
+  };
 
   //////////////////////////////////////////////////////////////////////
   // Validate the data before submitting the form

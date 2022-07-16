@@ -85,6 +85,20 @@ label.data-mgmt {
   padding-top: 5px;
 }
 
+.label-data-mgmt {
+  display: inline-block;
+  width: 200px;
+  vertical-align: top;
+  padding-top: 5px;
+}
+
+.label-data-mgmt-short {
+  display: inline-block;
+  width: 100px;
+  vertical-align: top;
+  padding-top: 5px;
+}
+
 label.data-mgmt-display {
   display: inline-block;
   width: 300px;

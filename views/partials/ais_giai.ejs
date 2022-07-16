@@ -205,13 +205,16 @@
       <!-- Sponsor Logo Filename -->
       <div class="data-mgmt-row row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="sponsorLogoFilename" class="data-mgmt">Logo (File Location):</label>
+          <label for="sponsorLogoFilename" class="label-data-mgmt">Logo (File Location):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="sponsorLogoFilename" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
           <input type="text" id="sponsorLogoFilenameDisplay" name="sponsorLogoFilenameDisplay" class="data-mgmt-text-third">
+          <input type="button" id="sponsorLogoFilenameClear" name="sponsorLogoFilenameClear" class="data-mgmt" value="Clear Filename"
+              onclick="clearLogoFilename();"><br>
+          <label class="label-data-mgmt-short">Change to:</label>
           <input type="file" id="sponsorLogoFilename" name="sponsorLogoFilename" class="data-mgmt-half"><br>
           <span class="data-mgmt-error" id="sponsorLogoFilenameErrors"></span>
         </div>
@@ -301,6 +304,11 @@
     };
   <% } %>
 
+  // Clear the current Logo filename
+  function clearLogoFilename() {
+    document.getElementById('sponsorLogoFilenameDisplay').value = '';
+    document.getElementById('sponsorLogoFilename').value = '';
+  };
 
   //////////////////////////////////////////////////////////////////////
   // Validate the data before submitting the form
