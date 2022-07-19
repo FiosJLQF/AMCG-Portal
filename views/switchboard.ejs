@@ -20,11 +20,15 @@
       <% if ( selectedAISContentType === '801001' ) { %>
         <%- include('partials/ais_giai') %>
       <% } else if ( selectedAISContentType === '801002' ) { %>
-          <%- include('partials/ais_gigb') %>
+        <%- include('partials/ais_gigb') %>
       <% } else if ( selectedAISContentType === '801003' ) { %>
-          <%- include('partials/ais_gioa') %>
+        <%- include('partials/ais_gioa') %>
       <% } else if ( selectedAISContentType === '801004' ) { %>
-            <%- include('partials/ais_gilc') %>
+        <%- include('partials/ais_gilc') %>
+      <% } else if ( selectedAISContentType === '801005' ) { %>
+        <%- include('partials/ais_inli') %>
+      <% } else if ( selectedAISContentType === '801006' ) { %>
+        <%- include('partials/ais_infs') %>
       <% } else { %>  <!-- no specific AIS Content requested, so show the "home" page -->
         <%- include('partials/ais_giai') %>
       <% } %>

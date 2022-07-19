@@ -78,6 +78,15 @@ module.exports = (sequelize, DataTypes) => {
         NPIASHubClassificationDesc:  DataTypes.STRING,
         NPIASGACategory:             DataTypes.STRING,
         LFClassificationNotes:       DataTypes.STRING,
+        LFAcreage:                   DataTypes.STRING,
+        LFLandSF:                    DataTypes.STRING,
+        LFLandNotes:                 DataTypes.STRING,
+        LFSecurityFence:             DataTypes.STRING,
+        LFSecurityControlledAccess:  DataTypes.STRING,
+        LFSecurityCCTV:              DataTypes.STRING,
+        LFSecurityPersonnel:         DataTypes.STRING,
+        LFSecurityUserDefined:       DataTypes.STRING,
+        LFSecurityNotes:             DataTypes.STRING,
 
         // Format data for "Matching Airports" DDL
         optionid:  {

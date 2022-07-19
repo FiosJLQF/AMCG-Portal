@@ -538,7 +538,7 @@ router.get('/', requiresAuth(), async (req, res) => {
 ////////////////////////////////////////
 
 /////////////////////////
-// AIS - GI - Airport/Sponsor Info
+// AIS - General Information - Airport/Sponsor Info
 /////////////////////////
 router.put('/airportupdategiai', requiresAuth(), async (req, res) => {
 
@@ -567,7 +567,7 @@ router.put('/airportupdategiai', requiresAuth(), async (req, res) => {
 });
 
 /////////////////////////
-// AIS - GI - Governing/Advisory Body Info
+// AIS - General Information - Governing/Advisory Body Info
 /////////////////////////
 router.put('/airportupdategigb', requiresAuth(), async (req, res) => {
 
@@ -606,7 +606,7 @@ router.put('/airportupdategigb', requiresAuth(), async (req, res) => {
 });
 
 /////////////////////////
-// AIS - GI - Operator/Manager Info
+// AIS - General Information - Operator/Manager Info
 /////////////////////////
 router.put('/airportupdategioa', requiresAuth(), async (req, res) => {
 
@@ -641,7 +641,7 @@ router.put('/airportupdategioa', requiresAuth(), async (req, res) => {
 });
 
 /////////////////////////
-// AIS - GI - Location/Classification Information
+// AIS - General Information - Location/Classification Information
 /////////////////////////
 router.put('/airportupdategilc', requiresAuth(), async (req, res) => {
 
@@ -665,6 +665,37 @@ router.put('/airportupdategilc', requiresAuth(), async (req, res) => {
         res.redirect(`/switchboard?airportid=${airportRecord.LFLocationID}` +
                      `&status=airportupdatesuccess` +
                      `&aiscontenttype=801004`);
+    });
+});
+
+/////////////////////////
+// AIS - Infrastructure - Land/Security Information
+/////////////////////////
+router.put('/airportupdateinli', requiresAuth(), async (req, res) => {
+
+    // Get a pointer to the current record
+// ToDo:  Verify airport ID !
+    const airportRecord = await AirportsTable.findOne( {
+        where: { LFLocationID: req.body.airportIDToUpdate }
+    }).catch(function (err) {
+        console.log(`INLI findOne Error: ${err}`);
+    });
+    console.log(`INLI airportIDToUpdate: ${airportRecord.LFLocationID}`);
+    console.log(`INLI landNotes (new): ${req.body.landNotes}`);
+
+    // Update the database record with the new data
+    await airportRecord.update( {
+        LFLandNotes: req.body.landNotes,
+        LFSecurityFence: req.body.perimeterFencing,
+        LFSecurityControlledAccess: req.body.controlledAccess,
+        LFSecurityCCTV: req.body.cctv,
+        LFSecurityPersonnel: req.body.securityPersonnel,
+        LFSecurityUserDefined: req.body.userDefined,
+        LFSecurityNotes: req.body.securityNotes
+    }).then( () => {
+        res.redirect(`/switchboard?airportid=${airportRecord.LFLocationID}` +
+                     `&status=airportupdatesuccess` +
+                     `&aiscontenttype=801005`);
     });
 });
 

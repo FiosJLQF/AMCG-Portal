@@ -1,0 +1,232 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+    <% } %>
+
+    <!-- The data entry form container -->
+    <form action="/switchboard/airportupdateinli?_method=PUT" method="POST" id="airportINLIData">
+
+      <input type="hidden" id="airportIDToUpdate" name="airportIDToUpdate"><br>
+
+      <label class="data-mgmt-col-title" id="airportInformationBlock">Land Information</label></span><br>
+
+      <!-- Acreage -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="acreage" class="data-mgmt">Acreage:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="acreage" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="acreage" name="acreage" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="acreageErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Square Footage -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="squareFootage" class="data-mgmt">Land Square Footage:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="squareFootage" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="squareFootage" name="squareFootage" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="squareFootageErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Land Notes -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="landNotes" class="data-mgmt">Notes:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="landNotes" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <textarea id="landNotes" name="landNotes" class="data-mgmt-textarea"></textarea><br>
+          <span class="data-mgmt-error" id="landNotesErrors"></span>
+        </div>
+      </div><br>
+
+      <br>
+      <label class="data-mgmt-col-title" id="ownerInformationBlock">Security Information</label></span><br>
+
+      <!-- Perimeter Fencing -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="perimeterFencing" class="data-mgmt">Perimeter Fencing:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="perimeterFencing" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <select id="perimeterFencing" name="perimeterFencing" class="data-mgmt-single-quarter">
+            <option value="">(Not Selected)</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select><br>
+          <span class="data-mgmt-error" id="perimeterFencingErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Controlled Access -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="controlledAccess" class="data-mgmt">Controlled Access:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="controlledAccess" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <select id="controlledAccess" name="controlledAccess" class="data-mgmt-single-quarter">
+            <option value="">(Not Selected)</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select><br>
+          <span class="data-mgmt-error" id="controlledAccessErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- CCTV -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="cctv" class="data-mgmt">CCTV:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="cctv" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <select id="cctv" name="cctv" class="data-mgmt-single-quarter">
+            <option value="">(Not Selected)</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select><br>
+          <span class="data-mgmt-error" id="cctvErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Security Personnel -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="securityPersonnel" class="data-mgmt">Security Personnel:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="securityPersonnel" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <select id="securityPersonnel" name="securityPersonnel" class="data-mgmt-single-quarter">
+            <option value="">(Not Selected)</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select><br>
+          <span class="data-mgmt-error" id="securityPersonnelErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- User Defined -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="userDefined" class="data-mgmt">User-Defined:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="userDefined" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <select id="userDefined" name="userDefined" class="data-mgmt-single-quarter">
+            <option value="">(Not Selected)</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select><br>
+          <span class="data-mgmt-error" id="userDefinedErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Security Notes -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="securityNotes" class="data-mgmt">Notes:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="securityNotes" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <textarea id="securityNotes" name="securityNotes" class="data-mgmt-textarea"></textarea><br>
+          <span class="data-mgmt-error" id="securityNotesErrors"></span>
+        </div>
+      </div><br>
+
+    </form>
+    <div><br>
+      <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
+        <button class="data-mgmt" form="airportINLIData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+    </div><br><br>
+    <hr class="bodycol2break">
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Set the page title
+  document.getElementById("pageTitle").innerText = "Switchboard - Land/Security Information";
+  // Set the instructions
+  document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Is an aiport being edited?
+  <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
+    // Set the current values
+    document.getElementById('airportIDToUpdate').value = "<%- selectedAirport.LFLocationID_FAA %>";
+    document.getElementById('acreage').value = "<%- selectedAirport.LFAcreage %>";
+    document.getElementById('acreage').disabled = true;
+    document.getElementById('squareFootage').value = "<%- selectedAirport.LFLandSF %>";
+    document.getElementById('squareFootage').disabled = true;
+    document.getElementById('landNotes').value = "<%- selectedAirport.LFLandNotes %>";
+    document.getElementById('perimeterFencing').value = "<%- selectedAirport.LFSecurityFence %>";
+    document.getElementById('controlledAccess').value = "<%- selectedAirport.LFSecurityControlledAccess %>";
+    document.getElementById('cctv').value = "<%- selectedAirport.LFSecurityCCTV %>";
+    document.getElementById('securityPersonnel').value = "<%- selectedAirport.LFSecurityPersonnel %>";
+    document.getElementById('userDefined').value = "<%- selectedAirport.LFSecurityUserDefined %>";
+    document.getElementById('securityNotes').value = "<%- selectedAirport.LFSecurityNotes %>";
+
+    // Disable the controls (and change the instruction) if the user does not have permission to update AIS data.
+    if ( <%- !userCanUpdateAirport %> ) {
+      document.getElementById('airportInstructions').innerText = "Review the entries below.";
+      document.getElementById('landNotes').disabled = true;
+      document.getElementById('perimeterFencing').disabled = true;
+      document.getElementById('controlledAccess').disabled = true;
+      document.getElementById('cctv').disabled = true;
+      document.getElementById('securityPersonnel').disabled = true;
+      document.getElementById('userDefined').disabled = true;
+      document.getElementById('securityNotes').disabled = true;
+    };
+  <% } %>
+
+
+  //////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  //////////////////////////////////////////////////////////////////////
+  function validateData() {
+    var dataAreValid = true;  // test for errors below
+
+    //////////////////////////////////////////////////
+    // If no errors, submit the changes
+    //////////////////////////////////////////////////
+    return dataAreValid;
+
+  };
+
+</script>
