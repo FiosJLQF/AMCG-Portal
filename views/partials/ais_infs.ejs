@@ -1,0 +1,186 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+    <% } %>
+
+    <!-- The data entry form container -->
+    <form action="/switchboard/airportupdateinfs?_method=PUT" method="POST" id="airportINFSData">
+
+      <input type="hidden" id="airportIDToUpdate" name="airportIDToUpdate"><br>
+
+      <label class="data-mgmt-col-title" id="airportInformationBlock">Fuel Storage</label></span><br>
+
+      <!-- Fuel Storage Unit List -->
+      <div class="data-mgmt-row row">
+          <div class="col-3 data-mgmt-sublabel-col">
+            <label for="fuelStorageUnits" class="data-mgmt-label">Select a Storage Unit:</label><br>
+          </div>
+          <div class="col-1 data-mgmt-required-col">
+            <label for="fuelStorageUnits" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-col">
+
+<!-- SWITCH DB VIEW to use standard "optiontex" syntax for DDL loading -->
+
+            <select id="fuelStorageUnits" name="fuelStorageUnits" class="data-mgmt-select-single" size=6 onchange="loadFuelStorageUnit();"></select><br>
+            <span class="data-mgmt-span-error" id="fuelStorageUnitsErrors"></span>
+          </div>
+      </div><br>
+
+      <!-- Construction Date -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="constructionDate" class="data-mgmt">Construction Date:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="constructionDate" class="data-mgmt-required">*</label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="date" id="constructionDate" name="constructionDate" class="data-mgmt-date"><br>
+          <span class="data-mgmt-error" id="constructionDateErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Construction Cost -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="constructionCost" class="data-mgmt">Construction Cost:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="constructionCost" class="data-mgmt-required">*</label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="constructionCost" name="constructionCost" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="constructionCostErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Condition -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="storageCondition" class="data-mgmt">Condition:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="storageCondition" class="data-mgmt-required">*</label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="storageCondition" name="storageCondition" class="data-mgmt-text-third"><br>
+          <span class="data-mgmt-error" id="storageConditionErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Type -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="storageType" class="data-mgmt">Type:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="storageType" class="data-mgmt-required">*</label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="storageType" name="storageType" class="data-mgmt-text-third"><br>
+          <span class="data-mgmt-error" id="storageTypeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Fuel Grade -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="fuelGrade" class="data-mgmt">Fuel Grade:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="fuelGrade" class="data-mgmt-required">*</label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="fuelGrade" name="fuelGrade" class="data-mgmt-text-third"><br>
+          <span class="data-mgmt-error" id="fuelGradeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Capacity -->
+      <div class="data-mgmt-row row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="storageCapacity" class="data-mgmt">Capacity:</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="storageCapacity" class="data-mgmt-required">*</label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="storageCapacity" name="storageCapacity" class="data-mgmt-text-half"><br>
+          <span class="data-mgmt-error" id="storageCapacityErrors"></span>
+        </div>
+      </div><br>
+
+    </form>
+    <div><br>
+      <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
+        <button class="data-mgmt" form="airportINFSData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+    </div><br><br>
+    <hr class="bodycol2break">
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Set the page title
+  document.getElementById("pageTitle").innerText = "Switchboard - Fuel Storage Information";
+  // Set the instructions
+  document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Load the Fuel Storage Units for the requested Airport
+  var fsuRows = <%- JSON.stringify(fuelStorageUnits.rows) %>;
+  alert(<%- JSON.stringify(fuelStorageUnits.count) %>);
+  loadSelectOptionsList("fuelStorageUnits", "(Not Selected)", 0, fsuRows);
+
+  // Load the SELECT objects with the available options
+  var fscRows = <%- JSON.stringify(fuelStorageConditionCategoriesDDL.rows) %>;
+  loadSelectOptionsList("storageCondition", "(Not Selected)", 0, fscRows);
+
+
+
+
+  // Is an aiport being edited?
+  <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
+
+// #1
+
+
+
+
+
+
+  <% } %>
+
+  //////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  //////////////////////////////////////////////////////////////////////
+  function validateData() {
+    var dataAreValid = true;  // test for errors below
+
+// #2
+
+
+
+
+
+
+
+    //////////////////////////////////////////////////
+    // If no errors, submit the changes
+    //////////////////////////////////////////////////
+    return dataAreValid;
+
+  };
+
+</script>

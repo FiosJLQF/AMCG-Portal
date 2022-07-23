@@ -69,6 +69,14 @@ const LFOwnerTypeCategoriesModel = require('./lfOwnerTypeCategoriesView.model');
 const LFOwnerTypeCategories = LFOwnerTypeCategoriesModel(sequelize, DataTypes);
 LFOwnerTypeCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
 
+const FuelStorageConditionCategoriesModel = require('./fuelStorageConditionCategoriesView.model');
+const FuelStorageConditionCategories = FuelStorageConditionCategoriesModel(sequelize, DataTypes);
+FuelStorageConditionCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
+const FuelStorageUnitsAllModel = require('./fuelStorageUnitsAllView.model');
+const FuelStorageUnitsAll = FuelStorageUnitsAllModel(sequelize, DataTypes);
+FuelStorageUnitsAll.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
 
 /********************************************
   User Models
@@ -142,5 +150,7 @@ module.exports = {
   AirportsTable,
   AirportsCurrent,
   AISContentTypeCategories,
-  LFOwnerTypeCategories
+  LFOwnerTypeCategories,
+  FuelStorageConditionCategories,
+  FuelStorageUnitsAll
 };

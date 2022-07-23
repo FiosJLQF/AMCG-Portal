@@ -219,7 +219,20 @@ select.data-mgmt-multiple {
   padding: 0px;
 }
 
+.data-mgmt-select-multiple {
+  font-size: 0.875em;
+  width: 680px;
+  padding: 0px;
+}
+
 select.data-mgmt-single {
+  font-size: 0.875em;
+  width: 680px;
+  padding: 0px;
+  height: 24px;
+}
+
+.data-mgmt-select-single {
   font-size: 0.875em;
   width: 680px;
   padding: 0px;

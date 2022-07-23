@@ -18,7 +18,8 @@ const htmlEntities = require('html-entities');
 // Data Models
 ///////////////////////////////////////////////////////////////////////////////////
 const { UserProfiles, UserPermissionsActive, AirportsTable, AirportsCurrent,
-        AISContentTypeCategories, LFOwnerTypeCategories, NationalRegions
+        AISContentTypeCategories, LFOwnerTypeCategories, NationalRegions, 
+        FuelStorageConditionCategories, FuelStorageUnitsAll
 } = require('../models/sequelize.js');
 
 
@@ -102,6 +103,10 @@ router.get('/', requiresAuth(), async (req, res) => {
         let selectedAISContentType = ''; // AIS page to display
         let userIDRequested = '';
         let userPermissionIDRequested = '';
+        // Airport Data Mgmt DDLs
+        let lfOwnerTypeCategoriesDDL = []; // Owner Types for DDL
+        let fuelStorageUnits = [] // Fuel Storage Units list for listbox
+        let fuelStorageConditionCategoriesDDL = []; // Fuel Storage Unit Conditions for DDL
 
 // Test
 //let emailResult = genericFx.sendEmail('justjlqf@mail.com', `Test Email - Switchboard Route`,
@@ -482,7 +487,13 @@ router.get('/', requiresAuth(), async (req, res) => {
             aisContentTypeCategoriesDDL = await AISContentTypeCategories.findAndCountAll({});
         };
         // General Information (GIAI CRUD Form)
-        let lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+        lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+        // Infrastructure - Fuel Storage Units
+        fuelStorageUnits = await FuelStorageUnitsAll.findAndCountAll({
+            where: { LFLocationID: searchAirportID }
+        });
+        console.log(`fuelStorageUnits for ${searchAirportID}: ${fuelStorageUnits.count}`);
+        fuelStorageConditionCategoriesDDL = await FuelStorageConditionCategories.findAndCountAll({});
 
         ////////////////////////////////////////////////////
         // Render the page
@@ -524,6 +535,8 @@ router.get('/', requiresAuth(), async (req, res) => {
             selectedAISContentType,
             // Data Mgmt DDLs
             lfOwnerTypeCategoriesDDL,
+            fuelStorageUnits,
+            fuelStorageConditionCategoriesDDL,
             // Airport CRUD Information
             airportID // Used???
         });
