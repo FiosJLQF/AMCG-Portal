@@ -32,6 +32,10 @@
       <% } else { %>  <!-- no specific AIS Content requested, so show the "home" page -->
         <%- include('partials/ais_giai') %>
       <% } %>
+    <% } else if ( actionRequested === 'edituser' || actionRequested === 'adduser') { %>
+      <%- include('partials/user_crud') %>
+    <% } else if ( actionRequested === 'edituserpermission' || actionRequested === 'adduserpermission') { %>
+      <%- include('partials/userpermission_crud') %>
     <% } else { %>
       <%- include('partials/switchboard_home') %>
     <% } %>

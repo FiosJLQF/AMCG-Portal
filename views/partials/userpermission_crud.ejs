@@ -1,0 +1,366 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="datamgmtcolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="userPermissionInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+      <% } %>
+  
+    <!-- The data entry form container -->
+    <form action="/switchboard/userpermissionadd" method="POST" id="userPermissionData">
+
+      <!-- If the form context is "Manage User Permission" then provide the userID for reference -->
+      <input type="hidden" id="userID" name="userID">
+      <input type="hidden" id="userPermissionIDToUpdate" name="userPermissionIDToUpdate">
+
+      <!-- User Name (for reference) -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="userName" class="data-mgmt-label">User:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="userName" class="data-mgmt-label-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="text" id="userName" name="userName" class="data-mgmt-text-half"><br>
+            <span class="data-mgmt-span-error" id="userNameErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Permission Category (for reference)-->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="permissionCategory" class="data-mgmt-label">Permission Category:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="permissionCategory" class="data-mgmt-label-required">*</label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <select id="permissionCategory" name="permissionCategory" class="data-mgmt-select-single-half"></select><br>
+            <span class="data-mgmt-span-error" id="permissionCategoryErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Limiting Values ("*" for all) -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="permissionValues" class="data-mgmt-label">Limiting Values (* = all):</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="permissionValues" class="data-mgmt-label-required">*</label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="text" id="permissionValues" name="permissionValues" class="data-mgmt-text"><br>
+            <span class="data-mgmt-span-error" id="permissionValuesErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- "Can Read/View" Permission -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="canRead" class="data-mgmt-label">Can View Data:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="canRead" class="data-mgmt-label-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="checkbox" id="canRead" name="canRead" class="data-mgmt-checkbox" value="CanRead"><br>
+            <span class="data-mgmt-span-error" id="canReadErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- "Can Update" Permission -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="canUpdate" class="data-mgmt-label">Can Update Data:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="canUpdate" class="data-mgmt-label-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="checkbox" id="canUpdate" name="canUpdate" class="data-mgmt-checkbox" value="CanUpdate"><br>
+            <span class="data-mgmt-span-error" id="canUpdateErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- "Can Delete" Permission -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="canDelete" class="data-mgmt-label">Can Delete Data:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="canDelete" class="data-mgmt-label-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="checkbox" id="canDelete" name="canDelete" class="data-mgmt-checkbox" value="CanDelete"><br>
+            <span class="data-mgmt-span-error" id="canDeleteErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- "Can Create" Permission -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="canCreate" class="data-mgmt-label">Can Create/Insert Data:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="canCreate" class="data-mgmt-label-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="checkbox" id="canCreate" name="canCreate" class="data-mgmt-checkbox" value="CanCreate"><br>
+            <span class="data-mgmt-span-error" id="canCreateErrors"></span>
+          </div>
+        <!-- </div> -->
+      </div><br>
+
+      <!-- Effective Date -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="effectiveDate" class="data-mgmt-label">Effective/Start Date:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="effectiveDate" class="data-mgmt-label-required">*</label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="date" id="effectiveDate" name="effectiveDate" class="data-mgmt-date">
+            <span class="data-mgmt-span-error" id="effectiveDateErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+      <!-- Expiration Date -->
+      <div class="data-mgmt-row">
+        <div class="row">
+          <div class="col-3 data-mgmt-label-div">
+            <label for="expirationDate" class="data-mgmt-label">Expiration/End Date:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-div">
+            <label for="expirationDate" class="data-mgmt-label-required">*</label>
+          </div>
+          <div class="col-8 data-mgmt-value-div">
+            <input type="date" id="expirationDate" name="expirationDate" class="data-mgmt-date">
+            <span class="data-mgmt-span-error" id="expirationDateErrors"></span>
+          </div>
+        </div>
+      </div><br>
+
+    </form> <!-- End data mgmt form -->
+
+    <!-- CRUD Actions -->
+    <div><br>
+      <% if ( actionRequested === 'adduserpermission' ) { %>
+        <button class="data-mgmt" form="userPermissionData" onclick="return validateData();">Add User Permission</button>
+      <% } %>
+      <% if ( userPermissionIDRequested !== '' && userCanDeleteUserPermission ) { %>
+        <form form action="/switchboard/userpermissiondelete?_method=DELETE" method="POST" id="userPermissionDataDelete">
+          <input type="hidden" id="userPermissionIDToDelete" name="userPermissionIDToDelete" value="<%= userPermissionIDRequested %>">
+          <input type="hidden" id="userIDOfPermission" name="userIDOfPermission" value="<%= currentUserID %>">
+        </form>
+      <% } %>
+      <% if ( userPermissionIDRequested !== '' && userCanUpdateUserPermission ) { %>
+        <button class="data-mgmt" form="userPermissionData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+      <% if ( userPermissionIDRequested !== '' && userCanDeleteUserPermission ) { %>
+        <button class="data-mgmt" form="userPermissionDataDelete" onclick=" return deleteUserPermission();">Delete This User Permission</button>
+      <% } %>
+    </div><br><br>
+    <hr class="bodycol2break">
+
+</div>
+
+<script>
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  // Configure elements
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  document.getElementById('userID').value = "<%- currentUserID %>";
+  document.getElementById('userName').value = "<%- userPermissionDetails[0].Username %>";
+  document.getElementById('userName').disabled = true; // always read-only
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  // Load the DDLs options lists
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  var userPermissionCategoryRows = <%- JSON.stringify(userPermissionsCategoriesAllDLL.rows) %>;
+  loadSelectOptionsList("permissionCategory", "(Not Selected)", 0, userPermissionCategoryRows);
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  // Customize the page based on the context ("Add User Permission" v. "Manage User Permission")
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  <% if ( actionRequested === 'adduserpermission' ) { %>  // "Add User Permission"
+
+    // Set the browser tab name (i.e., title)
+    document.title = "Future of Aviation - Add User Permission";
+    // Set the page title
+    document.getElementById("pageTitle").innerText = "Switchboard - Add User Permission";
+    // Set the instructions
+    document.getElementById('userPermissionInstructions').innerText = "Add the information for the new User Permission below, and click 'Add User Permission'.";
+    // Set the User ID for this new User Permission
+    document.getElementById('userID').value = "<%= currentUserID %>";
+
+  <% } else if ( userPermissionIDRequested !== '' ) { %>  // "Read/Update/Delete User Permission"
+
+    // Set the browser tab name (i.e., title)
+    document.title = "Future of Aviation - Manage User Permission";
+    // Set the page title
+    document.getElementById("pageTitle").innerText = "Switchboard - Manage User Permission";
+    // Set the instructions
+    document.getElementById('userPermissionInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+    // Set the form submittal configuration
+    document.getElementById('userPermissionData').action = "/switchboard/userpermissionupdate?_method=PUT";
+    document.getElementById('userPermissionData').method = "POST";
+    // Set the current values for the User Permission data elements
+    document.getElementById('userPermissionIDToUpdate').value = "<%- userPermissionDetails[0].WebsiteUserPermissionID %>";
+    document.getElementById('permissionCategory').value = "<%- userPermissionDetails[0].PermissionCategoryID %>";
+    document.getElementById('permissionCategory').disabled = true; // Cannot change the Permission Category while editing 
+    document.getElementById('permissionValues').value = "<%- userPermissionDetails[0].ObjectValues %>";
+    document.getElementById('canRead').checked = <%- userPermissionDetails[0].CanRead %>;
+    document.getElementById('canUpdate').checked = <%- userPermissionDetails[0].CanUpdate %>;
+    document.getElementById('canDelete').checked = <%- userPermissionDetails[0].CanDelete %>;
+    document.getElementById('canCreate').checked = <%- userPermissionDetails[0].CanCreate %>;
+    document.getElementById('effectiveDate').value = "<%- userPermissionDetails[0].EffectiveDate %>";
+    document.getElementById('expirationDate').value = "<%- userPermissionDetails[0].ExpirationDate %>";
+
+    // Disable the controls (and change the instruction) if the user does not have permission to update User Permissions.
+    if ( <%- !userCanUpdateUserPermission %> ) {
+      document.getElementById('userPermissionInstructions').innerText = "Review the entries below.";
+      document.getElementById('permissionCategory').disabled = true;
+      document.getElementById('permissionvalues').disabled = true;
+      document.getElementById('canRead').disabled = true;
+      document.getElementById('canUpdate').disabled = true;
+      document.getElementById('canDelete').disabled = true;
+      document.getElementById('canCreate').disabled = true;
+      document.getElementById('effectiveDate').disabled = true;
+      document.getElementById('expirationDate').disabled = true;
+    };
+
+  <% } %>
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  // Validate the data before submitting the form
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  function validateData() {
+    var dataAreValid = true;  // test for errors below
+
+    //////////////////////////////////////////////////
+    // Permission Category
+    //////////////////////////////////////////////////
+    var permissionCategory = document.getElementById("permissionCategory").value;
+    var permissionCategoryErrors = document.getElementById("permissionCategoryErrors");
+    permissionCategoryErrors.innerText = '';  // reset value
+    if ( permissionCategory.length === 0 || permissionCategory == '0') {
+      permissionCategoryErrors.innerText = "Permission Category cannot be selected.";
+    };
+    if ( permissionCategoryErrors.innerText.length === 0 ) {  // if no errors, hide the error text
+      permissionCategoryErrors.style.display = "none";
+    } else {
+      permissionCategoryErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Permission Values
+    //////////////////////////////////////////////////
+    var permissionValues = document.getElementById("permissionValues").value;
+    var permissionValuesErrors = document.getElementById("permissionValuesErrors");
+    permissionValuesErrors.innerText = '';  // reset value
+    if ( permissionValues.length === 0 ) {
+      permissionValuesErrors.innerText = "Limiting Values cannot be blank.";
+    };
+    if ( permissionValuesErrors.innerText.length === 0 ) {  // if no errors, hide the error text
+      permissionValuesErrors.style.display = "none";
+    } else {
+      permissionValuesErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Permission Effective Date
+    //////////////////////////////////////////////////
+    var effectiveDate = document.getElementById("effectiveDate").value;
+    var effectiveDateErrors = document.getElementById("effectiveDateErrors");
+    effectiveDateErrors.innerText = '';  // reset value
+    var expirationDate = document.getElementById("expirationDate").value;
+    // check validation rules
+    if ( effectiveDate.length > 0 ) {
+      // if present, must be a valid date
+      if ( Date.parse(effectiveDate) === NaN ) {
+        effectiveDateErrors.innerText += "Effective/Start Date must be a valid date. ";
+      };
+      // if Expiration Date also present, Effective Date must be before Expiration Date
+      if ( expirationDate.length > 0  && effectiveDate > expirationDate ) {
+        effectiveDateErrors.innerText += "Effective/Start Date must be before the Expiration/End Date. ";
+      };
+    } else { // Effective Date is blank
+      effectiveDateErrors.innerText = "Effective/Start Date cannot be blank.";
+    };
+    // Were errors found?
+    if ( effectiveDateErrors.innerText.length === 0 ) {  // if no errors, hide the error text
+      effectiveDateErrors.style.display = "none";
+    } else {
+      effectiveDateErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // Permission Expiration Date
+    //////////////////////////////////////////////////
+    var expirationDate = document.getElementById("expirationDate").value;
+    var expirationDateErrors = document.getElementById("expirationDateErrors");
+    expirationDateErrors.innerText = '';  // reset value
+    // if present, must be a valid date
+    if ( expirationDate.length > 0 ) {
+      // if present, must be a valid date
+      if ( Date.parse(expirationDate) === NaN ) {
+        expirationDateErrors.innerText += "Expiration/End Date must be a valid date. ";
+      };
+      // if Effective Date also present, Expiration Date must be after Effective Date
+      if ( effectiveDate.length > 0  && effectiveDate > expirationDate ) {
+        expirationDateErrors.innerText += "Expiration/End Date must be after the Effective/Start Date. ";
+      };
+    } else { // Expiration Date is blank
+      expirationDateErrors.innerText = "Expiration/End Date cannot be blank.";
+    };
+    // Were errors found?
+    if ( expirationDateErrors.innerText.length === 0 ) {  // if no errors, hide the error text
+      expirationDateErrors.style.display = "none";
+    } else {
+      expirationDateErrors.style.display = "block";
+      dataAreValid = false;
+    };
+
+    //////////////////////////////////////////////////
+    // If no errors, add the Scholarship
+    //////////////////////////////////////////////////
+//    dataAreValid = false;  // force stop during debugging
+    return dataAreValid;
+
+  }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  // Confirm the user wants to delete this Scholarship, and process accordingly
+  /////////////////////////////////////////////////////////////////////////////////////////////
+  function deleteUserPermission() {
+    var answer = confirm('Are you sure you want to delete this User Permission? (' + document.getElementById('userPermissionIDToDelete').value + ')');
+    if (answer !== true) {
+      return false;
+    };
+  };
+
+</script>

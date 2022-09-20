@@ -4,12 +4,10 @@
   <hr class="bodycol1break">
   <div class="searchInstructions">Select an item from the options below:</div><br>
 
-  <!-- My Account Info (A placeholder for future enhancements)-->
-  <!--
+  <!-- My Account Info -->
   <div id="myAccount">
-    <button type="button" class="btn btn-default button-normal-nomargins" onclick="">My Account (<%= user.email %>)</button>
+    <button type="button" class="btn btn-default button-normal-nomargins" onclick="gotoMyProfile()">My Account (<%= user.email %>)</button>
   </div><br>
-  -->
   
   <% if ( userCanReadAISMenu ) { %>
 
@@ -68,7 +66,7 @@
 
   <br>
 
-  <% if ( userCanReadUsers ) { %>  <!-- If the current user can read the users list, show all Users menus. -->
+  <% if ( userCanReadUsersDDL ) { %>  <!-- If the current user can read the users list, show all Users menus. -->
   <!-- User(s) -->
   <div>
     Users:
@@ -83,13 +81,13 @@
   </div><br>  <!-- End Website Users menu block -->
 
   <!-- User Permission(s) -->
-  <% if ( userCanReadUserPermissions ) { %>  <!-- If the current user can read the Website User's Permissions list, show it. -->
+  <% if ( userCanReadUserPermissionsDDL ) { %>  <!-- If the current user can read the Website User's Permissions list, show it. -->
   <div>
     User Permissions:
-    <% if ( userCanCreateUserPermissions && userID !== '' ) { %>  <!-- If the current user can create user permissions, show the link. -->
+    <% if ( userCanCreateUserPermissions && userIDRequested !== '' ) { %>  <!-- If the current user can create user permissions, show the link. -->
       <span id="addUserPermission" class="float-right">
         <a id="addUserPermission" class="btn btn-default button-small"
-          href="/switchboard?actionrequested=adduserpermission&userid=<%=userID %>">Add User Permission</a>&nbsp;
+          href="/switchboard?actionrequested=adduserpermission&userid=<%=userIDRequested %>">Add User Permission</a>&nbsp;
       </span>
     <% } %>
     </div>
@@ -109,6 +107,9 @@
   // Configure the page
   //////////////////////////////////////////////////////////////////////
 
+  // If the user can use the AIS, configure the menu
+  <% if ( userCanReadAISMenu ) { %>
+
   // Set the AIS Search Crteria initial display configuration
   toggleSearchCriteriaInputBlock(
     document.querySelector('#filterAISIcon'),
@@ -119,54 +120,59 @@
   document.getElementById('searchAISLFID').value = '<%= searchAirportID %>';
   document.getElementById('searchAISName').value = '<%= searchAirportName %>';
 
-
-
+  <% } %> 
 
   //////////////////////////////////////////////////////////////////////
   // Loading any SELECT objects and set their value (default or requested)
   //////////////////////////////////////////////////////////////////////
 
   // National Regions SELECT options
-  var regRows = <%- JSON.stringify(nationalRegionsDDL.rows) %>;
-  loadSelectOptionsList("searchAISNationalRegion", "(Not Selected)", 0, regRows, "");
+  <% if ( userCanReadAISMenu ) { %>
+      var regRows = <%- JSON.stringify(nationalRegionsDDL.rows) %>;
+      loadSelectOptionsList("searchAISNationalRegion", "(Not Selected)", 0, regRows, "");
+  <% } %> 
 
-  // Matching Airports SELECT configuration
-  <% if ( matchingAirportsCount > 0 ) { %> // if any matching airports were passed to the page, load the DDLs
-    <% if ( matchingAirportsCount == 1 ) { %> 
-      document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> match)";
-    <% } else { %>
-      document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> matches)";
-    <% } %>      
-    var lfsRows = <%- JSON.stringify(matchingAirports.rows) %>;
+  // Matching Airports SELECT configuration (If the user can use the AIS)
+  <% if ( userCanReadAISMenu ) { %>
+    <% if ( matchingAirportsCount > 0 ) { %> // if any matching airports were passed to the page, load the DDLs
+      <% if ( matchingAirportsCount == 1 ) { %> 
+        document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> match)";
+      <% } else { %>
+        document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> matches)";
+      <% } %>      
+      var lfsRows = <%- JSON.stringify(matchingAirports.rows) %>;
 //    var lfsCount = <%= matchingAirportsCount %>;
-    loadSelectOptionsList("searchAISMatches", "(Not Selected)", 0, lfsRows, "");
-    // if a particular airport was selected, load it
-    <% if ( selectedAirportID !== '' ) { %>
-      document.getElementById("searchAISMatches").value = "<%= selectedAirportID %>";
-    <% } %>
-    // if there is only one matching airport, disable the SELECT object
-    <% if ( matchingAirports.count === 1 ) { %>
-      document.getElementById("searchAISMatches").disabled = true;
-    <% } %>
-    // Load the AIS Content Types
-    var actRows = <%- JSON.stringify(aisContentTypeCategoriesDDL.rows) %>;
-    loadSelectOptionsList("searchAISContentTypeCategories", "(Not Selected)", 0, actRows, "<%= selectedAISContentType %>");
+      loadSelectOptionsList("searchAISMatches", "(Not Selected)", 0, lfsRows, "");
+      // if a particular airport was selected, load it
+      <% if ( selectedAirportID !== '' ) { %>
+        document.getElementById("searchAISMatches").value = "<%= selectedAirportID %>";
+      <% } %>
+      // if there is only one matching airport, disable the SELECT object
+      <% if ( matchingAirports.count === 1 ) { %>
+        document.getElementById("searchAISMatches").disabled = true;
+      <% } %>
+      // Load the AIS Content Types
+      var actRows = <%- JSON.stringify(aisContentTypeCategoriesDDL.rows) %>;
+      loadSelectOptionsList("searchAISContentTypeCategories", "(Not Selected)", 0, actRows, "<%= selectedAISContentType %>");
 
-  <% } else { %>  // either no search requested, or no matching airports found
-    <% if ( matchingAirportsCount == 0 ) { %> 
-      document.getElementById("searchAISMatchingAirportsCount").innerText = "(no matches)";
+    <% } else { %>  // either no search requested, or no matching airports found
+      <% if ( matchingAirportsCount == 0 ) { %> 
+        document.getElementById("searchAISMatchingAirportsCount").innerText = "(no matches)";
+      <% } %>
+      document.getElementById("searchAISMatches").disabled = true;
+      document.getElementById("searchAISContentTypeCategories").disabled = true;
     <% } %>
-    document.getElementById("searchAISMatches").disabled = true;
-    document.getElementById("searchAISContentTypeCategories").disabled = true;
   <% } %>
 
   // Load the Users List into the DDL, if the user has permission to use the DDL
-  if ( '<%= userCanReadUsers %>' === 'true' ) {
+  <% if ( userCanReadUsersDDL ) { %>
     var usrRows = <%- JSON.stringify(usersAllowedDDL.rows) %>;
-    loadSelectOptionsList("filterUsersInput", "(Not Selected)", 0, usrRows, '<%= userID %>');
-  };
+    loadSelectOptionsList("filterUsersInput", "(Not Selected)", 0, usrRows, '<%= userIDRequested %>');
+  <% } %> 
 
+  //////////////////////////////////////////////////////////////////////
   // Redirect the user to the Users Details page
+  //////////////////////////////////////////////////////////////////////
   function gotoUserDetails(selectedUserID) {
     var newURL = '';
     if ( selectedUserID == 0 ) {
@@ -177,39 +183,41 @@
     location.href=newURL;
   };
 
-  // If a User is selected, enable the "Add User Permission" link and load the User Permissions DDL
-  var ddlUsers = document.getElementById("filterUsersInput");
-  console.log('ddlUsers.value: ' + ddlUsers.value);
-  if ( ddlUsers.value !== '0' ) {
-    var perRows = <%- JSON.stringify(userPermissionsAllowedDDL.rows) %>;
-    var perCount = <%- JSON.stringify(userPermissionsAllowedDDL.count) %>;
-    if ( perCount === 0 ) {
-      loadSelectOptionsList("filterUserPermissionsInput", "(None)", 0, perRows, '');
-    } else {
-      loadSelectOptionsList("filterUserPermissionsInput", "(Not Selected)", 0, perRows, '');
-      if ( '<%= userPermissionID %>' !== '' ) {
-        document.getElementById("filterUserPermissionsInput").value = '<%= userPermissionID %>';
+  //////////////////////////////////////////////////////////////////////
+  // If a User is selected, and the current user has permission to the User Permissions DDL, show and load the User Permissions DDL
+  //////////////////////////////////////////////////////////////////////
+  <% if ( userCanReadUserPermissionsDDL ) { %>
+    var ddlUsers = document.getElementById("filterUsersInput");
+    console.log('ddlUsers.value: ' + ddlUsers.value);
+    if ( ddlUsers.value !== '0' ) {
+      var perRows = <%- JSON.stringify(userPermissionsAllowedDDL.rows) %>;
+      var perCount = <%- JSON.stringify(userPermissionsAllowedDDL.count) %>;
+      if ( perCount === 0 ) {
+        loadSelectOptionsList("filterUserPermissionsInput", "(None)", 0, perRows, '');
+      } else {
+        loadSelectOptionsList("filterUserPermissionsInput", "(Not Selected)", 0, perRows, '');
+        if ( '<%= userPermissionIDRequested %>' !== '' ) {
+          document.getElementById("filterUserPermissionsInput").value = '<%= userPermissionIDRequested %>';
+        };
       };
+    } else {
+      document.getElementById('filterUserPermissionsInput').disabled = true;
     };
-  } else {
-    document.getElementById('filterUserPermissionsInput').disabled = true;
-  };
+    <% } %> 
 
+  //////////////////////////////////////////////////////////////////////
   // Redirect the user to the User Permissions Details page
+  //////////////////////////////////////////////////////////////////////
   function gotoUserPermissionDetails(selectedUserPermissionID) {
     var newURL = '';
     if ( selectedUserPermissionID == 0 ) {
       newURL = '/switchboard';
     } else {
       newURL = 'switchboard?actionrequested=edituserpermission' +
-               '&userpermissionid=' + selectedUserPermissionID + 
-               '&userid=<%= userID %>';
+               '&userpermissionid=' + selectedUserPermissionID;
     }
     location.href=newURL;
   };
-
-
-
 
   //////////////////////////////////////////////////////////////////////
   // Find matching airports
@@ -234,7 +242,6 @@
                       '&searchairportcity=' + criteriaAirportCity + '&searchairportnationalregion=' + criteriaAirportNationalRegion;
     };
   };
-
 
   //////////////////////////////////////////////////////////////////////
   // Validate the data before submitting the form
@@ -314,30 +321,44 @@
   // Redirect the user to the selected Airport's General Info page
   //////////////////////////////////////////////////////////////////////
   function gotoAirport(selectedAirportID) {
-    var newURL = '';
-    if ( selectedAirportID == 0 ) {
-      newURL = '/switchboard';
-    } else {
-      newURL = '/switchboard?airportid=' + selectedAirportID + '&aiscontenttype=801001' +
-               '&searchairportid=' + document.getElementById('searchAISLFID').value +
-               '&searchairportname=' + document.getElementById('searchAISName').value;
-    }
-    location.href=newURL;
+  var newURL = '';
+  if ( selectedAirportID == 0 ) {
+    newURL = '/switchboard';
+  } else {
+    newURL = '/switchboard?airportid=' + selectedAirportID + '&aiscontenttype=801001' +
+             '&searchairportid=' + document.getElementById('searchAISLFID').value +
+             '&searchairportname=' + document.getElementById('searchAISName').value;
+  }
+  location.href=newURL;
   };
 
   //////////////////////////////////////////////////////////////////////
   // Redirect the user to the AIS Content Type for the current Airport
   //////////////////////////////////////////////////////////////////////
   function gotoAISContentType(selectedAISContentType) {
-//    alert('AIS Content Type changed to ' + selectedAISContentType);
-    var newURL = '';
-    if ( selectedAISContentType !== '' ) {
-      newURL = '/switchboard?airportid=' + "<%= selectedAirportID %>" +
-               '&aiscontenttype=' + selectedAISContentType +
-               '&searchairportid=' + document.getElementById('searchAISLFID').value +
-               '&searchairportname=' + document.getElementById('searchAISName').value;
-      location.href=newURL;
-    };
+  //    alert('AIS Content Type changed to ' + selectedAISContentType);
+  var newURL = '';
+  if ( selectedAISContentType !== '' ) {
+    newURL = '/switchboard?airportid=' + "<%= selectedAirportID %>" +
+             '&aiscontenttype=' + selectedAISContentType +
+             '&searchairportid=' + document.getElementById('searchAISLFID').value +
+             '&searchairportname=' + document.getElementById('searchAISName').value;
+    location.href=newURL;
   };
+};
+
+  //////////////////////////////////////////////////////////////////////
+  // Redirect the user to their User Profile page
+  //////////////////////////////////////////////////////////////////////
+  function gotoMyProfile() {
+  var newURL = '';
+  if ( <%= currentUserID %> == 0 ) {
+    newURL = '/switchboard';
+  } else {
+    newURL = `/switchboard?userid=<%= currentUserID %>` +
+                  `&actionrequested=edituser`;
+  }
+  location.href=newURL;
+};
 
 </script>

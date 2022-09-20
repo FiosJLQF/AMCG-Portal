@@ -1,4 +1,4 @@
-<div class="col-9 bodylayout1col2-datamgmt" id="scholarshipsearchresultscolumn">
+<div class="col-9 bodylayout1col2-datamgmt" id="datamgmtcolumn">
     <span class="bodylayout1col2title">
       <label class="data-mgmt-col-title" id="userInstructions"></label></span><br>
     <hr class="bodycol2break">
@@ -18,7 +18,7 @@
 
       <!-- User Login Name -->
       <div class="data-mgmt-row">
-        <div class="row">
+        <!-- <div class="row"> -->
           <div class="col-3 data-mgmt-label">
             <label for="userLoginName" class="data-mgmt">User Login Name (Email):</label>
           </div>
@@ -29,7 +29,7 @@
             <input type="text" id="userLoginName" name="userLoginName" class="data-mgmt-text-short"><br>
             <span class="data-mgmt-error" id="userLoginNameErrors"></span>
           </div>
-        </div>
+        <!-- </div> -->
       </div><br>
 
       <!-- User First Name -->
@@ -84,35 +84,37 @@
       <% if ( actionRequested === 'adduser' ) { %>
         <button class="data-mgmt" form="userData" onclick="return validateData();">Add User</button>
       <% } %>
-      <% if ( userID !== '' && userCanDeleteUser ) { %>
+      <% if ( userIDRequested !== '' && userCanDeleteUser ) { %>
         <form form action="/switchboard/userdelete?_method=DELETE" method="POST" id="userDataDelete">
           <input type="hidden" id="userIDToDelete" name="userIDToDelete" value="<%- userDetails[0].UserID %>">
         </form>
       <% } %>
-      <% if ( userID !== '' && userCanUpdateUser ) { %>
+      <% if ( userIDRequested !== '' && userCanUpdateUser ) { %>
         <button class="data-mgmt" form="userData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
       <% } %>
-      <% if ( userID !== '' && userCanDeleteUser ) { %>
+      <% if ( userIDRequested !== '' && userCanDeleteUser ) { %>
         <button class="data-mgmt" form="userDataDelete" onclick=" return deleteUser();">Delete This User</button>
       <% } %>
     </div><br><br>
 
 <script>
 
+  //////////////////////////////////////////////////////////////////////////////////////////////
   // Customize the page based on the context ("Add User" v. "Manage User")
+  //////////////////////////////////////////////////////////////////////////////////////////////
   <% if ( actionRequested === 'adduser' ) { %>  // "Add User"
-
+    
     // Set the browser tab name (i.e., title)
-    document.title = "Future of Aviation - Add User";
+    document.title = "AMCG - Add User";
     // Set the page title
     document.getElementById("pageTitle").innerText = "Switchboard - Add User";
     // Set the instructions
     document.getElementById('userInstructions').innerText = "Add the information for the new User below, and click 'Add User'.";
 
-  <% } else if ( userID !== '' ) { %>  // "Read/Update/Delete User"
-
+  <% } else if ( userIDRequested !== '' ) { %>  // "Read/Update/Delete User"
+    
     // Set the browser tab name (i.e., title)
-    document.title = "Future of Aviation - Manage User";
+    document.title = "AMCG - Manage User";
     // Set the page title
     document.getElementById("pageTitle").innerText = "Switchboard - Manage User";
     // Set the instructions
@@ -120,12 +122,14 @@
     // Set the form submittal configuration
     document.getElementById('userData').action = "/switchboard/userupdate?_method=PUT";
     document.getElementById('userData').method = "POST";
+
     // Set the current values for the User data elements
     document.getElementById('userIDToUpdate').value = "<%- userDetails[0].UserID %>";
     document.getElementById('userLoginName').value = "<%= userDetails[0].Username %>";
     document.getElementById('userFName').value = "<%= userDetails[0].UserFName %>";
     document.getElementById('userLName').value = "<%= userDetails[0].UserLName %>";
     document.getElementById('userTelephone').value = "<%= userDetails[0].UserTelephone %>";
+
     // Disable the controls (and change the instruction) if the user does not have permission to update Users.
     if ( <%- !userCanUpdateUser %> ) {
       document.getElementById('userInstructions').innerText = "Review the entries below.";
@@ -137,12 +141,19 @@
 
   <% } %>
 
-  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // Customize the page, based on user permissions
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  <% if ( !userIsDataAdmin ) { %>
+    document.getElementById('userLoginName').disabled = true;
+  <% } %>
+
+  //////////////////////////////////////////////////////////////////////////////////////////////
   // Validate the data before submitting the form
-  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////
   function validateData() {
     var dataAreValid = true;  // test for errors below
-
+    
     //////////////////////////////////////////////////
     // User Login Name
     //////////////////////////////////////////////////
@@ -158,20 +169,22 @@
       userLoginNameErrors.style.display = "block";
       dataAreValid = false;
     };
-
+    
     //////////////////////////////////////////////////
     // If no errors, add the User
     //////////////////////////////////////////////////
     return dataAreValid;
-
+    
   }
-
+    
+  //////////////////////////////////////////////////////////////////////////////////////////////
   // Confirm the user wants to delete this User, and process accordingly
+  //////////////////////////////////////////////////////////////////////////////////////////////
   function deleteUser() {
     var answer = confirm('Are you sure you want to delete this User?');
     if (answer !== true) {
       return false;
     };
   };
-
+ 
 </script>

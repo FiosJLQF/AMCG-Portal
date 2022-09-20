@@ -1,10 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // global variables
 //////////////////////////////////////////////////////////////////////////////////////////
-const { EventLogsTable, UserProfiles, UsersAllView, UsersAllDDL,
+const { EventLogsTable, UsersAllView, UsersAllDDL,
         UserPermissionsActive, UserPermissionsAllDDL, UserPermissionsAllView,
-        AirportsCurrent, AISContentTypeCategories,
-        LFOwnerTypeCategories, NationalRegions} = require('../models/sequelize.js');
+    } = require('../models/sequelize_common.js');
 require("dotenv").config();  // load all ".env" variables into "process.env" for use
 const nodemailer = require('nodemailer');  // allows SMPT push emails to be sent
     
@@ -52,6 +51,102 @@ async function logEvent(processName, eventObject, eventCode, eventStatus, eventD
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// If the Current User is not configured for access (i.e., a New User),
+// create an entry in the User Profiles table, and create their default User Permissions
+//////////////////////////////////////////////////////////////////////////////////////////
+async function checkForNewUser( usernameToCheck ) {
+
+    // Local variables
+    let errorCode = 0;
+    let newUserID = 0;
+    let today = new Date();
+    let permissionExpirationDate = new Date();
+    permissionExpirationDate.setFullYear(today.getFullYear() + 5);
+
+    // Log the event
+    let logEventResult = await logEvent('User Profiles', 'Get Current User', 0, 'Failure',
+        'User not yet configured.', 0, 0, 0, '');
+
+    // Add the new data to the database in a new record, and return the newly-generated [UserID] value
+    const newUser = new UsersTable( { Username: usernameToCheck });
+console.log(`Before newuser.save`);
+    await newUser.save()
+        .then( async function() {
+            newUserID = newUser.UserID;
+console.log(`newUser.UserID: ${newUserID}`);
+
+            // Add New User Permission (Switchboard)
+            const newUserPermissionSwitchboard = new UserPermissionsTable( {
+                UserID: newUserID,
+                PermissionCategoryID: '923001',
+                ObjectValues: '*',
+                EffectiveDate: today,
+                ExpirationDate: permissionExpirationDate,
+                CanCreate: false,
+                CanRead: true,
+                CanUpdate: false,
+                CanDelete: false
+            });
+            await newUserPermissionSwitchboard.save()
+                .then()
+                .catch( async function(errorSwitchboard) {
+console.log(`newUser Switchboard Permission error: ${errorSwitchboard}`);
+                    errorCode = 902;
+                    // Log the error
+                    let logEventResult = logEvent('Error', 'New Permission', errorCode, 'Failure',
+                        'Could not create new User Permission for Switchboard (' + errorSwitchboard + ').',
+                        0, 0, newUserID, '');
+                }); // END: Create new User Permission (Switchboard)
+
+            // Add New User Permission (User Data Mgmt - allows user to manage their "profile" information)
+            const newUserPermissionUserMgmt = new UserPermissionsTable( {
+                UserID: newUserID,
+                PermissionCategoryID: '923007',
+                ObjectValues: newUserID,
+                EffectiveDate: today,
+                ExpirationDate: permissionExpirationDate,
+                CanCreate: false,
+                CanRead: true,
+                CanUpdate: true,
+                CanDelete: false
+            });
+            await newUserPermissionUserMgmt.save()
+                .then()
+                .catch( async function(errorUserMgmt) {
+ console.log(`newUser User Data Mgmt Permission error: ${errorUserMgmt}`);
+                    errorCode = 902;
+                    // Log the error
+                    let logEventResult = logEvent('Error', 'New Permission', errorCode, 'Failure',
+                        'Could not create new User Permission for User Data Mgmt (' + errorUserMgmt + ').',
+                        0, 0, newUserID, '');
+                }); // END: Create new User Permission (User Data Mgmt)
+
+        }).catch( function(errorUserProfile) { // Could not create new User Profile
+console.log(`newUser error: ${errorUserProfile}`);
+            errorCode = 901;
+            // Log the error
+            let logEventResult = logEvent('Error', 'New User', errorCode, 'Failure',
+                'Could not create new User Profile (' + errorUserProfile + ').',
+                0, 0, newUserID, '');
+        }); // END: Create new User Profile
+
+console.log(`After newuser.save`);
+
+    // ToDo: Send email notification
+    let emailResultError = sendEmail(
+        'fiosjlqf@gmail.com',
+        `New User Account Created`,
+        `A New User Account was successfully created for ${usernameToCheck}.`,
+        '');
+
+    // New User successfully configured
+    
+    return { errorCode, newUserID };
+       
+}; // END: checkForNewUser()
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // Check Current User Permission
 //////////////////////////////////////////////////////////////////////////////////////////
 async function checkUserPermission(userID, permissionCategoryID, permissionType) {
@@ -82,8 +177,9 @@ async function checkUserPermission(userID, permissionCategoryID, permissionType)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Format selected options in a SELECT control into a delimited string for database storage
+// => server-side version (see public/js/foa_fx.js for client-side version)
 //////////////////////////////////////////////////////////////////////////////////////////
-function convertOptionsToDelimitedString(optionsToConvert, delimiterToUse = "|", notSelectedValue) {
+function convertOptionsToDelimitedString(optionsToConvert, delimiterToUse = "|", notSelectedValue, trimEdges) {
 
     let optionsOrig = optionsToConvert;
     let optionsFormatted = '';
@@ -110,9 +206,15 @@ function convertOptionsToDelimitedString(optionsToConvert, delimiterToUse = "|",
         };
     };
 
+    // If the function call requests the edges to be trimmed, remove the delimiter from the left and right edges
+    if ( trimEdges === "true" ) {
+        optionsFormatted = optionsFormatted.slice(delimiterToUse.length, optionsFormatted.length - delimiterToUse.length);
+    };
+
+    // Return the formatted string
     return optionsFormatted;
     
-}
+};
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -123,6 +225,7 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
 
     // declare and set local variables
     // User Profiles
+    let userPermissionsUserDDL = [];
     let userCanReadUsers = false; // DDL permission
     let userCanCreateUsers = false; // "Add User" link permission
     let userPermissionsUsers = [];
@@ -135,14 +238,19 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
     let userCanUpdateUser = false;
     let userCanDeleteUser = false;
 
-    // Get the list of user-related permissions for the current user
-    const userPermissionsUserDDL = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923004);
+    // Get the permissions for the Users DLL for the current user
+    userPermissionsUserDDL = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923004);
+    console.log(`userPermissionsUserDDL.length: ${userPermissionsUserDDL.length}`);
 
-    // Can the current user view the Users DDL?  What Users can the current user see?
-    if ( userPermissionsUserDDL.length > 0 && userPermissionsUserDDL[0].CanRead ) {
-        userCanReadUsers = true;
-        // What CRUD operations can the current user perform?
-        userPermissionsUsers = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923007);
+    // Get the CRUD permissions for user (in general) for the current user
+    userPermissionsUsers = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923007);
+    console.log(`userPermissionsUsers.length: ${userPermissionsUsers.length}`);
+
+    ////////////////////////////////////////////////////////////////////
+    // Can the current user view the Users DDL?  If so, what users(s) can they see?
+    ////////////////////////////////////////////////////////////////////
+    if ( userPermissionsUserDDL.length > 0 ) { 
+        userCanReadUsers = userPermissionsUserDDL[0].CanRead;
         // Find the list of Users the current user can see (for loading into the "User:" dropdown list)
         if ( userPermissionsUsers.length > 0 && userPermissionsUsers[0].CanRead ) {
             if ( userPermissionsUsers[0].ObjectValues === '*' ) {
@@ -158,16 +266,18 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
             userCanReadUsers = false;
         };
     };
-    console.log(`userPermissionsUserDDL.length: ${userPermissionsUserDDL.length}`);
-    console.log(`userPermissionsUserDDL[0].CanRead: ${userPermissionsUserDDL[0].CanRead}`);
     console.log(`userCanReadUsers: ${userCanReadUsers}`);
 
+    ////////////////////////////////////////////////////////////////////
     // Can the current user create new Users?
+    ////////////////////////////////////////////////////////////////////
     if ( userPermissionsUserDDL.length > 0 && userPermissionsUserDDL[0].CanCreate ) {
         userCanCreateUsers = true;
     };
     
-    // If a querystring request was made for a specific User 
+    ////////////////////////////////////////////////////////////////////
+    // If a querystring request was made for a specific User, retrieve the profile and associated permissions
+    ////////////////////////////////////////////////////////////////////
     if ( userIDRequested ) {
         console.log(`userIDRequested: ${userIDRequested}`);
         // Does the requested User exist? Retrieve the User's details from the database.
@@ -176,8 +286,10 @@ async function getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRe
             doesUserExist = false;
         } else { // User ID does exist
             doesUserExist = true;
+            console.log(`User does exist!`);
+            console.log(`userPermissionsUsers[0].ObjectValues: ${userPermissionsUsers[0].ObjectValues}`);
             // Can current user view requested User (or permission to view all Users)?
-            if ( userIDRequested === userPermissionsUsers[0].ObjectValues
+            if ( userIDRequested == userPermissionsUsers[0].ObjectValues
                  || userPermissionsUsers[0].ObjectValues === '*' ) {
                 userCanReadUser = userPermissionsUsers[0].CanRead;
                 console.log(`userCanReadUser: ${userCanReadUser}`);
@@ -236,7 +348,7 @@ async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive
     // declare and set local variables
     // User Permissions (note individual website user permissions are not separated in authority; 
     // if the current user can see any user permission, they can see all user permissions)
-    let userCanReadUserPermissions = false; // DDL permissions
+    let userCanReadUserPermissionsDDL = false; // DDL permissions
     let userCanCreateUserPermissions = false; // "Add Permission" link permission
     let userPermissionsUserPermissions = [];  // Current User's permissions for requested Website User's permissions
     let userPermissionsAllowedDDL = [];
@@ -253,7 +365,7 @@ async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive
     
     // Can the current user view the User Permissions DDL?  What User Permissions can the current user see?
     if ( userPermissionsUserPermissionDDL.length > 0 && userPermissionsUserPermissionDDL[0].CanRead ) {
-        userCanReadUserPermissions = true;
+        userCanReadUserPermissionsDDL = true;
 
         // What CRUD operations can the current user perform?
         userPermissionsUserPermissions = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923008 );
@@ -274,13 +386,13 @@ async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive
                 userPermissionIDDefault = 999999; // used ???
             };
         } else {  // The user can see the User Permissions DDL, but has no User Permissions assigned to them - hide the DDL
-            userCanReadUserPermissions = false;
+            userCanReadUserPermissionsDDL = false;
         };
 
     };
     console.log(`userPermissionsUserPermissionDDL.length: ${userPermissionsUserPermissionDDL.length}`);
-    console.log(`record Permission Category ID: ${userPermissionsUserPermissionDDL[0].PermissionCategoryID}`);
-    console.log(`userCanReadUserPermissions: ${userCanReadUserPermissions}`);
+//    console.log(`record Permission Category ID: ${userPermissionsUserPermissionDDL[0].PermissionCategoryID}`);
+    console.log(`userCanReadUserPermissionsDDL: ${userCanReadUserPermissionsDDL}`);
 
     // Can the current user create new User Permissions? (Current logic is always true for allowed User)
     if ( userPermissionsUserPermissionDDL.length > 0 && userPermissionsUserPermissionDDL[0].CanCreate ) {
@@ -340,7 +452,7 @@ async function getUserPermissionsForWebsiteUserPermission( userPermissionsActive
 
     console.log(`userPermissionID returned: ${userPermissionID}`);
 
-    return { userCanReadUserPermissions, userCanCreateUserPermissions, userPermissionsAllowedDDL,
+    return { userCanReadUserPermissionsDDL, userCanCreateUserPermissions, userPermissionsAllowedDDL,
              userPermissionID, userPermissionDetails, doesUserPermissionExist,
              userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission };
 };
@@ -403,6 +515,7 @@ function sendEmail(emailRecipient, emailSubject, emailBody) {
 module.exports = {
     logEvent,
     checkUserPermission,
+    checkForNewUser,
     convertOptionsToDelimitedString,
     getUserPermissionsForWebsiteUser,
     getUserPermissionsForWebsiteUserPermission,

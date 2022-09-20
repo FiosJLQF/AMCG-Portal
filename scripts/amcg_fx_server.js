@@ -1,13 +1,11 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 // global variables
 //////////////////////////////////////////////////////////////////////////////////////////
-const { EventLogsTable, UserProfiles, UsersAllView, UsersAllDDL,
-        UserPermissionsActive, UserPermissionsAllDDL, UserPermissionsAllView,
-        AirportsCurrent, AISContentTypeCategories,
-        LFOwnerTypeCategories, NationalRegions} = require('../models/sequelize.js');
+const { AirportsCurrent
+    } = require('../models/sequelize_portal.js');
 require("dotenv").config();  // load all ".env" variables into "process.env" for use
 const nodemailer = require('nodemailer');  // allows SMPT push emails to be sent
-const genericFx = require('../scripts/generic_node_fx');
+const commonFx = require('./common_fx_server');
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -27,9 +25,9 @@ async function getAISPermissionsForUser( currentUserID, airportIDRequested ) {
     let userCanUpdateAirport = false;
 
     // Get the generic AIS-related permissions for the current user
-    userCanReadAISMenu = await genericFx.checkUserPermission( currentUserID, '923002', 'CanRead' );
-    userCanReadAirports = await genericFx.checkUserPermission( currentUserID, '923003', 'CanRead' );
-    airportsAllowedToUser = await genericFx.checkUserPermission( currentUserID, '923005', 'ObjectValues' );
+    userCanReadAISMenu = await commonFx.checkUserPermission( currentUserID, '923002', 'CanRead' );
+    userCanReadAirports = await commonFx.checkUserPermission( currentUserID, '923003', 'CanRead' );
+    airportsAllowedToUser = await commonFx.checkUserPermission( currentUserID, '923005', 'ObjectValues' );
     airportsAllowedToUserArray = airportsAllowedToUser.split('|').slice(1, -1);
 
     // If the user can read/use the AIS, continue checking
@@ -47,8 +45,8 @@ async function getAISPermissionsForUser( currentUserID, airportIDRequested ) {
                 console.log('Airport does exist.');
                 // Can current user view requested Airport (or have permission to view all Airports)?
                 if ( airportsAllowedToUserArray.indexOf(airportIDRequested) > -1 || airportsAllowedToUser === '*' ) {
-                    userCanReadAirport = await genericFx.checkUserPermission( currentUserID, '923005', 'CanRead' );
-                    userCanUpdateAirport = await genericFx.checkUserPermission( currentUserID, '923005', 'CanUpdate' );
+                    userCanReadAirport = await commonFx.checkUserPermission( currentUserID, '923005', 'CanRead' );
+                    userCanUpdateAirport = await commonFx.checkUserPermission( currentUserID, '923005', 'CanUpdate' );
                 };
                 airportID = airportIDRequested;
             };

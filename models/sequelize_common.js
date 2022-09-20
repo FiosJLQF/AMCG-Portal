@@ -27,17 +27,6 @@ sequelize.authenticate().then(() => {
 });
 
 
-/**************************************************************************************************
-  Import all models
-**************************************************************************************************/
-// const ScholarshipsActiveModel = require('./scholarshipsActiveView.model');
-// const ScholarshipsActive = ScholarshipsActiveModel(sequelize, DataTypes);
-// const SponsorsModel = require('./sponsors.model');
-// const Sponsors = SponsorsModel(sequelize, DataTypes);
-// const SponsorTypeCategoriesDDLModel = require('./sponsortypeddl.model');
-// const SponsorTypeCategoriesDDL = SponsorTypeCategoriesDDLModel(sequelize, DataTypes);
-
-
 /********************************************
   Administrative Models
 ********************************************/
@@ -47,40 +36,9 @@ EventLogsTable.removeAttribute('id');  // a different, auto-populated primary ke
 
 
 /********************************************
-  AIS / Airports Models
-********************************************/
-const AirportsTableModel = require('./airportsTable.model');
-const AirportsTable = AirportsTableModel(sequelize, DataTypes);
-AirportsTable.removeAttribute('id');  // a different, auto-populated primary key is used in the DB
-
-const AirportsCurrentModel = require('./airportsCurrent.model');
-const AirportsCurrent = AirportsCurrentModel(sequelize, DataTypes);
-AirportsCurrent.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
-const NationalRegionsModel = require('./nationalRegionsActiveView.model');
-const NationalRegions = NationalRegionsModel(sequelize, DataTypes);
-NationalRegions.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
-const AISContentTypeCategoriesModel = require('./aisContentTypeCategoriesView.model');
-const AISContentTypeCategories = AISContentTypeCategoriesModel(sequelize, DataTypes);
-AISContentTypeCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
-const LFOwnerTypeCategoriesModel = require('./lfOwnerTypeCategoriesView.model');
-const LFOwnerTypeCategories = LFOwnerTypeCategoriesModel(sequelize, DataTypes);
-LFOwnerTypeCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
-const FuelStorageConditionCategoriesModel = require('./fuelStorageConditionCategoriesView.model');
-const FuelStorageConditionCategories = FuelStorageConditionCategoriesModel(sequelize, DataTypes);
-FuelStorageConditionCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
-const FuelStorageUnitsAllModel = require('./fuelStorageUnitsAllView.model');
-const FuelStorageUnitsAll = FuelStorageUnitsAllModel(sequelize, DataTypes);
-FuelStorageUnitsAll.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
-
-/********************************************
   User Models
 ********************************************/
+
 /*****************************
   User Profiles
 *****************************/
@@ -96,10 +54,7 @@ UsersAllView.removeAttribute('id');  // The default [id] column is not used in t
 const UsersTableModel = require('./usersTable.model');
 const UsersTable = UsersTableModel(sequelize, DataTypes);
 UsersTable.removeAttribute('id');  // The default [id] column is not used in this table
-// View used for reading user profile data
-const UserProfilesModel = require('./userProfiles.model');
-const UserProfiles = UserProfilesModel(sequelize, DataTypes);
-UserProfiles.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
 /*****************************
   User Permissions
 *****************************/
@@ -115,42 +70,29 @@ UserPermissionsActive.removeAttribute('id');  // this is an non-updatable view a
 const UserPermissionsAllViewModel = require('./userPermissionsAllView.model');
 const UserPermissionsAllView = UserPermissionsAllViewModel(sequelize, DataTypes);
 UserPermissionsAllView.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
-
+// Table reference used for writing user permission data to the database
+const UserPermissionsTableModel = require('./userPermissionsTable.model');
+const UserPermissionsTable = UserPermissionsTableModel(sequelize, DataTypes);
+UserPermissionsTable.removeAttribute('id');  // The default [id] column is not used in this table
+// Basic user permission category information formatted for the "Select a User Permission Category" SELECT object
+const UserPermissionCategoriesAllDDLModel = require('./userPermissionCategoriesAllDDL.model');
+const UserPermissionCategoriesAllDDL = UserPermissionCategoriesAllDDLModel(sequelize, DataTypes);
 
 /**************************************************************************************************
   Export objects
 **************************************************************************************************/
 module.exports = {
-  // ScholarshipsDDL,
-  // ScholarshipsAllDDL,
-  // ScholarshipsAllDDLTest,
-  // FieldOfStudyCategoriesDDL,
-  // GenderCategoriesDDL,
-  // CitizenshipCategoriesDDL,
-  // YearOfNeedCategoriesDDL,
-  // EnrollmentStatusCategoriesDDL,
-  // MilitaryServiceCategoriesDDL,
-  // FAAPilotCertificateCategoriesDDL,
-  // FAAPilotRatingCategoriesDDL,
-  // FAAMechanicCertificateCategoriesDDL,
-  // Sponsors,
-  // SponsorTypeCategoriesDDL,
   // Administrative
   EventLogsTable,
   // Users
-  UserProfiles,
+//  UserProfiles,
   UsersAllDDL,
   UsersAllView,
   UsersTable,
+  // User Permissions
   UserPermissionsActive,
   UserPermissionsAllDDL,
   UserPermissionsAllView,
-  // AIS - Airports
-  NationalRegions,
-  AirportsTable,
-  AirportsCurrent,
-  AISContentTypeCategories,
-  LFOwnerTypeCategories,
-  FuelStorageConditionCategories,
-  FuelStorageUnitsAll
+  UserPermissionsTable,
+  UserPermissionCategoriesAllDDL
 };

@@ -8,8 +8,8 @@ require("dotenv").config();  // load all ".env" variables into "process.env" for
 const { sequelize, Op } = require('sequelize');  // Sequelize "Operators" functions for querying
 const methodOverride = require('method-override');  // allows PUT and other non-standard methods
 router.use(methodOverride('_method')); // allows use of the PUT/DELETE method extensions
-const amcgFx = require('../scripts/amcg_node_fx');
-const genericFx = require('../scripts/generic_node_fx');
+const amcgFx = require('../scripts/amcg_fx_server');
+const commonFx = require('../scripts/common_fx_server');
 const { check, validationResult, body } = require('express-validator');
 const htmlEntities = require('html-entities');
 
@@ -17,10 +17,12 @@ const htmlEntities = require('html-entities');
 ///////////////////////////////////////////////////////////////////////////////////
 // Data Models
 ///////////////////////////////////////////////////////////////////////////////////
-const { UserProfiles, UserPermissionsActive, AirportsTable, AirportsCurrent,
-        AISContentTypeCategories, LFOwnerTypeCategories, NationalRegions, 
-        FuelStorageConditionCategories, FuelStorageUnitsAll
-} = require('../models/sequelize.js');
+const { AirportsTable, AirportsCurrent, AISContentTypeCategories, LFOwnerTypeCategories,
+        NationalRegions, FuelStorageConditionCategories, FuelStorageUnitsAll
+    } = require('../models/sequelize_portal.js');
+const { UsersTable, UsersAllView,
+        UserPermissionsTable, UserPermissionsActive, UserPermissionsAllView, UserPermissionCategoriesAllDDL
+    } = require('../models/sequelize_common.js');
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -55,11 +57,11 @@ router.get('/newuser', requiresAuth(), async (req, res) => {
     try {
 
         // Log the request (10001 = "New User Page Redirect")
-//        const logResult = genericFx.createLogEntry(10001, req.oidc.user.name);
+//        const logResult = commonFx.createLogEntry(10001, req.oidc.user.email);
         console.log('New User!');
         return res.render('switchboard_newuser', {
             user: req.oidc.user,
-            userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+            userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
         } )
     } catch(err) {
         console.log('Error:' + err);
@@ -77,10 +79,13 @@ router.get('/', requiresAuth(), async (req, res) => {
         // Set local variables
         ////////////////////////////////////////////////////
         let errorCode = 0;
+        const actionRequestedValues = [
+            'editairport', 'adduser', 'edituser', 'adduserpermission', 'edituserpermission'
+        ];
         let statusMessage = '';
         let logEventResult = '';
         // Current User variables
-        let userProfiles = [];
+        let currentUserProfile = [];
         let currentUserID = 0;
         let userIsDataAdmin = false;
         // Querystring parameters
@@ -89,6 +94,7 @@ router.get('/', requiresAuth(), async (req, res) => {
         // SELECT object options
         let nationalRegionsDDL = []; // list of all options for the State/Province/Territory/etc SELECT object
         let aisContentTypeCategoriesDDL = []; // list of all AIS Content Type Categories for the SELECT object
+        let userPermissionsCategoriesAllDLL = []; // list of all User Permissions Categories for the SELECT object
         // Airport search criteria
         let searchAirportID = '';
         let searchAirportName = '';
@@ -109,36 +115,55 @@ router.get('/', requiresAuth(), async (req, res) => {
         let fuelStorageConditionCategoriesDDL = []; // Fuel Storage Unit Conditions for DDL
 
 // Test
-//let emailResult = genericFx.sendEmail('justjlqf@mail.com', `Test Email - Switchboard Route`,
-//    `This is a test email from the AMCG switchboard.`);
-// Test
-//let logEventResult = await genericFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
+console.log('Before sending test email.');
+let emailResult = await commonFx.sendEmail('justjlqf@mail.com', 'Test Email - Switchboard Route',
+   'This is a test email from the AMCG switchboard.', 'This is a test email from the AMCG switchboard.');
+console.log(`emailResult: ${emailResult}`);
+console.log('After sending test email.');
+//Test
+//let logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
 //0, 0, 0, 'justjlqf@mail.com');
 
         ////////////////////////////////////////////////////
         // Get the current user's profile and permissions
         ////////////////////////////////////////////////////
-        userProfiles = await UserProfiles.findAndCountAll( { where: { Username: req.oidc.user.email }});
-        console.log(`User Profiles count: ${userProfiles.count}`);
+        currentUserProfile = await UsersAllView.findAndCountAll( { where: { Username: req.oidc.user.email }});
 
-        if ( userProfiles.count == 0 ) {  // The new user has not yet been set up
-            // Log the event
-            logEventResult = await genericFx.logEvent('User Profiles', 'Get Current User', 903, 'Failure',
-                'User not yet configured', 0, 0, 0, '');
-            // Redirect the user to the "New User" screen
-            res.redirect(`/switchboard/newuser`);
-        };  // END: Does the User Profile exist?
+        // Does the user profile exist?  If not, add the basic account information.
+        if ( currentUserProfile.count == 0 ) {  // The new user has not yet been set up
+            const { errorCode, newUserID } = await commonFx.checkForNewUser( req.oidc.user.email );
+            if ( errorCode !== 0 ) { // If an error was raised during the New User configuration, redirect the user
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                });
+            } else { // New User was successfully created, so redirect to the New User Data Mgmt screen
+                res.redirect(`/switchboard?userid=${newUserID}` +
+                    `&status=usercreatesuccess` +
+                    `&actionrequested=edituser`);
+            };
+        }; // END: Does the User Profile exist?
 
         // Current User exists and is configured; continue processing
-        currentUserID = userProfiles.rows[0].UserID;
+        currentUserID = currentUserProfile.rows[0].UserID;
         // Log the access by the Current User
-        logEventResult = await genericFx.logEvent('Page Access', 'Switchboard', 900, 'Informational', 'User Accessed Page',
+        logEventResult = await commonFx.logEvent('Page Access', 'Switchboard', 900, 'Informational', 'User Accessed Page',
             0, 0, currentUserID, '');
+
+
+
+
+
+
         // Get the list of active permissions for the user
-// TODO: Replace with "genericFx.checkUserPermission()"" function calls
+// TODO: Replace with "commonFx.checkUserPermission()"" function calls
         const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: currentUserID }});
+
+
+
+
         // Check to see if the current User is a "Data Admin" (AMCG web manager)
-        userIsDataAdmin = await genericFx.checkUserPermission(currentUserID, '923010', 'CanRead');
+        userIsDataAdmin = await commonFx.checkUserPermission(currentUserID, '923010', 'CanRead');
 
 
         ////////////////////////////////////////////////////
@@ -159,7 +184,7 @@ router.get('/', requiresAuth(), async (req, res) => {
             if ( searchAirportID !== '' ) {  // querystring is present
                 if ( !/^[A-Za-z0-9]*$/.test(searchAirportID) ) {  // Airport ID contains invalid characters
                     // Log the event
-                    logEventResult = await genericFx.logEvent('Airport ID Validation', '', 908, 'Failure',
+                    logEventResult = await commonFx.logEvent('Airport ID Validation', '', 908, 'Failure',
                         `Airport ID contains invalid characters (${searchAirportID})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
@@ -176,7 +201,7 @@ router.get('/', requiresAuth(), async (req, res) => {
                 // validate the requested Airport Name
                 if ( !/^[A-Za-z]*$/.test(searchAirportName) ) {  // Airport Name contains invalid characters
                     // Log the event
-                    logEventResult = await genericFx.logEvent('Airport Name Validation', '', 909, 'Failure',
+                    logEventResult = await commonFx.logEvent('Airport Name Validation', '', 909, 'Failure',
                         `Airport Name contains invalid characters (${searchAirportName})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
@@ -193,7 +218,7 @@ router.get('/', requiresAuth(), async (req, res) => {
                 // validate the requested Airport City
                 if ( !/^[A-Za-z]*$/.test(searchAirportCity) ) {  // Airport City contains invalid characters
                     // Log the event
-                    logEventResult = await genericFx.logEvent('Airport City Validation', '', 912, 'Failure',
+                    logEventResult = await commonFx.logEvent('Airport City Validation', '', 912, 'Failure',
                         `Airport City contains invalid characters (${searchAirportCity})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
@@ -210,7 +235,7 @@ router.get('/', requiresAuth(), async (req, res) => {
                 // validate the requested Airport National Region
                 if ( !/^[A-Za-z]*$/.test(searchAirportNationalRegion) ) {  // Airport National Region contains invalid characters
                     // Log the event
-                    logEventResult = await genericFx.logEvent('Airport National Region Validation', '', 913, 'Failure',
+                    logEventResult = await commonFx.logEvent('Airport National Region Validation', '', 913, 'Failure',
                         `Airport National Region contains invalid characters (${searchAirportNationalRegion})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
@@ -226,7 +251,7 @@ router.get('/', requiresAuth(), async (req, res) => {
             if ( airportIDRequested !== '' ) {  // querystring is present
                 if ( !/^[A-Za-z0-9]*$/.test(airportIDRequested) ) {  // Airport ID contains invalid characters
                     // Log the event
-                    logEventResult = await genericFx.logEvent('Airport ID Validation', '', 914, 'Failure',
+                    logEventResult = await commonFx.logEvent('Airport ID Validation', '', 914, 'Failure',
                         `Airport ID contains invalid characters (${airportIDRequested})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
@@ -245,7 +270,7 @@ router.get('/', requiresAuth(), async (req, res) => {
             if ( aisContentTypeRequested !== '' ) {  // querystring is present
                 if ( !/^[0-9]*$/.test(aisContentTypeRequested) ) {  // AIS Content Type contains invalid characters
                     // Log the event
-                    logEventResult = await genericFx.logEvent('AIS Content Type Validation', '', 915, 'Failure',
+                    logEventResult = await commonFx.logEvent('AIS Content Type Validation', '', 915, 'Failure',
                         `AIS Content Type contains invalid characters (${aisContentTypeRequested})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
@@ -264,31 +289,83 @@ router.get('/', requiresAuth(), async (req, res) => {
         // Were any other parameters present?
         /////////////////////////
         
+        // Validate the "action requested", if present
+        if ( req.query['actionrequested'] != undefined ) {
+            if ( actionRequestedValues.indexOf(req.query['actionrequested']) > -1 ) {
+                actionRequested = req.query['actionrequested'];
+            } else {
+                errorCode = 948; // Invalid, missing or non-existant "action requested"
+                // Log the event
+                logEventResult = await commonFx.logEvent('Action Requested Validation', '', 0, 'Failure',
+                    `Action Requested is not valid (${req.query['actionrequested']})`,
+                    0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                // redirect the user to the error screen
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                });
+            };
+        };
+
         // Validate the "Requested Website User ID" parameter, if present
         if ( req.query['userid'] != undefined ) {
             userIDRequested = Number(req.query['userid']);
-            console.log(`req.query['userid']: ${userIDRequested}`);
             if ( userIDRequested == 0 || userIDRequested === '' || Number.isNaN(userIDRequested)) {
+                errorCode = 910; // Invalid, missing or non-existent UserID
                 // Log the event
-                logEventResult = await genericFx.logEvent('UserID Validation', '', 910, 'Failure',
-                    `UserID is not valid (${req.query['userid']})`,
+                logEventResult = await commonFx.logEvent('UserID Validation', '', 0, 'Failure',
+                    `UserID is not a valid format (${req.query['userid']})`,
                     0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
-                // Redirect the user to the main switchboard
-                res.redirect('/switchboard');
+                // Redirect the user to the error screen
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                });
+            } else {  // Value is in a valid format; check to see if it exists in the database
+                let doesUserIDExist = await UsersAllView.findAndCountAll( { where: { UserID: userIDRequested } } );
+                if ( doesUserIDExist.count == 0 ) {
+                    errorCode = 910; // Non-existant UserID
+                    // Log the event
+                    logEventResult = await commonFx.logEvent('UserID Validation', '', 0, 'Failure',
+                        `UserID does not exist (${req.query['userid']})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Redirect the user to the error screen
+                    return res.render( 'error', {
+                        errorCode: errorCode,
+                        userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                    });
+                };
             };
         };
                 
-        // Validate the "Requested Website User Permission ID" parameter, if present
-        if ( req.query['userpermissionid'] != undefined ) {
+        // If a requested "userpermissionid" is blank, zero or not a number, redirect to the generic Switchboard page
+        if ( req.query['userpermissionid'] != undefined ) {  // If the querystring variable exists, check its format
             userPermissionIDRequested = Number(req.query['userpermissionid']);
-            console.log(`req.query['userpermissionid'] = ${userPermissionIDRequested}`);
             if ( userPermissionIDRequested == 0 || userPermissionIDRequested === '' || Number.isNaN(userPermissionIDRequested)) {
+                errorCode = 911; // Invalid, missing or non-existent UserPermissionID
                 // Log the event
-                logEventResult = await genericFx.logEvent('UserPermissionID Validation', '', 911, 'Failure',
-                    `UserPermissionID is not valid (${req.query['userpermissionid']})`,
+                logEventResult = await commonFx.logEvent('UserPermissionID Validation', '', 0, 'Failure',
+                    `UserPermissionID is not a valid format (${req.query['userpermissionid']})`,
                     0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
-                // Redirect the user to the main switchboard
-                res.redirect('/switchboard');
+                // Redirect the user to the error screen
+                return res.render( 'error', {
+                    errorCode: errorCode,
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                });
+            } else {  // Value is in a valid format; check to see if it exists in the database
+                let doesUserPermissionIDExist = await UserPermissionsAllView.findAndCountAll( { where: { WebsiteUserPermissionID: userPermissionIDRequested } } );
+                if ( doesUserPermissionIDExist.count == 0 ) {
+                    errorCode = 911; // Non-existant UserPermissionID
+                    // Log the event
+                    logEventResult = await commonFx.logEvent('UserPermissionID Validation', '', 0, 'Failure',
+                        `UserPermissionID does not exist (${req.query['userpermissionid']})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Redirect the user to the error screen
+                    return res.render( 'error', {
+                        errorCode: errorCode,
+                        userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                    });
+                };
             };
         };
                 
@@ -296,10 +373,16 @@ router.get('/', requiresAuth(), async (req, res) => {
         if ( req.query['status'] != undefined ) {
             if ( req.query['status'] === 'airportupdatesuccess' ) {
                 statusMessage = 'Airport was updated.';
+            } else if ( req.query['status'] === 'usercreatesuccess' ) {
+                statusMessage = 'User was created.';
+            } else if ( req.query['status'] === 'userupdatesuccess' ) {
+                statusMessage = 'User was updated.';
+            } else if ( req.query['status'] === 'userdeletesuccess' ) {
+                statusMessage = 'User was deleted.';
             } else {
                 statusMessage = '';
                 // Log the event
-                logEventResult = await genericFx.logEvent('Status Message ID Validation', '', 916, 'Failure',
+                logEventResult = await commonFx.logEvent('Status Message ID Validation', '', 916, 'Failure',
                     `Status Message ID is not valid (${req.query['status']})`,
                     0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
             };
@@ -317,7 +400,7 @@ router.get('/', requiresAuth(), async (req, res) => {
         // If an Airport was requested, but it doesn't exist, trap the error
         if ( selectedAirportID && !airportExists ) {
             // Log the error
-            logEventResult = await genericFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 921,
+            logEventResult = await commonFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 921,
                'Failure', 'Requested airport does not exist.', 0, 0, currentUserID, '');
             // Redirect the user to the main switchboard
             res.redirect('/switchboard');
@@ -326,13 +409,13 @@ router.get('/', requiresAuth(), async (req, res) => {
         // If an Airport was requested, but the user does not have permission to view this Airport, trap and error
         if ( selectedAirportID && !userCanReadAirport ) {
             // Log the error
-            logEventResult = await genericFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 922,
+            logEventResult = await commonFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 922,
                'Failure', 'User not authorized to view airport data', 0, 0, currentUserID, '');
             // Redirect the user to the main switchboard
             res.redirect('/switchboard');
         } else {
             // User can see the requested Airport, log the access
-            logEventResult = await genericFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 920,
+            logEventResult = await commonFx.logEvent('Content Access', `AIS Airport Data: ${ selectedAirportID }`, 920,
                 'Success', '', 0, 0, currentUserID, '');
         };
 
@@ -393,41 +476,42 @@ router.get('/', requiresAuth(), async (req, res) => {
         ////////////////////////////////////////////////////
         //  Website User Data Permissions / Details (DDL, Add User, Default User, etc.)
         ////////////////////////////////////////////////////
-        const { userCanReadUsers, userCanCreateUsers, usersAllowedDDL, userID, userDetails, doesUserExist,
-            userCanReadUser, userCanUpdateUser, userCanDeleteUser
-        } = await genericFx.getUserPermissionsForWebsiteUser( userPermissionsActive, userIDRequested );
+        const { userCanReadUsersDDL, userCanCreateUsers, usersAllowedDDL,
+                userDetails, doesUserExist,
+                userCanReadUser, userCanUpdateUser, userCanDeleteUser
+        } = await commonFx.getWebsiteUserPermissionsForCurrentUser( currentUserID, userIDRequested );
 
-        // Does the User have access to the Users DDL?
-        if ( userCanReadUsers ) {
+        // Does the Current User have access to the Users DDL?
+        if ( userCanReadUsersDDL && userIDRequested.toString().length > 0 ) {
 
             // Does the requested User exist (if requested)?  If not, skip error processing
             console.log(`doesUserExist: (${doesUserExist})`);
             if ( !doesUserExist ) {  // User ID does not exist
                 errorCode = 928;  // Unknown User
                 // Log the event
-                logEventResult = await genericFx.logEvent('User Access', `Website User: ${ userIDRequested }`, errorCode,
+                logEventResult = await commonFx.logEvent('User ID Validation', `Website User: ${ userIDRequested }`, errorCode,
                     'Failure', 'UserID does not exist', 0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Raise an error
                 return res.render( 'error', {
                     errorCode: errorCode,
-                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
                 });
             };
 
-            // Does the User have permission to see/edit/delete this User?
+            // Does the Current User have permission to see/edit/delete this User?
             if ( !userCanReadUser ) { // Current User does not have permission to read User's data - trap and log error
                 errorCode = 929;  // Unknown User
                 // Log the error
-                logEventResult = await genericFx.logEvent('Website User Access', `Website User: ${ userIDRequested }`, errorCode,
+                logEventResult = await commonFx.logEvent('Website User Access', `Website User: ${ userIDRequested }`, errorCode,
                    'Failure', 'User not authorized to view website user data', 0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Raise an error
                 return res.render( 'error', {
                     errorCode: errorCode,
-                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
                 });
             } else {
                 // Log the access
-                logEventResult = await genericFx.logEvent('Content Access', `Website User: ${ userIDRequested }`, 930,
+                logEventResult = await commonFx.logEvent('Content Access', `Website User: ${ userIDRequested }`, 930,
                     'Success', '', 0, 0, currentUserID, '');
             };
         };
@@ -436,25 +520,29 @@ router.get('/', requiresAuth(), async (req, res) => {
         ////////////////////////////////////////////////////
         //  Website User Permissions Permissions / Details (DDL, Add Permission, Default Permission, etc.)
         ////////////////////////////////////////////////////
-        const { userCanReadUserPermissions, userCanCreateUserPermissions, userPermissionsAllowedDDL,
-            userPermissionID, userPermissionDetails, doesUserPermissionExist,
-            userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission
-        } = await genericFx.getUserPermissionsForWebsiteUserPermission( userPermissionsActive, userID, userPermissionIDRequested );
+        console.log(`Checking Website User Permission Permissions for Current User (${currentUserID})`);
+        const { userCanReadUserPermissionsDDL, userCanCreateUserPermissions, userPermissionsAllowedDDL,
+                userPermissionDetails, doesUserPermissionExist,
+                userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission
+        } = await commonFx.getWebsiteUserPermissionPermissionsForCurrentUser( currentUserID, userPermissionIDRequested );
+
+console.log(`userCanReadUserPermissionsDDL: ${userCanReadUserPermissionsDDL}`);
+console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
 
         // Does the User have access to the User Permissions DDL?
-        if ( userCanReadUserPermissions ) {
+        if ( userCanReadUserPermissionsDDL  && userPermissionIDRequested.toString().length > 0 ) {
 
             // Does the requested User Permission exist (if requested)?  If not, skip error processing
             console.log(`doesUserPermissionExist: (${doesUserPermissionExist})`);
             if ( !doesUserPermissionExist ) {  // User ID does not exist
                 errorCode = 938;  // Unknown User Permission
                 // Log the event
-                logEventResult = await genericFx.logEvent('User Permission Access', `Website User Permission: ${ userPermissionIDRequested }`, errorCode,
-                    'Failure', 'UserPermissionID does not exist', 0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                logEventResult = await commonFx.logEvent('User Permission Access', `Website User Permission: ${ userPermissionIDRequested }`,
+                     errorCode, 'Failure', 'UserPermissionID does not exist', 0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Raise an error
                 return res.render( 'error', {
                     errorCode: errorCode,
-                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
                 });
             };
 
@@ -462,23 +550,27 @@ router.get('/', requiresAuth(), async (req, res) => {
             if ( !userCanReadUserPermission ) { // Current User does not have permission to read Website User's Permission data - trap and log error
                 errorCode = 939;  // Unknown User
                 // Log the error
-                logEventResult = await genericFx.logEvent('Website User Permission Access', `Website User Permission: ${ userPermissionIDRequested }`, errorCode,
+                logEventResult = await commonFx.logEvent('Website User Permission Access', `Website User Permission: ${ userPermissionIDRequested }`, errorCode,
                    'Failure', 'User not authorized to view website user permission data', 0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                 // Raise an error
                 return res.render( 'error', {
                     errorCode: errorCode,
-                    userName: ( req.oidc.user == null ? '' : req.oidc.user.name )
+                    userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
                 });
             } else {
                 // Log the access
-                logEventResult = await genericFx.logEvent('Content Access', `Website User Permission: ${ userPermissionIDRequested }`, 931,
+                logEventResult = await commonFx.logEvent('Content Access', `Website User Permission: ${ userPermissionIDRequested }`, 931,
                     'Success', '', 0, 0, currentUserID, '');
             };
+
+            // Re-assign the "User ID Requested" to the user assigned to the user permission requested
+            userIDRequested = userPermissionDetails[0].UserID;
+            console.log(`User Permission User ID: ${userIDRequested}`);
         };
 
 
         ////////////////////////////////////////////////////
-        // Retrieve options for add/edit form DDLs
+        // Retrieve options lists for data mgmt form DDLs
         ////////////////////////////////////////////////////
 
         // AIS Search Engine DDLs
@@ -486,14 +578,28 @@ router.get('/', requiresAuth(), async (req, res) => {
             nationalRegionsDDL = await NationalRegions.findAndCountAll({});
             aisContentTypeCategoriesDDL = await AISContentTypeCategories.findAndCountAll({});
         };
-        // General Information (GIAI CRUD Form)
-        lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
-        // Infrastructure - Fuel Storage Units
-        fuelStorageUnits = await FuelStorageUnitsAll.findAndCountAll({
-            where: { LFLocationID: searchAirportID }
-        });
-        console.log(`fuelStorageUnits for ${searchAirportID}: ${fuelStorageUnits.count}`);
-        fuelStorageConditionCategoriesDDL = await FuelStorageConditionCategories.findAndCountAll({});
+
+        // CRUD Forms - AIS
+        switch (selectedAISContentType) {
+            case 'ais_giai': // General Information - Airport Information
+                lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+                break;
+            case 'ais_infs': // Infrastructure - Fuel Storage Units
+                fuelStorageUnits = await FuelStorageUnitsAll.findAndCountAll({
+                    where: { LFLocationID: searchAirportID } });
+                fuelStorageConditionCategoriesDDL = await FuelStorageConditionCategories.findAndCountAll({});
+                console.log(`fuelStorageUnits for ${searchAirportID}: ${fuelStorageUnits.count}`);
+                break;
+        };
+
+        // CRUD Forms - Data Management
+        switch (actionRequested) {
+            case 'adduserpermission': // "OR" the next condition
+            case 'edituserpermission':
+                userPermissionsCategoriesAllDLL = await UserPermissionCategoriesAllDDL.findAndCountAll({});
+                break;
+        }
+
 
         ////////////////////////////////////////////////////
         // Render the page
@@ -506,19 +612,19 @@ router.get('/', requiresAuth(), async (req, res) => {
             statusMessage,
             // User data
             user: req.oidc.user,
-            userName: ( req.oidc.user == null ? '' : req.oidc.user.name ),
+            userName: ( req.oidc.user == null ? '' : req.oidc.user.email ),
+            currentUserID,
+            userIsDataAdmin,
             // Menu item permissions
             userCanReadAISMenu,
             userCanReadAirports,
-//            userCanCreateAirports,
-            userCanReadUsers,
+            userCanReadUsersDDL,
             userCanCreateUsers,
             usersAllowedDDL,
-            userID,
-            userCanReadUserPermissions,
+            userCanReadUserPermissionsDDL,
             userCanCreateUserPermissions,
             userPermissionsAllowedDDL,
-            userPermissionID,
+//            userPermissionID,
             // Search criteria
             searchAirportID,
             searchAirportName,
@@ -538,11 +644,136 @@ router.get('/', requiresAuth(), async (req, res) => {
             fuelStorageUnits,
             fuelStorageConditionCategoriesDDL,
             // Airport CRUD Information
-            airportID // Used???
+            airportID, // Used???
+            // Website User CRUD Information
+            userIDRequested,
+            userDetails,
+            userCanReadUser,
+            userCanUpdateUser,
+            userCanDeleteUser,
+            // Website User Permission CRUD Information
+            userPermissionsCategoriesAllDLL,
+            userPermissionIDRequested,
+            userPermissionDetails,
+            userCanReadUserPermission,
+            userCanUpdateUserPermission,
+            userCanDeleteUserPermission
         });
     } catch(err) {
         console.log('Error:' + err);
     }
+});
+
+
+////////////////////////////////////////////////////////////
+// "POST" Routes (Add new data records)
+////////////////////////////////////////////////////////////
+
+///////////////////////////////
+// User (Insert)
+///////////////////////////////
+router.post('/useradd', requiresAuth(),
+    [
+        check('userLoginName')
+            .isLength( { min: 3, max: 100 } ).withMessage('User Login Name should be 3 to 100 characters.')
+    ],
+
+    async (req, res) => {
+
+    // Validate the input
+    const validationErrors = validationResult(req);
+
+    // If invalid data, return errors to client
+    if ( !validationErrors.isEmpty() ) {
+
+// ToDo:  Replicate the GET render code above, including parameters prep work
+
+        return res.status(400).json(validationErrors.array());
+
+
+
+
+
+
+
+    } else {
+        // Add the new data to the database in a new record, and return the newly-generated [UserID] value
+        const newUser = new UsersTable( {
+            Username: req.body.userLoginName,
+            UserFName: req.body.userFName,
+            UserLName: req.body.userLName,
+            UserTelephone: req.body.userTelephone
+        });
+        await newUser.save();
+
+// ToDo:  If insert successful, add basic permissions for new User
+
+        res.redirect(`/switchboard?userid=${newUser.UserID}` +
+                     `&status=usercreatesuccess` +
+                     `&actionrequested=edituser`);
+    };
+});
+
+///////////////////////////////
+// User Permission (Insert)
+///////////////////////////////
+router.post('/userpermissionadd', requiresAuth(),
+[
+    check('permissionValues')
+        .isLength( { min: 1, max: 100 } ).withMessage('Limiting Values should be 1 to 100 characters.')
+],
+
+    async (req, res) => {
+
+    // Reformat checkboxes to boolean values to be updated into Postgres
+    let CanRead = (req.body.canRead === "CanRead") ? true : false;
+    let CanUpdate = (req.body.canUpdate === "CanUpdate") ? true : false;
+    let CanDelete = (req.body.canDelete === "CanDelete") ? true : false;
+    let CanCreate = (req.body.canCreate === "CanCreate") ? true : false;
+
+    // Reformat blank dates and numbers to NULL values to be updated into Postgres
+    let EffectiveDate = (req.body.effectiveDate === "") ? null : req.body.effectiveDate;
+    let ExpirationDate = (req.body.expirationDate === "") ? null : req.body.expirationDate;
+
+    // Validate the input
+    const validationErrors = validationResult(req);
+
+    // If invalid data, return errors to client
+    if ( !validationErrors.isEmpty() ) {
+
+// ToDo:  Replicate the GET render code above, including parameters prep work
+
+
+        return res.status(400).json(validationErrors.array());
+
+
+
+
+
+
+
+    } else {
+        // Add the new data to the database in a new record, and return the newly-generated [WebsiteUserPermissionID] value
+        console.log(`userID to save user permission: ${req.body.userID}`);
+        const newUserPermission = new UserPermissionsTable( {
+            UserID: req.body.userID,
+            PermissionCategoryID: req.body.permissionCategory,
+            ObjectValues: req.body.permissionValues,
+            CanCreate: CanCreate,
+            CanRead: CanRead,
+            CanUpdate: CanUpdate,
+            CanDelete: CanDelete,
+            EffectiveDate: EffectiveDate,
+            ExpirationDate: ExpirationDate,
+            });
+        await newUserPermission.save();
+
+// ToDo:  Error Checking
+        res.redirect(`/switchboard?userpermissionid=${newUserPermission.WebsiteUserPermissionID}` +
+                     `&status=userpermissioncreatesuccess` +
+                     `&actionrequested=edituserpermission` +
+                     `&userid=${req.body.userID}`);
+    };
 });
 
 
@@ -713,6 +944,126 @@ router.put('/airportupdateinli', requiresAuth(), async (req, res) => {
 });
 
 
+///////////////////////////////
+// User (Update)
+///////////////////////////////
+router.put('/userupdate', requiresAuth(), async (req, res) => {
+
+    //ToDo: Add server-side verification
+    
+        // Get a pointer to the current record
+        const userRecord = await UsersTable.findOne( {
+            where: { UserID: req.body.userIDToUpdate }
+        });
+    
+        // Update the database record with the new data
+        await userRecord.update( {
+            Username: req.body.userLoginName,
+            UserFName: req.body.userFName,
+            UserLName: req.body.userLName,
+            UserTelephone: req.body.userTelephone
+        }).then( () => {
+            res.redirect(`/switchboard?userid=${userRecord.UserID}` +
+                         `&status=userupdatesuccess` +
+                         `&actionrequested=edituser`);
+        });
+    });
+
+    ///////////////////////////////
+// User Permission (Update)
+///////////////////////////////
+router.put('/userpermissionupdate', requiresAuth(), async (req, res) => {
+
+//ToDo: Add server-side verification
+    
+    // Reformat checkboxes to boolean values to be updated into Postgres
+    let CanRead = (req.body.canRead === "CanRead") ? true : false;
+    let CanUpdate = (req.body.canUpdate === "CanUpdate") ? true : false;
+    let CanDelete = (req.body.canDelete === "CanDelete") ? true : false;
+    let CanCreate = (req.body.canCreate === "CanCreate") ? true : false;
+    
+    // Reformat blank dates and numbers to NULL values to be updated into Postgres
+    let EffectiveDate = (req.body.effectiveDate === "") ? null : req.body.effectiveDate;
+    let ExpirationDate = (req.body.expirationDate === "") ? null : req.body.expirationDate;
+    
+    // Validate the input
+//    const validationErrors = validationResult(req);
+    
+    // If invalid data, return errors to client
+//    if ( !validationErrors.isEmpty() ) {
+    
+// ToDo:  Replicate the GET render code above, including parameters prep work
+    
+    
+//        return res.status(400).json(validationErrors.array());
+    
+    //    } else {
+    
+        // Get a pointer to the current record
+        const userPermissionRecord = await UserPermissionsTable.findOne( {
+            where: { WebsiteUserPermissionID: req.body.userPermissionIDToUpdate }
+        });
+    
+        // Update the database record with the new data
+        await userPermissionRecord.update( {
+            ObjectValues: req.body.permissionValues,
+            CanCreate: CanCreate,
+            CanRead: CanRead,
+            CanUpdate: CanUpdate,
+            CanDelete: CanDelete,
+            EffectiveDate: EffectiveDate,
+            ExpirationDate: ExpirationDate,
+        }).then( () => {
+            res.redirect(`/switchboard?userpermissionid=${userPermissionRecord.WebsiteUserPermissionID}` +
+                         `&userid=${userPermissionRecord.UserID}` +
+                         `&status=userpermissionupdatesuccess` +
+                         `&actionrequested=edituserpermission`);
+        });
+//    };
+});
+    
+    
+////////////////////////////////////////////////////////////
+// "DELETE" Routes (Delete data)
+////////////////////////////////////////////////////////////
+
+///////////////////////////////
+// User (Delete)
+///////////////////////////////
+router.delete('/userdelete', requiresAuth(), async (req, res) => {
+
+    // Get a pointer to the current record
+    const userRecord = await UsersTable.findOne( {
+        where: { UserID: req.body.userIDToDelete }
+    });
+
+    // Delete the record, based on the User ID
+    await userRecord.destroy().then( () => {
+        res.redirect(`/switchboard?status=userdeletesuccess`);
+    });
+});
+
+///////////////////////////////
+// User Permission (Delete)
+///////////////////////////////
+router.delete('/userpermissiondelete', requiresAuth(), async (req, res) => {
+
+    // Get a pointer to the current record
+    console.log(`body.userPermissionIDToDelete: ${req.body.userPermissionIDToDelete}`);
+    const userPermissionRecord = await UserPermissionsTable.findOne( {
+        where: { WebsiteUserPermissionID: req.body.userPermissionIDToDelete }
+    });
+    console.log(`userPermissionRecord: ${userPermissionRecord.WebsiteUserPermissionID}`);
+
+    // Delete the record
+    console.log(`userID to redirect to after user permission deletion: ${req.body.userIDOfPermission}`)
+    await userPermissionRecord.destroy().then( () => {
+        res.redirect(`/switchboard?status=userpermissiondeletesuccess` +
+                     `&userid=${req.body.userIDOfPermission}`);
+    });
+});
+
+    
 ////////////////////////////////////////
 // Return all routes
 ////////////////////////////////////////
