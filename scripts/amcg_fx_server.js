@@ -11,7 +11,7 @@ const commonFx = require('./common_fx_server');
 //////////////////////////////////////////////////////////////////////////////////////////
 // Get the Current User's Airport permissions
 //////////////////////////////////////////////////////////////////////////////////////////
-async function getAISPermissionsForUser( currentUserID, airportIDRequested ) {
+async function getAISPermissionsForCurrentUser( currentUserID, airportIDRequested ) {
 
     // declare and set local variables
     let userCanReadAISMenu = false;
@@ -66,5 +66,5 @@ async function getAISPermissionsForUser( currentUserID, airportIDRequested ) {
 
 
 module.exports = {
-    getAISPermissionsForUser
+    getAISPermissionsForCurrentUser
 };

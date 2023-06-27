@@ -11,12 +11,7 @@ router.use(methodOverride('_method')); // allows use of the PUT/DELETE method ex
 const amcgFx = require('../scripts/amcg_fx_server');
 const commonFx = require('../scripts/common_fx_server');
 const { check, validationResult, body } = require('express-validator');
-const htmlEntities = require('html-entities');
-
-
-
-
-
+//const htmlEntities = require('html-entities');
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +116,7 @@ router.get('/', requiresAuth(), async (req, res) => {
 
 // Test
 console.log('Before sending test email.');
-let emailResult = await commonFx.sendEmail('justjlqf@mail.com', 'Test Email - Switchboard Route',
+let emailResult = await commonFx.sendEmail('fiosjlqf@gmail.com', 'Test Email - Switchboard Route',
    'This is a test email from the AMCG switchboard.', 'This is a test email from the AMCG switchboard.');
 console.log(`emailResult: ${emailResult}`);
 console.log('After sending test email.');
@@ -400,7 +395,7 @@ console.log('After sending test email.');
         const {
             userCanReadAISMenu, userCanReadAirports, airportsAllowedToUser, airportsAllowedToUserArray,
             airportID, airportExists, airportDetails, userCanReadAirport, userCanUpdateAirport
-        } = await amcgFx.getAISPermissionsForUser( currentUserID, selectedAirportID );
+        } = await amcgFx.getAISPermissionsForCurrentUser( currentUserID, selectedAirportID );
 
         // If an Airport was requested, but it doesn't exist, trap the error
         if ( selectedAirportID && !airportExists ) {
@@ -585,15 +580,18 @@ console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
         };
 
         // CRUD Forms - AIS
+        console.log(`selectedAISContentType: ${selectedAISContentType}`);
         switch (selectedAISContentType) {
-            case 'ais_giai': // General Information - Airport Information
+            case '801001': // General Information - Airport Information
                 lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
                 break;
-            case 'ais_infs': // Infrastructure - Fuel Storage Units
+            case '801003': // Operator Information / Manager Information
+                lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+                break;
+            case '801006': // Infrastructure - Fuel Storage Units
                 fuelStorageUnits = await FuelStorageUnitsAll.findAndCountAll({
                     where: { LFLocationID: searchAirportID } });
                 fuelStorageConditionCategoriesDDL = await FuelStorageConditionCategories.findAndCountAll({});
-                console.log(`fuelStorageUnits for ${searchAirportID}: ${fuelStorageUnits.count}`);
                 break;
         };
 
@@ -1065,6 +1063,17 @@ router.delete('/userpermissiondelete', requiresAuth(), async (req, res) => {
     await userPermissionRecord.destroy().then( () => {
         res.redirect(`/switchboard?status=userpermissiondeletesuccess` +
                      `&userid=${req.body.userIDOfPermission}`);
+    });
+});
+
+
+////////////////////////////////////////////////////////////
+// Invalid Routes
+////////////////////////////////////////////////////////////
+router.get('*', async (req, res) => {
+    return res.render('error', {
+        userName: '',
+        errorCode: 901  // invalid route
     });
 });
 

@@ -13,10 +13,10 @@
 
     <!-- Airport Information System (AIS) -->
     Airport Information System (AIS): <button type="button" class="btn btn-default button-small"
-        onclick="toggleSearchCriteriaInputBlock(
-            document.querySelector('#filterAISIcon'),
-            document.querySelector('#filterAISInputBlock'),
-            document.querySelector('#filterAISInput'), '')">
+      onclick="toggleBlockShowHide(
+        document.querySelector('#filterAISIcon'),
+        document.querySelector('#filterAISInputBlock'),
+        '', '', 'fa-chevron-up', 'fa-chevron-down')">
         <i id="filterAISIcon" class="fas fa-chevron-down expand-filter chevrons"></i>
     </button><br>
     <div id="filterAISInputBlock" class="filter-input-subblock">
@@ -111,11 +111,10 @@
   <% if ( userCanReadAISMenu ) { %>
 
   // Set the AIS Search Crteria initial display configuration
-  toggleSearchCriteriaInputBlock(
+  toggleBlockShowHide(
     document.querySelector('#filterAISIcon'),
     document.querySelector('#filterAISInputBlock'),
-    document.querySelector('#filterAISInput'), '');
-
+    '', '', 'fa-chevron-up', 'fa-chevron-down');
   // Load the Search Criteria (if post-submit)
   document.getElementById('searchAISLFID').value = '<%= searchAirportID %>';
   document.getElementById('searchAISName').value = '<%= searchAirportName %>';

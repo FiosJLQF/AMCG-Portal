@@ -1,5 +1,20 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Common scripts for all pages (server-side scripts)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//   logEvent
+//   checkForNewUser
+//   checkUserPermission
+//   convertOptionsToDelimitedString
+//   getWebsiteUserPermissionsForCurrentUser
+//   getWebsiteUserPermissionPermissionsForCurrentUser
+//   sendEmail
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 //////////////////////////////////////////////////////////////////////////////////////////
-// global variables
+// Libraries and Definitions
 //////////////////////////////////////////////////////////////////////////////////////////
 const { EventLogsTable, UsersAllView, UsersAllDDL, UsersTable,
         UserPermissionsActive, UserPermissionsAllDDL, UserPermissionsAllView,
@@ -13,7 +28,7 @@ const nodemailer = require('nodemailer');  // allows SMPT push emails to be sent
 // Create a log entry
 //////////////////////////////////////////////////////////////////////////////////////////
 async function logEvent(processName, eventObject, eventCode, eventStatus, eventDescription, eventDuration,
-    eventRows, eventUserID, sendEmailTo) {
+    eventRows, eventUserID, sendEmailTo, eventObjectID) {
 
     let logEventResult = false;
     console.log('Logging event now...');
@@ -25,6 +40,7 @@ async function logEvent(processName, eventObject, eventCode, eventStatus, eventD
             EventDate: Date().toString(),
             ProcessName: processName,
             EventObject: eventObject,
+            EventObjectID: eventObjectID,
             EventStatus: eventStatus,
             EventDescription: eventDescription,
             EventDuration: eventDuration,
@@ -179,7 +195,7 @@ async function checkUserPermission(userID, permissionCategoryID, permissionType)
 //////////////////////////////////////////////////////////////////////////////////////////
 // Format selected options in a SELECT control into a delimited string for database storage
 //////////////////////////////////////////////////////////////////////////////////////////
-function convertOptionsToDelimitedString(optionsToConvert, delimiterToUse = "|", notSelectedValue) {
+function convertOptionsToDelimitedString(optionsToConvert, delimiterToUse = "|", notSelectedValue, trimEdges) {
 
     let optionsOrig = optionsToConvert;
     let optionsFormatted = '';
@@ -206,6 +222,12 @@ function convertOptionsToDelimitedString(optionsToConvert, delimiterToUse = "|",
         };
     };
 
+    // If the function call requests the edges to be trimmed, remove the delimiter from the left and right edges
+    if ( trimEdges === "true" ) {
+        optionsFormatted = optionsFormatted.slice(delimiterToUse.length, optionsFormatted.length - delimiterToUse.length);
+    };
+    
+    // Return the formatted string
     return optionsFormatted;
     
 }
@@ -246,8 +268,6 @@ async function getWebsiteUserPermissionsForCurrentUser( currentUserID, userIDReq
     } else {  // Current user can only see specific Website User(s)
         usersAllowedDDL = await UsersAllDDL.findAndCountAll({ where: { optionid: usersAllowedToCurrentUserArray } });
     };
-//    } else { // populate a blank data set
-//        usersAllowedDDL = await UsersAllDDL.findAndCountAll( { where: { optionid: 0 } } );
 
     ////////////////////////////////////////////////////////////////////
     // If a querystring request was made for a specific User, retrieve the profile and associated permissions
@@ -272,7 +292,6 @@ async function getWebsiteUserPermissionsForCurrentUser( currentUserID, userIDReq
     console.log(`currentUserID: ${currentUserID}`);
     console.log(`userIDRequested: ${userIDRequested}`);
     console.log(`userCanReadUsersDDL: ${userCanReadUsersDDL}`);
-    console.log(`currentUserID: ${currentUserID}`);
     console.log(`userAllowedToCurrentUser: ${usersAllowedToCurrentUser}`);
     console.log(`usersAllowedDDL.count: ${usersAllowedDDL.count}`);
     console.log(`userCanReadUser: ${userCanReadUser}`);
@@ -301,8 +320,6 @@ async function getWebsiteUserPermissionPermissionsForCurrentUser( currentUserID,
     let userPermissionsAllowedToCurrentUser = '';
     let userPermissionsAllowedToCurrentUserArray = [];
     let userPermissionsAllowedDDL = [];
-//    let userPermissionIDDefault = 0;
-//    let userPermissionID = 0;  // same as used above
     let userPermissionDetails = []; // User Permissions data
     let doesUserPermissionExist = false;
     let userCanReadUserPermission = false;
@@ -351,98 +368,6 @@ async function getWebsiteUserPermissionPermissionsForCurrentUser( currentUserID,
         };
     }; // End: Retrieve Requested Website User Permission details
 
-
-    //     // Get the list of user permissions-related permissions for the current user
-//     const userPermissionsUserPermissionDDL = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923009 );
-    
-//     // Can the current user view the User Permissions DDL?  What User Permissions can the current user see?
-//     if ( userPermissionsUserPermissionDDL.length > 0 && userPermissionsUserPermissionDDL[0].CanRead ) {
-//         userCanReadUserPermissionsDDL = true;
-
-//         // What CRUD operations can the current user perform?
-//         userPermissionsUserPermissions = userPermissionsActive.rows.filter( permission => permission.PermissionCategoryID == 923008 );
-//         // Find the list of User Permissions the current user can see (for loading into the "User:" dropdown list)
-//         if ( userPermissionsUserPermissions.length > 0 && userPermissionsUserPermissions[0].CanRead ) {
-//             if ( userIDRequested !== '' ) { // A specific User was requested - load User Permissions for that User
-//                 if ( userPermissionsUserPermissions[0].ObjectValues === '*' ) {
-//                     userPermissionsAllowedDDL = await UserPermissionsAllDDL.findAndCountAll({ where: { UserID: userIDRequested } });
-//                     userPermissionIDDefault = 999999;
-//                 } else {  // Current user can only see specific User Permission(s)
-//                     userPermissionsAllowedDDL = await UserPermissionsAllDDL.findAndCountAll({ where: { optionid: userPermissionsUserPermissions[0].ObjectValues } });
-// // ToDo: expand for multiple User Permissions (eventually)
-//                     // Assign the default UserPermissionID to be the sole User Permission allowed
-//                     userPermissionIDDefault = userPermissionsUserPermissions[0].ObjectValues; // Set the User Permission ID to the only one User Permission the User has permission to see
-//                 };
-//             } else {  // Load a blank row of data
-//                 userPermissionsAllowedDDL = await UserPermissionsAllDDL.findAndCountAll({ where: { UserID: -1 } });
-//                 userPermissionIDDefault = 999999; // used ???
-//             };
-//         } else {  // The user can see the User Permissions DDL, but has no User Permissions assigned to them - hide the DDL
-//             userCanReadUserPermissionsDDL = false;
-//         };
-
-//     };
-//     console.log(`userPermissionsUserPermissionDDL.length: ${userPermissionsUserPermissionDDL.length}`);
-// //    console.log(`record Permission Category ID: ${userPermissionsUserPermissionDDL[0].PermissionCategoryID}`);
-//     console.log(`userCanReadUserPermissionsDDL: ${userCanReadUserPermissionsDDL}`);
-
-//     // Can the current user create new User Permissions? (Current logic is always true for allowed User)
-//     if ( userPermissionsUserPermissionDDL.length > 0 && userPermissionsUserPermissionDDL[0].CanCreate ) {
-//         userCanCreateUserPermissions = true;
-//     };
-
-//     // If a querystring request was made for a specific User Permission
-//     if ( userPermissionIDRequested ) {
-//         console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
-//         // Does the requested User Permission exist? Retrieve the User Permission's details from the database.
-//         userPermissionDetails = await UserPermissionsAllView.findAll({ where: { WebsiteUserPermissionID: userPermissionIDRequested }});
-//         if ( typeof userPermissionDetails[0] === 'undefined' ) {  // User Permission ID does not exist
-//             doesUserPermissionExist = false;
-//         } else { // User Permission ID does exist
-//             doesUserPermissionExist = true;
-//             // Can current user view requested User Permission (or permission to view all User Permissions)?
-//             if ( userPermissionIDRequested === userPermissionsUserPermissions[0].ObjectValues
-//                  || userPermissionsUserPermissions[0].ObjectValues === '*' ) {
-//                 userCanReadUserPermission = userPermissionsUserPermissions[0].CanRead;
-//                 console.log(`userCanReadUserPermission: ${userCanReadUserPermission}`);
-//                 userCanUpdateUserPermission = userPermissionsUserPermissions[0].CanUpdate;
-//                 console.log(`userCanUpdateUserPermission: ${userCanUpdateUserPermission}`);
-//                 userCanDeleteUserPermission = userPermissionsUserPermissions[0].CanDelete;
-//                 console.log(`userCanDeleteUserPermission: ${userCanDeleteUserPermission}`);
-//             };
-//             userPermissionID = userPermissionIDRequested;
-//         };
-
-//     } else if ( userPermissionIDDefault !== 999999) { // Requested User Permission ID does not exist - if there a default User Permission ID
-//         console.log(`userPermissionIDRequested does not exist - process default User Permission ID: ${userPermissionIDDefault}`);
-//         // Does the default User Permission exist? Retrieve the User Permission's details from the database.
-//         userPermissionDetails = await UserPermissionsAllView.findAll({ where: { WebsiteUserPermissionID: userPermissionIDDefault }});
-//         if ( typeof userPermissionDetails[0] === 'undefined' ) {  // User Permission ID does not exist
-//             doesUserPermissionExist = false;
-//         } else {
-//             doesUserPermissionExist = true;
-//             // Can current user view requested User Permission (or permission to view all User Permissions)?
-//             if ( userPermissionIDDefault === userPermissionsUserPermissions[0].ObjectValues
-//                 || userPermissionsUserPermissions[0].ObjectValues === '*' ) {
-//                userCanReadUserPermission = userPermissionsUserPermissions[0].CanRead;
-//                console.log(`userCanReadUserPermission: ${userCanReadUserPermission}`);
-//                userCanUpdateUserPermission = userPermissionsUserPermissions[0].CanUpdate;
-//                console.log(`userCanUpdateUserPermission: ${userCanUpdateUserPermission}`);
-//                userCanDeleteUserPermission = userPermissionsUserPermissions[0].CanDelete;
-//                console.log(`userCanDeleteUserPermission: ${userCanDeleteUserPermission}`);
-//            };
-//            userPermissionID = userPermissionIDDefault;
-//         };
-
-//     } else { // No specific User Permission was requested, or user can read all User Permissions
-
-//         doesUserPermissionExist = true;
-//         userCanReadUserPermission = true;
-//         userPermissionID = '';
-
-//     };
-
-//    console.log(`userPermissionID returned: ${userPermissionID}`);
     console.log(`currentUserID: ${currentUserID}`);
     console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
     console.log(`userCanReadUserPermissionsDDL: ${userCanReadUserPermissionsDDL}`);
@@ -469,17 +394,16 @@ async function sendEmail(emailRecipient, emailSubject, emailBody, emailBodyHTML)
     // create message
     var msg = {
         to: emailRecipient,
-        from: process.env.EMAIL_SENDER,
+        from: process.env.EMAIL_SENDER,  // FatCow
+        replyTo: process.env.EMAIL_REPLY_TO,
         subject: emailSubject,
         text: emailBody,
         html: emailBodyHTML
     };
 
-    // send the message
-    // nodemailer example
-    console.log('Before creating nodemailer transporter.');
-    let transporter = nodemailer.createTransport( {  // the email account to send SMTP emails
-//        service: 'smtp.fatcow.com',
+/*
+    // create the transport object (gmail)
+    var transporter = nodemailer.createTransport( {  // the email account to send SMTP emails
         host: 'smtp.gmail.com',
         port: 465, // 587 without SSL
         secure: true,
@@ -491,29 +415,33 @@ async function sendEmail(emailRecipient, emailSubject, emailBody, emailBodyHTML)
             refreshToken: process.env.EMAIL_OAUTH_REFRESHTOKEN
         },
     });
-    console.log(`After creating nodemailer transporter: ${transporter}`);
-//     let info = await transporter.sendMail( msg , function (error, info) {
-//         console.log(`sendMail() result: ${info}`);
-// //        if (error) {
-// //            console.log(error.message);
-// //            result = error;
-// //            // ToDo: log error in "events" table
-// //        } else {
-// //            console.log('Email sent: ' + info.response);
-// //            result = info.response;
-// //            // ToDo: log event in "events" table
-// //        }
-// //        console.log(`Result (in sendMail Fn): ${result}`);
-//     }
-//     ).then( info => {
-//         console.log(`sendMail() result: ${info}`);
-//     });
-
-/*
-    let info = await transporter.sendMail( msg );
-    console.log(`Send email result: ${info.messageId}`);
 */
-    console.log('After sending email by transporter.');
+
+    // create the transport object (Fatcow)
+    var transporter = nodemailer.createTransport( {  // the email account to send SMTP emails
+        host: 'smtp.fatcow.com',
+        port: 465, // 587 without SSL
+        secure: true,
+        auth: {
+            user: process.env.EMAIL_SENDER,
+            pass: process.env.EMAIL_PWD
+          }
+    });
+
+    // send the email
+    transporter.sendMail( msg, function (error, info) {
+        if (error) {
+            console.log(error);
+            // ToDo: log error in "events" table
+
+
+        } else {
+            console.log('Email sent: ' + info.response);
+            // ToDo: log event in "events" table
+
+
+        }
+    });
 
     return result;
 

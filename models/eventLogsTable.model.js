@@ -11,12 +11,14 @@ module.exports = (sequelize, DataTypes) => {
         EventDate:                   DataTypes.DATE,
         ProcessName:                 DataTypes.STRING,
         EventObject:                 DataTypes.STRING,
+        EventObjectID:               DataTypes.STRING,
         EventStatus:                 DataTypes.STRING,
         EventDescription:            DataTypes.STRING,
         EventDuration:               DataTypes.NUMBER,
         EventRows:                   DataTypes.NUMBER,
         EventUserID:                 DataTypes.NUMBER,
-        EventCode:                   DataTypes.NUMBER
+        EventCode:                   DataTypes.NUMBER,
+        EventLocation:               DataTypes.STRING
     }, {
         schema: 'amcgportal',
         freezeTableName: true,  // don't have Sequelize automatically pluralize the table name
