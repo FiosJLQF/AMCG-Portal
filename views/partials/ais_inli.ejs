@@ -18,35 +18,43 @@
       <label class="data-mgmt-col-title" id="airportInformationBlock">Land Information</label></span><br>
 
       <!-- Acreage -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="acreage" class="data-mgmt">Acreage:</label>
+          <label for="acreage" class="data-mgmt">Acreage (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="acreage" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="acreage" name="acreage" class="data-mgmt-text-half"><br>
+          <input type="text" id="acreage" name="acreage" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#acreageHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="acreageHx" name="acreageHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="acreageErrors"></span>
         </div>
       </div><br>
 
       <!-- Square Footage -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="squareFootage" class="data-mgmt">Land Square Footage:</label>
+          <label for="squareFootage" class="data-mgmt">Land Square Footage (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="squareFootage" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="squareFootage" name="squareFootage" class="data-mgmt-text-half"><br>
+          <input type="text" id="squareFootage" name="squareFootage" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#landSFHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="landSFHx" name="landSFHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="squareFootageErrors"></span>
         </div>
       </div><br>
 
       <!-- Land Notes -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="landNotes" class="data-mgmt">Notes:</label>
         </div>
@@ -60,10 +68,10 @@
       </div><br>
 
       <br>
-      <label class="data-mgmt-col-title" id="ownerInformationBlock">Security Information</label></span><br>
+      <label class="data-mgmt-col-title" id="securityInformationBlock">Security Information</label></span><br>
 
       <!-- Perimeter Fencing -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="perimeterFencing" class="data-mgmt">Perimeter Fencing:</label>
         </div>
@@ -81,7 +89,7 @@
       </div><br>
 
       <!-- Controlled Access -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="controlledAccess" class="data-mgmt">Controlled Access:</label>
         </div>
@@ -99,7 +107,7 @@
       </div><br>
 
       <!-- CCTV -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="cctv" class="data-mgmt">CCTV:</label>
         </div>
@@ -117,7 +125,7 @@
       </div><br>
 
       <!-- Security Personnel -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="securityPersonnel" class="data-mgmt">Security Personnel:</label>
         </div>
@@ -135,7 +143,7 @@
       </div><br>
 
       <!-- User Defined -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="userDefined" class="data-mgmt">User-Defined:</label>
         </div>
@@ -153,7 +161,7 @@
       </div><br>
 
       <!-- Security Notes -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="securityNotes" class="data-mgmt">Notes:</label>
         </div>
@@ -185,6 +193,16 @@
   document.getElementById("pageTitle").innerText = "Switchboard - Land/Security Information";
   // Set the instructions
   document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Load the Hx SELECT objects
+  var acreageHxRows = <%- JSON.stringify(lfAcreageHx.rows) %>;
+    loadSelectOptionsList("acreageHx", "", 0, acreageHxRows);
+    document.getElementById('acreageHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#acreageHx'), '', 'hide', '', '');
+  var landSFHxRows = <%- JSON.stringify(lfLandSFHx.rows) %>;
+    loadSelectOptionsList("landSFHx", "", 0, landSFHxRows);
+    document.getElementById('landSFHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#landSFHx'), '', 'hide', '', '');
 
   // Is an aiport being edited?
   <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"

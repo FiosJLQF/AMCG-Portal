@@ -62,5 +62,9 @@
   .data-mgmt-text-fifth {
     width: 25%; /* keep at 1/4 width so dates fully display */
   }
-
+  .data-mgmt-select-multiple {
+    font-size: 0.875em;
+    width: 435px;
+    padding: 0px;
+  }  
 }  

@@ -57,8 +57,14 @@
   .data-mgmt-text-half {
     width: 305px;
   }
+  .data-mgmt-hx-text-half {
+    width: 305px;
+  }
   .data-mgmt-textarea {
     width: 615px;
+  }
+  .data-mgmt-hx-text-third {
+    width: 290px;
   }
   select.data-mgmt-single-third {
     width: 205px;
@@ -66,5 +72,9 @@
   select.data-mgmt-single-quarter {
     width: 154px;
   }
-  
+  .data-mgmt-select-multiple {
+    font-size: 0.875em;
+    width: 615px;
+    padding: 0px;
+  }  
 }

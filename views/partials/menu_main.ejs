@@ -16,8 +16,8 @@
       onclick="toggleBlockShowHide(
         document.querySelector('#filterAISIcon'),
         document.querySelector('#filterAISInputBlock'),
-        '', '', 'fa-chevron-up', 'fa-chevron-down')">
-        <i id="filterAISIcon" class="fas fa-chevron-down expand-filter chevrons"></i>
+        '', '', 'chevron-small-up', 'chevron-small-down')">
+        <i id="filterAISIcon" class="chevron-small-down chevrons expand-filter"></i>
     </button><br>
     <div id="filterAISInputBlock" class="filter-input-subblock">
       <div class="searchInstructions">&nbsp;&nbsp;&nbsp;(Enter criteria and click "Search".)</div>
@@ -110,15 +110,15 @@
   // If the user can use the AIS, configure the menu
   <% if ( userCanReadAISMenu ) { %>
 
-  // Set the AIS Search Crteria initial display configuration
-  toggleBlockShowHide(
-    document.querySelector('#filterAISIcon'),
-    document.querySelector('#filterAISInputBlock'),
-    '', '', 'fa-chevron-up', 'fa-chevron-down');
-  // Load the Search Criteria (if post-submit)
-  document.getElementById('searchAISLFID').value = '<%= searchAirportID %>';
-  document.getElementById('searchAISName').value = '<%= searchAirportName %>';
-
+    // Set the AIS Search Crteria initial display configuration
+    toggleBlockShowHide(
+      document.querySelector('#filterAISIcon'),
+      document.querySelector('#filterAISInputBlock'),
+      '', '', 'chevron-small-up', 'chevron-small-down');
+    // Load the Search Criteria (if post-submit) - note the National Regions DDL is loaded below
+    document.getElementById('searchAISLFID').value = '<%= searchAirportID %>';
+    document.getElementById('searchAISName').value = "<%= searchAirportName %>".replaceAll("&#39;", "'");
+    document.getElementById('searchAISCity').value = "<%= searchAirportCity %>".replaceAll("&#39;", "'");
   <% } %> 
 
   //////////////////////////////////////////////////////////////////////
@@ -129,6 +129,9 @@
   <% if ( userCanReadAISMenu ) { %>
       var regRows = <%- JSON.stringify(nationalRegionsDDL.rows) %>;
       loadSelectOptionsList("searchAISNationalRegion", "(Not Selected)", 0, regRows, "");
+//alert('National Region: ' + '<%= searchAirportNationalRegion %>');
+      document.getElementById('searchAISNationalRegion').value = '<%= searchAirportNationalRegion %>';
+//alert('National Region DDL: ' + document.getElementById('searchAISNationalRegion'));
   <% } %> 
 
   // Matching Airports SELECT configuration (If the user can use the AIS)
@@ -213,7 +216,8 @@
       newURL = '/switchboard';
     } else {
       newURL = 'switchboard?actionrequested=edituserpermission' +
-               '&userpermissionid=' + selectedUserPermissionID;
+               '&userpermissionid=' + selectedUserPermissionID + 
+               '&userid=<%= userID %>';
     }
     location.href=newURL;
   };
@@ -223,22 +227,23 @@
   //////////////////////////////////////////////////////////////////////
   function findAirports() {
 
-//    alert('finding matching airports');
     var criteriaAreValid = validateAISSearchData();
-//    alert('search criteria are valid:' + criteriaAreValid);
+    var matchingAirportsURL;
 
     if ( criteriaAreValid ) {
       var criteriaAirportID = document.getElementById('searchAISLFID').value;
       var criteriaAirportName = document.getElementById('searchAISName').value;
       var criteriaAirportCity = document.getElementById('searchAISCity').value;
       var criteriaAirportNationalRegionSELECT = document.getElementById('searchAISNationalRegion');
-      var criteriaAirportNationalRegion = criteriaAirportNationalRegionSELECT.options[criteriaAirportNationalRegionSELECT.selectedIndex].text;
-      if ( criteriaAirportNationalRegionSELECT.value === "0" ) {
+      if ( criteriaAirportNationalRegionSELECT.value > "0" ) {
+        var criteriaAirportNationalRegion = criteriaAirportNationalRegionSELECT.options[criteriaAirportNationalRegionSELECT.selectedIndex].value;
+      } else {
         criteriaAirportNationalRegion = '';
       };
 
-      location.href = '/switchboard?searchairportid=' + criteriaAirportID + '&searchairportname=' + criteriaAirportName +
-                      '&searchairportcity=' + criteriaAirportCity + '&searchairportnationalregion=' + criteriaAirportNationalRegion;
+      matchingAirportsURL = '/switchboard?searchairportid=' + criteriaAirportID + '&searchairportname=' + encodeURI(criteriaAirportName) +
+                      '&searchairportcity=' + encodeURI(criteriaAirportCity) + '&searchairportnationalregion=' + criteriaAirportNationalRegion;
+      location.href = matchingAirportsURL;
     };
   };
 
@@ -292,19 +297,19 @@
     };                    
 
     //////////////////////////////////////////////////
-    // Airport Name must only be letters
+    // Airport Name must only be letters, spaces, hyphens, periods and apostrophes
     //////////////////////////////////////////////////
-    if ( !/^[A-Za-z]*$/.test(criteriaAirportName) ) {  // Airport Name contains invalid characters
-      criteriaAirportNameErrors.innerText = "Airport Name can only contain letters.";
+    if ( !/^[A-Za-z.'-\s]*$/.test(criteriaAirportName) ) {  // Airport Name contains invalid characters
+        criteriaAirportNameErrors.innerText = "Airport Name can only contain letters, hyphens, apostrophes, periods and spaces.";
       criteriaAirportNameErrors.style.display = "block";
       dataAreValid = false;
-    };                    
+    };
 
     //////////////////////////////////////////////////
-    // Airport City must only be letters
+    // Airport City must only be letters, spaces, hyphens, periods and apostrophes
     //////////////////////////////////////////////////
-    if ( !/^[A-Za-z]*$/.test(criteriaAirportCity) ) {  // Airport City contains invalid characters
-      criteriaAirportCityErrors.innerText = "Airport City can only contain letters.";
+    if ( !/^[A-Za-z.'-\s]*$/.test(criteriaAirportCity) ) {  // Airport City contains invalid characters
+      criteriaAirportCityErrors.innerText = "Airport City can only contain letters, hyphens, apostrophes, periods and spaces.";
       criteriaAirportCityErrors.style.display = "block";
       dataAreValid = false;
     };                    
@@ -312,6 +317,7 @@
     //////////////////////////////////////////////////
     // Return the validation results
     //////////////////////////////////////////////////
+//    alert('dataAreValid: ' + dataAreValid);
     return dataAreValid;
 
   };
@@ -324,9 +330,20 @@
   if ( selectedAirportID == 0 ) {
     newURL = '/switchboard';
   } else {
+    var criteriaAirportID = document.getElementById('searchAISLFID').value;
+    var criteriaAirportName = document.getElementById('searchAISName').value;
+    var criteriaAirportCity = document.getElementById('searchAISCity').value;
+    var criteriaAirportNationalRegionSELECT = document.getElementById('searchAISNationalRegion');
+    if ( criteriaAirportNationalRegionSELECT.value > "0" ) {
+      var criteriaAirportNationalRegion = criteriaAirportNationalRegionSELECT.options[criteriaAirportNationalRegionSELECT.selectedIndex].value;
+    } else {
+      criteriaAirportNationalRegion = '';
+    };
     newURL = '/switchboard?airportid=' + selectedAirportID + '&aiscontenttype=801001' +
-             '&searchairportid=' + document.getElementById('searchAISLFID').value +
-             '&searchairportname=' + document.getElementById('searchAISName').value;
+             '&searchairportid=' + criteriaAirportID +
+             '&searchairportname=' + encodeURI(criteriaAirportName) + 
+             '&searchairportcity=' + encodeURI(criteriaAirportCity) + 
+             '&searchairportnationalregion=' + criteriaAirportNationalRegion;
   }
   location.href=newURL;
   };
@@ -335,16 +352,27 @@
   // Redirect the user to the AIS Content Type for the current Airport
   //////////////////////////////////////////////////////////////////////
   function gotoAISContentType(selectedAISContentType) {
-  //    alert('AIS Content Type changed to ' + selectedAISContentType);
-  var newURL = '';
-  if ( selectedAISContentType !== '' ) {
-    newURL = '/switchboard?airportid=' + "<%= selectedAirportID %>" +
-             '&aiscontenttype=' + selectedAISContentType +
-             '&searchairportid=' + document.getElementById('searchAISLFID').value +
-             '&searchairportname=' + document.getElementById('searchAISName').value;
+    //    alert('AIS Content Type changed to ' + selectedAISContentType);
+    var newURL = '';
+    if ( selectedAISContentType !== '' ) {
+      var criteriaAirportID = document.getElementById('searchAISLFID').value;
+      var criteriaAirportName = document.getElementById('searchAISName').value;
+      var criteriaAirportCity = document.getElementById('searchAISCity').value;
+      var criteriaAirportNationalRegionSELECT = document.getElementById('searchAISNationalRegion');
+      if ( criteriaAirportNationalRegionSELECT.value > "0" ) {
+        var criteriaAirportNationalRegion = criteriaAirportNationalRegionSELECT.options[criteriaAirportNationalRegionSELECT.selectedIndex].value;
+      } else {
+        criteriaAirportNationalRegion = '';
+      };
+      newURL = '/switchboard?airportid=' + "<%= selectedAirportID %>" +
+               '&aiscontenttype=' + selectedAISContentType +
+               '&searchairportid=' + criteriaAirportID +
+               '&searchairportname=' + encodeURI(criteriaAirportName) + 
+               '&searchairportcity=' + encodeURI(criteriaAirportCity) + 
+               '&searchairportnationalregion=' + criteriaAirportNationalRegion;
+    }
     location.href=newURL;
   };
-};
 
   //////////////////////////////////////////////////////////////////////
   // Redirect the user to their User Profile page

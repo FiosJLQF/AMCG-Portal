@@ -17,12 +17,14 @@
     </div>  <!-- End column 1 DIV -->
 
     <!-- Right-hand Panel: Content -->
-    <div class="col-9 bodylayout1col2" id="scholarshipsearchresultscolumn">
+    <div class="col-9 bodylayout1col2" id="panel_body_right">
       <span class="bodylayout1col2title" id="userName">Welcome, <%= user.name %>!</span><br><br><br><br>
 
       Your account is under review, and a member of our team will contact you when you have been granted
       access to content such as the Airport Information System.<br><br><br><br><br><br>
 
+      Please contact webmaster@amcg.aero if you have any questions.<br><br>
+      
     </div>  <!-- End column 2 DIV  -->
 
   </div>    <!-- End row 1 DIV     -->
@@ -30,9 +32,14 @@
   <!-- 2nd Row of Main Body -->
   <div class="row">
     <div id="switchboardsidemenu_footer" class="col-3 bodylayout1col1"></div>
-    <div id="scholarshipsearchresultscolumn_footer" class="col-9 bodylayout1col2">
+    <div id="panel_body_right_footer" class="col-9 bodylayout1col2">
       <hr class="bodycol2break">
     </div>
   </div>    <!-- End row 2 DIV     -->
 
 </div>      <!-- End container DIV -->
+
+<script>
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG Portal - New User";
+</script>

@@ -34,6 +34,10 @@ const AirportsTableModel = require('./airportsTable.model');
 const AirportsTable = AirportsTableModel(sequelize, DataTypes);
 AirportsTable.removeAttribute('id');  // a different, auto-populated primary key is used in the DB
 
+const AirportsHxModel = require('./airportsHx.model');
+const AirportsHx = AirportsHxModel(sequelize, DataTypes);
+AirportsHx.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
 const AirportsCurrentModel = require('./airportsCurrent.model');
 const AirportsCurrent = AirportsCurrentModel(sequelize, DataTypes);
 AirportsCurrent.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
@@ -54,6 +58,14 @@ const FuelStorageConditionCategoriesModel = require('./fuelStorageConditionCateg
 const FuelStorageConditionCategories = FuelStorageConditionCategoriesModel(sequelize, DataTypes);
 FuelStorageConditionCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
 
+const FuelStorageTypeCategoriesModel = require('./fuelStorageTypeCategoriesView.model');
+const FuelStorageTypeCategories = FuelStorageTypeCategoriesModel(sequelize, DataTypes);
+FuelStorageTypeCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
+const FuelStorageFuelGradeCategoriesModel = require('./fuelStorageFuelGradeCategoriesView.model');
+const FuelStorageFuelGradeCategories = FuelStorageFuelGradeCategoriesModel(sequelize, DataTypes);
+FuelStorageFuelGradeCategories.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
 const FuelStorageUnitsAllModel = require('./fuelStorageUnitsAllView.model');
 const FuelStorageUnitsAll = FuelStorageUnitsAllModel(sequelize, DataTypes);
 FuelStorageUnitsAll.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
@@ -66,9 +78,12 @@ module.exports = {
   // AIS - Airports
   AirportsTable,
   AirportsCurrent,
+  AirportsHx,
   NationalRegions,
   AISContentTypeCategories,
   LFOwnerTypeCategories,
   FuelStorageConditionCategories,
+  FuelStorageTypeCategories,
+  FuelStorageFuelGradeCategories,
   FuelStorageUnitsAll
 };

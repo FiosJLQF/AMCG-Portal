@@ -185,6 +185,34 @@ select.single-choice {
   color: var(--amcg-blue);
 }
 
+.chevron-small-down {
+  content: URL("/img/img_chevon_single_down_48_blue.png");
+  width: 12px;
+  padding: 0px;
+  margin: 0px 0px 4px 0px;
+}
+
+.chevron-small-up {
+  content: URL("/img/img_chevon_single_up_48_blue.png");
+  width: 12px;
+  padding: 0px;
+  margin: 0px 0px 4px 0px;
+}
+
+.chevron-double-small-down {
+  content: URL("/img/img_chevon_double_down_48_blue.png");
+  width: 15px;
+  padding: 0px;
+  margin: 0px 0px 4px 0px;
+}
+
+.chevron-double-small-up {
+  content: URL("/img/img_chevon_double_up_48_blue.png");
+  width: 15px;
+  padding: 0px;
+  margin: 0px 0px 4px 0px;
+}
+
 .inline-element {
   display: inline-block;
 }
@@ -242,6 +270,14 @@ select.single-choice {
   color: var(--amcg-blue);
 }
 
+.button-normal {
+  font-size: 1.0em;
+  padding: 0px;
+  margin: 0px;
+  color: var(--amcg-blue);
+  border: 1px var(--amcg-blue);
+}
+
 .advanced-search-criteria {
   margin-left: 1.5em;
 }
@@ -253,9 +289,8 @@ select.single-choice {
 }
 
 .expand-filter {
-  padding: 0px;
+  padding-top: 4px;
   margin: 0px;
-  height: 5px;
 }
 
 .filter_textbox {

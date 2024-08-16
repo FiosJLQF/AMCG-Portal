@@ -16,6 +16,7 @@
  ***********************************************************************************************/
 
  div.data-mgmt-row {
+  display: flex;
   width: 975px;
   padding: 0px;
   border: 0px;
@@ -49,9 +50,9 @@ div.data-mgmt-sublabel-col {
 }
 
 div.data-mgmt-required-col {
-  width: 5px;
+  width: 15px;
+  padding: 0px 5px 0px 5px;
   margin: 0px;
-  padding: 0px;
 }
 
 .data-mgmt-value-col {
@@ -153,8 +154,6 @@ label.data-mgmt-instruction {
 }
 
 label.data-mgmt-required {
-/*  display: inline-block; */
-/*  width: 10px; */
   vertical-align: top;
   padding-top: 5px;
   color: red;
@@ -193,9 +192,21 @@ input.data-mgmt-file {
   line-height: 1.00;
 }
 
+.data-mgmt-hx-text-half {
+  width: 340px;
+  line-height: 1.00;
+  size: 5;
+}
+
 .data-mgmt-text-third {
   width: 225px;
   line-height: 1.00;
+}
+
+.data-mgmt-hx-text-third {
+  width: 225px;
+  line-height: 1.00;
+  size: 5;
 }
 
 .data-mgmt-text-quarter {

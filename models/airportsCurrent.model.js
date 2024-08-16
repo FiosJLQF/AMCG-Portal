@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         LFCityName_FAA:              DataTypes.STRING,
         LFStateName_FAA:             DataTypes.STRING,
         LFAddressCSZ_FAA:            DataTypes.STRING,
+        LFNationalRegion_FAA:        DataTypes.STRING,
         LFEmail:                     DataTypes.STRING,
         LFWebsite:                   DataTypes.STRING,
         LFNotes:                     DataTypes.STRING,

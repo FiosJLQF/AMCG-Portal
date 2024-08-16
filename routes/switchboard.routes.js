@@ -11,14 +11,14 @@ router.use(methodOverride('_method')); // allows use of the PUT/DELETE method ex
 const amcgFx = require('../scripts/amcg_fx_server');
 const commonFx = require('../scripts/common_fx_server');
 const { check, validationResult, body } = require('express-validator');
-//const htmlEntities = require('html-entities');
 
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Data Models
 ///////////////////////////////////////////////////////////////////////////////////
-const { AirportsTable, AirportsCurrent, AISContentTypeCategories, LFOwnerTypeCategories,
-        NationalRegions, FuelStorageConditionCategories, FuelStorageUnitsAll
+const { AirportsTable, AirportsCurrent, AirportsHx, AISContentTypeCategories, LFOwnerTypeCategories,
+        NationalRegions, FuelStorageConditionCategories, FuelStorageTypeCategories, FuelStorageFuelGradeCategories,
+        FuelStorageUnitsAll
     } = require('../models/sequelize_portal.js');
 const { UsersTable, UsersAllView,
         UserPermissionsTable, UserPermissionsActive, UserPermissionsAllView, UserPermissionCategoriesAllDDL
@@ -54,18 +54,25 @@ router.use(
 // If the user has not yet been granted any permissions
 ////////////////////////////////////////
 router.get('/newuser', requiresAuth(), async (req, res) => {
+    let currentUserProfile = '';
+
     try {
 
+        // Retrieve the user's ID
+        currentUserProfile = await UsersAllView.findAndCountAll( { where: { Username: req.oidc.user.email }});
+
         // Log the request (10001 = "New User Page Redirect")
-//        const logResult = commonFx.createLogEntry(10001, req.oidc.user.email);
         console.log('New User!');
+        console.log(`UserID: ${currentUserProfile.rows[0].UserID}`);
         return res.render('switchboard_newuser', {
             user: req.oidc.user,
+            userID: currentUserProfile.rows[0].UserID,
             userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
         } )
     } catch(err) {
         console.log('Error:' + err);
     }
+
 });
 
 
@@ -109,21 +116,52 @@ router.get('/', requiresAuth(), async (req, res) => {
         let selectedAISContentType = ''; // AIS page to display
         let userIDRequested = '';
         let userPermissionIDRequested = '';
-        // Airport Data Mgmt DDLs
-        let lfOwnerTypeCategoriesDDL = []; // Owner Types for DDL
-        let fuelStorageUnits = [] // Fuel Storage Units list for listbox
-        let fuelStorageConditionCategoriesDDL = []; // Fuel Storage Unit Conditions for DDL
+        let fuelStorageUnitIDRequested = '';
+        let fuelStorageUnitIDExists = false;
+        // Airport Data Mgmt DDLs and ExtHx Listboxs
+        let lfOwnerTypeCategoriesDDL = [];
+        let fuelStorageUnits = [];
+        let fuelStorageConditionCategoriesDDL = [];
+        let fuelStorageTypeCategoriesDDL = [];
+        let fuelStorageFuelGradeCategoriesDDL = [];
+        // Airport Data Mgmt ExtHx Listboxs
+        let lfAirportNameHx = [];
+        let lfAirportAddressHx = [];
+        let lfAirportAddressCSZHx = [];
+        let lfOwnerNameHx = [];
+        let lfOwnerAddressHx = [];
+        let lfOwnerAddressCSZHx = [];
+        let lfOwnerPhoneHx = [];
+        let lfMgrNameHx = [];
+        let lfMgrAddressHx = [];
+        let lfMgrAddressCSZHx = [];
+        let lfMgrPhoneHx = [];
+        let lfLatitudeHx = [];
+        let lfLongitudeHx = [];
+        let lfElevationHx = [];
+        let lfAeroSectionalChartHx = [];
+        let lfFAARegionCodeDescHx = [];
+        let lfFAADistrictCodeHx = [];
+        let lfOwnershipTypeDescHx = [];
+        let lfFacilityUseDescHx = [];
+        let lfLongestRunwayCategoryHx = [];
+        let lfAirportServiceLevelDescHx = [];
+        let lfHubClassificationDescHx = [];
+        let lfGACategoryHx = [];
+        let lfAcreageHx = [];
+        let lfLandSFHx = [];
 
 // Test
+/*
 console.log('Before sending test email.');
-let emailResult = await commonFx.sendEmail('fiosjlqf@gmail.com', 'Test Email - Switchboard Route',
+let emailResult = await commonFx.sendEmail(process.env.EMAIL_WEBMASTER_LIST, 'Test Email - Switchboard Route',
    'This is a test email from the AMCG switchboard.', 'This is a test email from the AMCG switchboard.');
 console.log(`emailResult: ${emailResult}`);
 console.log('After sending test email.');
 //Test
-//let logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
-//0, 0, 0, 'justjlqf@mail.com');
-
+logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
+0, 0, 0, process.env.EMAIL_WEBMASTER_LIST);
+*/
         ////////////////////////////////////////////////////
         // Get the current user's profile and permissions
         ////////////////////////////////////////////////////
@@ -149,22 +187,8 @@ console.log('After sending test email.');
         // Log the access by the Current User
         logEventResult = await commonFx.logEvent('Page Access', 'Switchboard', 900, 'Informational', 'User Accessed Page',
             0, 0, currentUserID, '');
-
-
-
-
-
-
-        // Get the list of active permissions for the user
-// TODO: Replace with "commonFx.checkUserPermission()"" function calls
-        const userPermissionsActive = await UserPermissionsActive.findAndCountAll( { where: { UserID: currentUserID }});
-
-
-
-
         // Check to see if the current User is a "Data Admin" (AMCG web manager)
         userIsDataAdmin = await commonFx.checkUserPermission(currentUserID, '923010', 'CanRead');
-
 
         ////////////////////////////////////////////////////
         // Validate any query string parameters
@@ -188,6 +212,7 @@ console.log('After sending test email.');
                         `Airport ID contains invalid characters (${searchAirportID})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
+// TODO: How to restore data and show error to user?
                     res.redirect('/switchboard');
                 };
             };
@@ -195,16 +220,17 @@ console.log('After sending test email.');
 
         // Validate the "Airport Name" search parameter, if present
         if ( req.query['searchairportname'] !== undefined ) {
-            searchAirportName = req.query['searchairportname'];
+            searchAirportName = decodeURI(req.query['searchairportname']);
             console.log(`querystring['searchairportname']: ${searchAirportName}`);
             if ( searchAirportName !== '' ) {
                 // validate the requested Airport Name
-                if ( !/^[A-Za-z]*$/.test(searchAirportName) ) {  // Airport Name contains invalid characters
+                if ( !/^[A-Za-z.'-\s]*$/.test(searchAirportName) ) {  // Airport Name contains invalid characters
                     // Log the event
                     logEventResult = await commonFx.logEvent('Airport Name Validation', '', 909, 'Failure',
                         `Airport Name contains invalid characters (${searchAirportName})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
+// TODO: How to restore data and show error to user?
                     res.redirect('/switchboard');
                 };
             };
@@ -212,16 +238,17 @@ console.log('After sending test email.');
 
         // Validate the "Airport City" search parameter, if present
         if ( req.query['searchairportcity'] !== undefined ) {
-            searchAirportCity = req.query['searchairportcity'];
+            searchAirportCity = decodeURI(req.query['searchairportcity']);
             console.log(`querystring['searchairportcity']: ${searchAirportCity}`);
             if ( searchAirportCity !== '' ) {
                 // validate the requested Airport City
-                if ( !/^[A-Za-z]*$/.test(searchAirportCity) ) {  // Airport City contains invalid characters
+                if ( !/^[A-Za-z.'-\s]*$/.test(searchAirportCity) ) {  // Airport City contains invalid characters
                     // Log the event
                     logEventResult = await commonFx.logEvent('Airport City Validation', '', 912, 'Failure',
                         `Airport City contains invalid characters (${searchAirportCity})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
+// TODO: How to restore data and show error to user?
                     res.redirect('/switchboard');
                 };
             };
@@ -233,12 +260,13 @@ console.log('After sending test email.');
             console.log(`querystring['searchairportnationalregion']: ${searchAirportNationalRegion}`);
             if ( searchAirportNationalRegion !== '' ) {
                 // validate the requested Airport National Region
-                if ( !/^[A-Za-z]*$/.test(searchAirportNationalRegion) ) {  // Airport National Region contains invalid characters
+                if ( !/^[0-9]*$/.test(searchAirportNationalRegion) ) {  // Airport National Region contains invalid characters
                     // Log the event
                     logEventResult = await commonFx.logEvent('Airport National Region Validation', '', 913, 'Failure',
                         `Airport National Region contains invalid characters (${searchAirportNationalRegion})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
+// TODO: How to restore data and show error to user?
                     res.redirect('/switchboard');
                 };
             };
@@ -255,6 +283,7 @@ console.log('After sending test email.');
                         `Airport ID contains invalid characters (${airportIDRequested})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
+// TODO: How to restore data and show error to user?
                     res.redirect('/switchboard');
                 } else {
                     // The requested airport has been validated
@@ -274,6 +303,7 @@ console.log('After sending test email.');
                         `AIS Content Type contains invalid characters (${aisContentTypeRequested})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
+// TODO: How to restore data and show error to user?
                     res.redirect('/switchboard');
                 } else {
                     // The requested AIS Content Type has been validated
@@ -282,6 +312,36 @@ console.log('After sending test email.');
             } else {
                 // if the value is blank, reset to default value
                 selectedAISContentType = '801001'; // default "General Information" page
+            };
+        };
+
+        // Validate the "Fuel Storage Unit ID" search parameter, if present
+        if ( req.query['fuelstorageunitid'] !== undefined ) {
+            fuelStorageUnitIDRequested = req.query['fuelstorageunitid'].toUpperCase();
+            console.log(`querystring['fuelstorageunitid']: ${fuelStorageUnitIDRequested}`);
+            if ( fuelStorageUnitIDRequested !== '' ) {  // querystring is present
+                if ( !/^[A-Za-z0-9 \-]*$/.test(fuelStorageUnitIDRequested) ) {  // Airport ID contains invalid characters
+                    // Log the event
+                    logEventResult = await commonFx.logEvent('Fuel Storage Unit ID Validation', '', 908, 'Failure',
+                        `Fuel Storage Unit ID contains invalid characters (${fuelStorageUnitIDRequested})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                };
+            } else {  // Value is in a valid format; check to see if it exists in the database
+                fuelStorageUnitIDExists = await FuelStorageUnitsAll.findAndCountAll( { where: { FuelStorageUnitID: fuelStorageUnitIDRequested } } );
+                if ( fuelStorageUnitIDExists.count == 0 ) {
+                    errorCode = 941; // Non-existant ID
+                    // Log the event
+                    logEventResult = await commonFx.logEvent('FuelStorageUnitID Validation', '', 0, 'Failure',
+                        `FuelStorageUnitID does not exist (${FuelStorageUnitID})`,
+                        0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                    // Redirect the user to the error screen
+                    return res.render( 'error', {
+                        errorCode: errorCode,
+                        userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                    });
+                };
             };
         };
 
@@ -379,6 +439,12 @@ console.log('After sending test email.');
                 statusMessage = 'User was updated.';
             } else if ( req.query['status'] === 'userdeletesuccess' ) {
                 statusMessage = 'User was deleted.';
+            } else if ( req.query['status'] === 'userpermissioncreatesuccess' ) {
+                statusMessage = 'User Permission was created.';
+            } else if ( req.query['status'] === 'userpermissionupdatesuccess' ) {
+                statusMessage = 'User Permission was updated.';
+            } else if ( req.query['status'] === 'userpermissiondeletesuccess' ) {
+                statusMessage = 'User Permission was deleted.';
             } else {
                 statusMessage = '';
                 // Log the event
@@ -435,16 +501,17 @@ console.log('After sending test email.');
                 });
             } else if ( searchAirportNationalRegion !== '' && searchAirportCity === '') {
                 matchingAirports = await AirportsCurrent.findAndCountAll({
-                    where: { LFStateName_FAA: searchAirportNationalRegion.toUpperCase() }
+                    where: { LFNationalRegion_FAA: searchAirportNationalRegion }
                 });
             } else if ( searchAirportNationalRegion !== '' && searchAirportCity !== '') {
                 matchingAirports = await AirportsCurrent.findAndCountAll({
                     where: { LFCityName_FAA: { [Op.like]: '%' + searchAirportCity.toUpperCase() + '%' },
-                             LFStateName_FAA: searchAirportNationalRegion.toUpperCase() }
+                             LFNationalRegion_FAA: searchAirportNationalRegion }
                 });
             };
-// TODO (Phase 2)     // Limit the matching Airports to those authorized for the Current User
 
+
+// TODO (Phase 2)     // Limit the matching Airports to those authorized for the Current User
 
             
             // Process all matching airports
@@ -453,7 +520,9 @@ console.log('After sending test email.');
                 res.redirect('/switchboard?airportid=' + matchingAirports.rows[0].LFLocationID_FAA +
                     '&aiscontenttype=801001' + 
                     '&searchairportid=' + searchAirportID +
-                    '&searchairportname=' + searchAirportName);
+                    '&searchairportname=' + req.query['searchairportname'] +
+                    '&searchairportcity=' + req.query['searchairportcity'] +
+                    '&searchairportnationalregion=' + searchAirportNationalRegion);
             };
             console.log(`matching Airports: ${matchingAirports.count}`);
             console.log(`matchingAirportID: ${selectedAirportID}`);
@@ -461,11 +530,6 @@ console.log('After sending test email.');
         
         // If a specific airport was requested, process it
         if ( selectedAirportID !== "" ) {  // a requested aiport was submitted (and validated)
-//            matchingAirports = await AirportsCurrent.findAndCountAll({ 
-//                where: { LFLocationID_FAA: selectedAirportID.toUpperCase() }
-//            });
-//            selectedAirport = matchingAirports.rows[0];
-//            matchingAirportsCount = 1;
             selectedAirport = airportDetails[0];
             actionRequested = 'editairport';
         };
@@ -485,7 +549,6 @@ console.log('After sending test email.');
         if ( userCanReadUsersDDL && userIDRequested.toString().length > 0 ) {
 
             // Does the requested User exist (if requested)?  If not, skip error processing
-            console.log(`doesUserExist: (${doesUserExist})`);
             if ( !doesUserExist ) {  // User ID does not exist
                 errorCode = 928;  // Unknown User
                 // Log the event
@@ -514,26 +577,22 @@ console.log('After sending test email.');
                 logEventResult = await commonFx.logEvent('Content Access', `Website User: ${ userIDRequested }`, 930,
                     'Success', '', 0, 0, currentUserID, '');
             };
-        };
-
+        }; // END: Can the Current User see the Website Users' DDL?
 
         ////////////////////////////////////////////////////
         //  Website User Permissions Permissions / Details (DDL, Add Permission, Default Permission, etc.)
         ////////////////////////////////////////////////////
-        console.log(`Checking Website User Permission Permissions for Current User (${currentUserID})`);
+//        console.log(`Checking Website User Permission Permissions for Current User (${currentUserID})`);
         const { userCanReadUserPermissionsDDL, userCanCreateUserPermissions, userPermissionsAllowedDDL,
                 userPermissionDetails, doesUserPermissionExist,
                 userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission
-        } = await commonFx.getWebsiteUserPermissionPermissionsForCurrentUser( currentUserID, userPermissionIDRequested );
-
-console.log(`userCanReadUserPermissionsDDL: ${userCanReadUserPermissionsDDL}`);
-console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
+        } = await commonFx.getWebsiteUserPermissionPermissionsForCurrentUser( currentUserID, userIDRequested, userPermissionIDRequested );
 
         // Does the User have access to the User Permissions DDL?
-        if ( userCanReadUserPermissionsDDL  && userPermissionIDRequested.toString().length > 0 ) {
+        if ( userCanReadUserPermissionsDDL && userIDRequested.length > 0 && userPermissionIDRequested.toString().length > 0 ) {
 
             // Does the requested User Permission exist (if requested)?  If not, skip error processing
-            console.log(`doesUserPermissionExist: (${doesUserPermissionExist})`);
+//            console.log(`doesUserPermissionExist: (${doesUserPermissionExist})`);
             if ( !doesUserPermissionExist ) {  // User ID does not exist
                 errorCode = 938;  // Unknown User Permission
                 // Log the event
@@ -563,14 +622,11 @@ console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
                     'Success', '', 0, 0, currentUserID, '');
             };
 
-            // Re-assign the "User ID Requested" to the user assigned to the user permission requested
-            userIDRequested = userPermissionDetails[0].UserID;
-            console.log(`User Permission User ID: ${userIDRequested}`);
-        };
+        }; // END: Can the Current User see the User Permissions' DDL?
 
 
         ////////////////////////////////////////////////////
-        // Retrieve options lists for data mgmt form DDLs
+        // Retrieve options lists for data mgmt form DDLs and ExtHx lists
         ////////////////////////////////////////////////////
 
         // AIS Search Engine DDLs
@@ -580,18 +636,129 @@ console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
         };
 
         // CRUD Forms - AIS
-        console.log(`selectedAISContentType: ${selectedAISContentType}`);
-        switch (selectedAISContentType) {
+        switch ( selectedAISContentType ) {
+
             case '801001': // General Information - Airport Information
                 lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+                lfAirportNameHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFName_FAA', 'optiontext'], ['LFName_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFName_FAA', 'DESC']]});
+                lfAirportAddressHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFAddress_FAA', 'optiontext'], ['LFAddress_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFAddress_FAA', 'DESC']]});
+                lfAirportAddressCSZHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFAddressCSZ_FAA', 'optiontext'], ['LFAddressCSZ_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFAddressCSZ_FAA', 'DESC']]});
+                lfOwnerNameHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFOwnerName_FAA', 'optiontext'], ['LFOwnerName_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFOwnerName_FAA', 'DESC']]});
+                lfOwnerAddressHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFOwnerAddress_FAA', 'optiontext'], ['LFOwnerAddress_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFOwnerAddress_FAA', 'DESC']]});
+                lfOwnerAddressCSZHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFOwnerAddressCSZ_FAA', 'optiontext'], ['LFOwnerAddressCSZ_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFOwnerAddressCSZ_FAA', 'DESC']]});
+                lfOwnerPhoneHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFOwnerPhone_FAA', 'optiontext'], ['LFOwnerPhone_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFOwnerPhone_FAA', 'DESC']]});
                 break;
+
             case '801003': // Operator Information / Manager Information
                 lfOwnerTypeCategoriesDDL = await LFOwnerTypeCategories.findAndCountAll({});
+                lfMgrNameHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFMgrName_FAA', 'optiontext'], ['LFMgrName_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFMgrName_FAA', 'DESC']]});
+                lfMgrAddressHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFMgrAddress_FAA', 'optiontext'], ['LFMgrAddress_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFMgrAddress_FAA', 'DESC']]});
+                lfMgrAddressCSZHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFMgrAddressCSZ_FAA', 'optiontext'], ['LFMgrAddressCSZ_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFMgrAddressCSZ_FAA', 'DESC']]});
+                lfMgrPhoneHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFMgrPhone_FAA', 'optiontext'], ['LFMgrPhone_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFMgrPhone_FAA', 'DESC']]});
                 break;
+
+            case '801004': // General - Location / Classification Information
+                lfLatitudeHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFLatitude_FAA', 'optiontext'], ['LFLatitude_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFLatitude_FAA', 'DESC']]});
+                lfLongitudeHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFLongitude_FAA', 'optiontext'], ['LFLongitude_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFLongitude_FAA', 'DESC']]});
+                lfElevationHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFElevation_FAA', 'optiontext'], ['LFElevation_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFElevation_FAA', 'DESC']]});
+                lfAeroSectionalChartHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFAeroSectionalChart_FAA', 'optiontext'], ['LFAeroSectionalChart_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFAeroSectionalChart_FAA', 'DESC']]});
+                lfFAARegionCodeDescHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFFAARegionCodeDesc_FAA', 'optiontext'], ['LFFAARegionCodeDesc_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFFAARegionCodeDesc_FAA', 'DESC']]});
+                lfFAADistrictCodeHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFFAADistrictCode_FAA', 'optiontext'], ['LFFAADistrictCode_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFFAADistrictCode_FAA', 'DESC']]});
+                lfOwnershipTypeDescHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFOwnershipTypeDesc_FAA', 'optiontext'], ['LFOwnershipTypeDesc_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFOwnershipTypeDesc_FAA', 'DESC']]});
+                lfFacilityUseDescHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFFacilityUseDesc_FAA', 'optiontext'], ['LFFacilityUseDesc_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFFacilityUseDesc_FAA', 'DESC']]});
+                lfLongestRunwayCategoryHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFLongestRunwayCategory_FAA', 'optiontext'], ['LFLongestRunwayCategory_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFLongestRunwayCategory_FAA', 'DESC']]});
+                lfAirportServiceLevelDescHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFServiceLevelDesc_NPIAS', 'optiontext'], ['LFServiceLevelDesc_NPIAS', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFServiceLevelDesc_NPIAS', 'DESC']]});
+                lfHubClassificationDescHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFHubClassificationDesc_NPIAS', 'optiontext'], ['LFHubClassificationDesc_NPIAS', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFHubClassificationDesc_NPIAS', 'DESC']]});
+                lfGACategoryHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFGACategory_NPIAS', 'optiontext'], ['LFGACategory_NPIAS', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFGACategory_NPIAS', 'DESC']]});
+                break;
+
+            case '801005': // Infrastructure - Land / Security Information
+                lfAcreageHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFAcreage_FAA', 'optiontext'], ['LFAcreage_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFAcreage_FAA', 'DESC']]});
+                lfLandSFHx = await AirportsHx.findAndCountAll({
+                    attributes: [ ['LFLandSF_FAA', 'optiontext'], ['LFLandSF_FAA', 'optionid'] ],
+                    where: { LFLocationID_FAA: searchAirportID },
+                    order: [['LFLandSF_FAA', 'DESC']]});
+                break;
+
             case '801006': // Infrastructure - Fuel Storage Units
                 fuelStorageUnits = await FuelStorageUnitsAll.findAndCountAll({
-                    where: { LFLocationID: searchAirportID } });
+                    where: { LFLocationID: searchAirportID },
+                    order: [['optiontext', 'ASC']]});
                 fuelStorageConditionCategoriesDDL = await FuelStorageConditionCategories.findAndCountAll({});
+                fuelStorageTypeCategoriesDDL = await FuelStorageTypeCategories.findAndCountAll({});
+                fuelStorageFuelGradeCategoriesDDL = await FuelStorageFuelGradeCategories.findAndCountAll({});
                 break;
         };
 
@@ -642,13 +809,44 @@ console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
             selectedAirportID,
             userCanUpdateAirport,
             selectedAISContentType,
+            // QueryString Parameters Requested
+            fuelStorageUnitIDRequested,
             // Data Mgmt DDLs
             lfOwnerTypeCategoriesDDL,
             fuelStorageUnits,
             fuelStorageConditionCategoriesDDL,
+            fuelStorageTypeCategoriesDDL,
+            fuelStorageFuelGradeCategoriesDDL,
+            // Data Mgmt Hx
+            lfAirportNameHx,
+            lfAirportAddressHx,
+            lfAirportAddressCSZHx,
+            lfOwnerNameHx,
+            lfOwnerAddressHx,
+            lfOwnerAddressCSZHx,
+            lfOwnerPhoneHx,
+            lfMgrNameHx,
+            lfMgrAddressHx,
+            lfMgrAddressCSZHx,
+            lfMgrPhoneHx,
+            lfLatitudeHx,
+            lfLongitudeHx,
+            lfElevationHx,
+            lfAeroSectionalChartHx,
+            lfFAARegionCodeDescHx,
+            lfFAADistrictCodeHx,
+            lfOwnershipTypeDescHx,
+            lfFacilityUseDescHx,
+            lfLongestRunwayCategoryHx,
+            lfAirportServiceLevelDescHx,
+            lfHubClassificationDescHx,
+            lfGACategoryHx,
+            lfAcreageHx,
+            lfLandSFHx,
             // Airport CRUD Information
             airportID, // Used???
             // Website User CRUD Information
+            userID: userIDRequested.toString(),
             userIDRequested,
             userDetails,
             userCanReadUser,
@@ -972,7 +1170,7 @@ router.put('/userupdate', requiresAuth(), async (req, res) => {
         });
     });
 
-    ///////////////////////////////
+///////////////////////////////
 // User Permission (Update)
 ///////////////////////////////
 router.put('/userpermissionupdate', requiresAuth(), async (req, res) => {
@@ -1052,14 +1250,14 @@ router.delete('/userdelete', requiresAuth(), async (req, res) => {
 router.delete('/userpermissiondelete', requiresAuth(), async (req, res) => {
 
     // Get a pointer to the current record
-    console.log(`body.userPermissionIDToDelete: ${req.body.userPermissionIDToDelete}`);
+//    console.log(`body.userPermissionIDToDelete: ${req.body.userPermissionIDToDelete}`);
     const userPermissionRecord = await UserPermissionsTable.findOne( {
         where: { WebsiteUserPermissionID: req.body.userPermissionIDToDelete }
     });
-    console.log(`userPermissionRecord: ${userPermissionRecord.WebsiteUserPermissionID}`);
+//    console.log(`userPermissionRecord: ${userPermissionRecord.WebsiteUserPermissionID}`);
 
     // Delete the record
-    console.log(`userID to redirect to after user permission deletion: ${req.body.userIDOfPermission}`)
+//    console.log(`userID to redirect to after user permission deletion: ${req.body.userIDOfPermission}`)
     await userPermissionRecord.destroy().then( () => {
         res.redirect(`/switchboard?status=userpermissiondeletesuccess` +
                      `&userid=${req.body.userIDOfPermission}`);

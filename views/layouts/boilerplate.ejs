@@ -17,11 +17,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.15/jquery.mask.min.js"></script>
 
     <!-- Styles and Fonts -->
-    <script src="https://kit.fontawesome.com/1fb7304d11.js" crossorigin="anonymous"></script>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Julius+Sans+One|Lato:400,700&display=swap" rel="stylesheet"> 
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-  <!-- TODO: Customized these FoA copies! -->
+    <!-- TODO: Customized VV these VV FoA templates! -->
     <link rel="stylesheet" href="/css/amcg.css">
     <link rel="stylesheet" href="/css/amcg_boilerplate.css">
     <link rel="stylesheet" href="/css/amcg_dataforms.css">
@@ -32,7 +31,7 @@
     <script src="/js/common_fx_client.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/validator/13.1.17/validator.min.js"></script>
 
-    <title>AMCG - Log in / Sign up</title>
+    <title>AMCG</title>
 
   </head>
   <body>
@@ -59,18 +58,16 @@
       if ( userName !== '' ) {
         navbarLoginLink.textContent = "Log Out";
         navbarLoginLink.href = "/logout/portal";
-//        navbarSwitchboardLink.style.display = "block";
         navbarSwitchboardLink.style.display = "inline-flex";
         navbarSwitchboardLink.textContent = "Switchboard";
         navbarSwitchboardLink.href = "/switchboard";
       } else {
         navbarLoginLink.textContent = "Log In / Sign Up";
         navbarLoginLink.href = "/portal";
-//        navbarSwitchboardLink.style.display = "none";
         navbarSwitchboardLink.textContent = "";
         navbarSwitchboardLink.href = "";
       };
-</script>
+    </script>
   </body>
 </html>
 

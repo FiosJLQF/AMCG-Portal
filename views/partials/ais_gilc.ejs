@@ -18,91 +18,115 @@
       <label class="data-mgmt-col-title" id="airportInformationBlock">Location Information</label></span><br>
 
       <!-- Latitude -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="latitude" class="data-mgmt">Latitude:</label>
+          <label for="latitude" class="data-mgmt">Latitude (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="latitude" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="latitude" name="latitude" class="data-mgmt-text-half"><br>
+          <input type="text" id="latitude" name="latitude" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#latitudeHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="latitudeHx" name="latitudeHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="latitudeErrors"></span>
         </div>
       </div><br>
 
       <!-- Longitude -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="longitude" class="data-mgmt">Longitude:</label>
+          <label for="longitude" class="data-mgmt">Longitude (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="longitude" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="longitude" name="longitude" class="data-mgmt-text-half"><br>
+          <input type="text" id="longitude" name="longitude" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#longitudeHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="longitudeHx" name="longitudeHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="longitudeErrors"></span>
         </div>
       </div><br>
 
       <!-- Elevation -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="elevation" class="data-mgmt">Elevation:</label>
+          <label for="elevation" class="data-mgmt">Elevation (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="elevation" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="elevation" name="elevation" class="data-mgmt-text-half"><br>
+          <input type="text" id="elevation" name="elevation" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#elevationHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="elevationHx" name="elevationHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="elevationErrors"></span>
         </div>
       </div><br>
 
       <!-- Sectional Chart -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="sectionalChart" class="data-mgmt">Sectional Chart:</label>
+          <label for="sectionalChart" class="data-mgmt">Sectional Chart (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="sectionalChart" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="sectionalChart" name="sectionalChart" class="data-mgmt-text-half"><br>
+          <input type="text" id="sectionalChart" name="sectionalChart" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#sectionalChartHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="sectionalChartHx" name="sectionalChartHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="sectionalChartErrors"></span>
         </div>
       </div><br>
 
       <!-- FAA Region -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="faaRegion" class="data-mgmt">FAA Region:</label>
+          <label for="faaRegion" class="data-mgmt">FAA Region (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="faaRegion" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="faaRegion" name="faaRegion" class="data-mgmt-text-half"><br>
+          <input type="text" id="faaRegion" name="faaRegion" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#faaRegionHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="faaRegionHx" name="faaRegionHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="faaRegionErrors"></span>
         </div>
       </div><br>
 
       <!-- FAA District Office -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="faaDistrictOffice" class="data-mgmt">FAA District Office:</label>
+          <label for="faaDistrictOffice" class="data-mgmt">FAA District Office (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="faaDistrictOffice" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="faaDistrictOffice" name="faaDistrictOffice" class="data-mgmt-text-half"><br>
+          <input type="text" id="faaDistrictOffice" name="faaDistrictOffice" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#faaDistrictOfficeHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="faaDistrictOfficeHx" name="faaDistrictOfficeHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="faaDistrictOfficeErrors"></span>
         </div>
       </div><br>
 
       <!-- Location Notes -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="locationNotes" class="data-mgmt">Notes:</label>
         </div>
@@ -116,52 +140,64 @@
       </div><br>
 
       <br>
-      <label class="data-mgmt-col-title" id="ownerInformationBlock">Classification Information</label></span><br>
+      <label class="data-mgmt-col-title" id="classificationInformationBlock">Classification Information</label></span><br>
 
       <!-- Ownership Type -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="ownershipType" class="data-mgmt">Ownership Type:</label>
+          <label for="ownershipType" class="data-mgmt">Ownership Type (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="ownershipType" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="ownershipType" name="ownershipType" class="data-mgmt-text-half"><br>
+          <input type="text" id="ownershipType" name="ownershipType" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#ownershipTypeDescHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="ownershipTypeDescHx" name="ownershipTypeDescHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="ownershipTypeErrors"></span>
         </div>
       </div><br>
 
       <!-- Facility Use Type -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="facilityUse" class="data-mgmt">Facility Use:</label>
+          <label for="facilityUse" class="data-mgmt">Facility Use (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="facilityUse" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="facilityUse" name="facilityUse" class="data-mgmt-text-half"><br>
+          <input type="text" id="facilityUse" name="facilityUse" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#facilityUseDescHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="facilityUseDescHx" name="facilityUseDescHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="facilityUseErrors"></span>
         </div>
       </div><br>
 
       <!-- Runway Category -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="runwayCategory" class="data-mgmt">Runway Category:</label>
+          <label for="runwayCategory" class="data-mgmt">Runway Category (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="runwayCategory" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="runwayCategory" name="runwayCategory" class="data-mgmt-text-half"><br>
+          <input type="text" id="runwayCategory" name="runwayCategory" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#longestRunwayCategoryHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="longestRunwayCategoryHx" name="longestRunwayCategoryHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="runwayCategoryErrors"></span>
         </div>
       </div><br>
 
       <!-- System Airport -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="systemAirport" class="data-mgmt">System Airport:</label>
         </div>
@@ -179,7 +215,7 @@
       </div><br>
 
       <!-- System Airport IDs -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="systemAirportIDs" class="data-mgmt">System Airport ID(s):</label>
         </div>
@@ -193,7 +229,7 @@
       </div><br>
 
       <!-- Comps Effective Date -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
           <div class="col-3 data-mgmt-sublabel-col">
             <label for="compsEffectiveDate" class="data-mgmt">Comps Effective Date:</label>
           </div>
@@ -207,7 +243,7 @@
       </div><br>
 
       <!-- Comparables -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="comparables" class="data-mgmt">Comparable(s):</label>
         </div>
@@ -221,7 +257,7 @@
       </div><br>
 
       <!-- Competitives -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="competitives" class="data-mgmt">Competitive(s):</label>
         </div>
@@ -235,49 +271,61 @@
       </div><br>
 
       <!-- Airport Service Level -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="airportServiceLevel" class="data-mgmt">Airport Service Level:</label>
+          <label for="airportServiceLevel" class="data-mgmt">Airport Service Level (NPIAS):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="airportServiceLevel" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="airportServiceLevel" name="airportServiceLevel" class="data-mgmt-text-half"><br>
+          <input type="text" id="airportServiceLevel" name="airportServiceLevel" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#airportServiceLevelDescHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="airportServiceLevelDescHx" name="airportServiceLevelDescHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="airportServiceLevelErrors"></span>
         </div>
       </div><br>
 
       <!-- Hub Classification -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="hubClassification" class="data-mgmt">Hub Classification:</label>
+          <label for="hubClassification" class="data-mgmt">Hub Classification (NPIAS):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="hubClassification" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="hubClassification" name="hubClassification" class="data-mgmt-text-half"><br>
+          <input type="text" id="hubClassification" name="hubClassification" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#hubClassificationDescHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="hubClassificationDescHx" name="hubClassificationDescHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="hubClassificationErrors"></span>
         </div>
       </div><br>
 
       <!-- GA Category -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="gaCategory" class="data-mgmt">GA Category:</label>
+          <label for="gaCategory" class="data-mgmt">GA Category (NPIAS):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
           <label for="gaCategory" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="gaCategory" name="gaCategory" class="data-mgmt-text-half"><br>
+          <input type="text" id="gaCategory" name="gaCategory" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#gaCategoryHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="gaCategoryHx" name="gaCategoryHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="gaCategoryErrors"></span>
         </div>
       </div><br>
 
       <!-- Classification Notes -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="classificationNotes" class="data-mgmt">Notes:</label>
         </div>
@@ -309,6 +357,56 @@
   document.getElementById("pageTitle").innerText = "Switchboard - Location/Classification Information";
   // Set the instructions
   document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+
+  // Load the Hx SELECT objects
+  var latitudeHxRows = <%- JSON.stringify(lfLatitudeHx.rows) %>;
+    loadSelectOptionsList("latitudeHx", "", 0, latitudeHxRows);
+    document.getElementById('latitudeHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#latitudeHx'), '', 'hide', '', '');
+  var longitudeHxRows = <%- JSON.stringify(lfLongitudeHx.rows) %>;
+    loadSelectOptionsList("longitudeHx", "", 0, longitudeHxRows);
+    document.getElementById('longitudeHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#longitudeHx'), '', 'hide', '', '');
+  var elevationHxRows = <%- JSON.stringify(lfElevationHx.rows) %>;
+    loadSelectOptionsList("elevationHx", "", 0, elevationHxRows);
+    document.getElementById('elevationHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#elevationHx'), '', 'hide', '', '');
+  var sectionalChartHxRows = <%- JSON.stringify(lfAeroSectionalChartHx.rows) %>;
+    loadSelectOptionsList("sectionalChartHx", "", 0, sectionalChartHxRows);
+    document.getElementById('sectionalChartHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#sectionalChartHx'), '', 'hide', '', '');
+  var faaRegionHxRows = <%- JSON.stringify(lfFAARegionCodeDescHx.rows) %>;
+    loadSelectOptionsList("faaRegionHx", "", 0, faaRegionHxRows);
+    document.getElementById('faaRegionHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#faaRegionHx'), '', 'hide', '', '');
+  var faaDistrictOfficeHxRows = <%- JSON.stringify(lfFAADistrictCodeHx.rows) %>;
+    loadSelectOptionsList("faaDistrictOfficeHx", "", 0, faaDistrictOfficeHxRows);
+    document.getElementById('faaDistrictOfficeHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#faaDistrictOfficeHx'), '', 'hide', '', '');
+  var ownershipTypeDescHxRows = <%- JSON.stringify(lfOwnershipTypeDescHx.rows) %>;
+    loadSelectOptionsList("ownershipTypeDescHx", "", 0, ownershipTypeDescHxRows);
+    document.getElementById('ownershipTypeDescHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#ownershipTypeDescHx'), '', 'hide', '', '');
+  var facilityUseDescHxRows = <%- JSON.stringify(lfFacilityUseDescHx.rows) %>;
+    loadSelectOptionsList("facilityUseDescHx", "", 0, facilityUseDescHxRows);
+    document.getElementById('facilityUseDescHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#facilityUseDescHx'), '', 'hide', '', '');
+  var longestRunwayCategoryHxRows = <%- JSON.stringify(lfLongestRunwayCategoryHx.rows) %>;
+    loadSelectOptionsList("longestRunwayCategoryHx", "", 0, longestRunwayCategoryHxRows);
+    document.getElementById('longestRunwayCategoryHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#longestRunwayCategoryHx'), '', 'hide', '', '');
+  var airportServiceLevelDescHxRows = <%- JSON.stringify(lfAirportServiceLevelDescHx.rows) %>;
+    loadSelectOptionsList("airportServiceLevelDescHx", "", 0, airportServiceLevelDescHxRows);
+    document.getElementById('airportServiceLevelDescHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#airportServiceLevelDescHx'), '', 'hide', '', '');
+  var hubClassificationDescHxRows = <%- JSON.stringify(lfHubClassificationDescHx.rows) %>;
+    loadSelectOptionsList("hubClassificationDescHx", "", 0, hubClassificationDescHxRows);
+    document.getElementById('hubClassificationDescHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#hubClassificationDescHx'), '', 'hide', '', '');
+  var gaCategoryHxRows = <%- JSON.stringify(lfGACategoryHx.rows) %>;
+    loadSelectOptionsList("gaCategoryHx", "", 0, gaCategoryHxRows);
+    document.getElementById('gaCategoryHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#gaCategoryHx'), '', 'hide', '', '');
 
   // Is an aiport being edited?
   <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"

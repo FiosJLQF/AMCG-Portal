@@ -31,7 +31,6 @@ function loadSelectOptionsList(selectEl, notSelectedText, notSelectedValue, opti
         optionEl.textContent = option['optiontext'];
         optionEl.value = option['optionid'];
         if (optionEl.value === selectedValue) {
-//            alert(`optionEl.value: (${option['optionid']}); selectedValue: (${selectedValue})`);
             optionEl.selected = true;
         };
         optionEl.classList.add('filter-option');
@@ -49,8 +48,8 @@ function toggleBlockShowHide(elIcon, elBlock, elInput, statusToSet, upIconName, 
     // Get the current style properties for the Block
     const cssStyles = window.getComputedStyle(elBlock, null);
 
-    console.log(`Changing block display for ${elBlock.id}.`);
-    console.log(`statustoSet: ${statusToSet}`);
+//    console.log(`Changing block display for ${elBlock.id}.`);
+//    console.log(`statustoSet: ${statusToSet}`);
 
     // if the current display is hidden and the forced statusToSet <> "hide", then show
     if (statusToSet !== "hide" && cssStyles.getPropertyValue("display") !== "block"
@@ -76,8 +75,9 @@ function toggleBlockShowHide(elIcon, elBlock, elInput, statusToSet, upIconName, 
         }
 
         elBlock.style.display = "none";
-        elIcon.classList.remove(upIconName);
-        elIcon.classList.add(downIconName);
+        if ( upIconName !== "" ) { elIcon.classList.remove(upIconName) };
+        if ( downIconName !== "" ) { elIcon.classList.remove(downIconName) };
+//        elIcon.classList.add(downIconName);
 
     };
 

@@ -11,6 +11,10 @@ require("dotenv").config();
 ///////////////////////////////////////////////////////////////////////////////////
 // Routes Definitions
 ///////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////
+// Login route (handled by Auth0)
+///////////////////////////////////////////
 router.get( "/login", 
     passport.authenticate("auth0", {
       scope: "openid email profile"
@@ -25,7 +29,7 @@ router.get( "/login",
 ///////////////////////////////////////////
 router.get("/callback", (req, res, next) => {
 
-  console.log('Entered router.get callback');
+//  console.log('Entered router.get callback');
 
   passport.authenticate("auth0", (err, user, info) => {
     if (err) {
@@ -39,7 +43,7 @@ router.get("/callback", (req, res, next) => {
         return next(err);
       }
       const returnTo = req.session.returnTo;
-      console.log(`returnTo: ${returnTo}`);
+//      console.log(`returnTo: ${returnTo}`);
       delete req.session.returnTo;
       res.redirect(returnTo || "/switchboard");
     });
@@ -76,7 +80,7 @@ router.get("/logout", (req, res) => {
 // Invalid Routes
 ///////////////////////////////////////////
 router.get('*', async (req, res) => {
-  console.log(`Invalid route: ${req.url}`);
+//  console.log(`Invalid route: ${req.url}`);
   return res.render('error', {
       userName: '',
       errorCode: 901  // invalid route

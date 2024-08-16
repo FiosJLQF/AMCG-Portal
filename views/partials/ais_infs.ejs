@@ -18,24 +18,21 @@
       <label class="data-mgmt-col-title" id="airportInformationBlock">Fuel Storage</label></span><br>
 
       <!-- Fuel Storage Unit List -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
           <div class="col-3 data-mgmt-sublabel-col">
-            <label for="fuelStorageUnits" class="data-mgmt-label">Select a Storage Unit:</label><br>
+            <label for="fuelStorageUnits" class="data-mgmt-label">Select a Storage Unit:</label>
           </div>
           <div class="col-1 data-mgmt-required-col">
             <label for="fuelStorageUnits" class="data-mgmt-required"></label>
           </div>
           <div class="col-8 data-mgmt-value-col">
-
-<!-- SWITCH DB VIEW to use standard "optiontex" syntax for DDL loading -->
-
-            <select id="fuelStorageUnits" name="fuelStorageUnits" class="data-mgmt-select-single" size=6 onchange="loadFuelStorageUnit();"></select><br>
+            <select id="fuelStorageUnits" name="fuelStorageUnits" class="data-mgmt-select-multiple" multiple onchange="loadFuelStorageUnit(this.value);"></select><br>
             <span class="data-mgmt-span-error" id="fuelStorageUnitsErrors"></span>
           </div>
       </div><br>
 
       <!-- Construction Date -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="constructionDate" class="data-mgmt">Construction Date:</label>
         </div>
@@ -49,7 +46,7 @@
       </div><br>
 
       <!-- Construction Cost -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="constructionCost" class="data-mgmt">Construction Cost:</label>
         </div>
@@ -63,7 +60,7 @@
       </div><br>
 
       <!-- Condition -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="storageCondition" class="data-mgmt">Condition:</label>
         </div>
@@ -71,13 +68,13 @@
           <label for="storageCondition" class="data-mgmt-required">*</label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="storageCondition" name="storageCondition" class="data-mgmt-text-third"><br>
+          <select id="storageCondition" name="storageCondition" class="data-mgmt-single-third"></select><br>
           <span class="data-mgmt-error" id="storageConditionErrors"></span>
         </div>
       </div><br>
 
       <!-- Type -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="storageType" class="data-mgmt">Type:</label>
         </div>
@@ -85,13 +82,13 @@
           <label for="storageType" class="data-mgmt-required">*</label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="storageType" name="storageType" class="data-mgmt-text-third"><br>
+          <select id="storageType" name="storageType" class="data-mgmt-single-third"></select><br>
           <span class="data-mgmt-error" id="storageTypeErrors"></span>
         </div>
       </div><br>
 
       <!-- Fuel Grade -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="fuelGrade" class="data-mgmt">Fuel Grade:</label>
         </div>
@@ -99,13 +96,13 @@
           <label for="fuelGrade" class="data-mgmt-required">*</label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="fuelGrade" name="fuelGrade" class="data-mgmt-text-third"><br>
+          <select id="fuelGrade" name="fuelGrade" class="data-mgmt-single-third"></select><br>
           <span class="data-mgmt-error" id="fuelGradeErrors"></span>
         </div>
       </div><br>
 
       <!-- Capacity -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="storageCapacity" class="data-mgmt">Capacity:</label>
         </div>
@@ -121,7 +118,7 @@
     </form>
     <div><br>
       <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
-        <button class="data-mgmt" form="airportINFSData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <button id="saveChanges" class="data-mgmt" form="airportINFSData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
       <% } %>
     </div><br><br>
     <hr class="bodycol2break">
@@ -140,25 +137,36 @@
 
   // Load the Fuel Storage Units for the requested Airport
   var fsuRows = <%- JSON.stringify(fuelStorageUnits.rows) %>;
-  alert(<%- JSON.stringify(fuelStorageUnits.count) %>);
-  loadSelectOptionsList("fuelStorageUnits", "(Not Selected)", 0, fsuRows);
+  loadSelectOptionsList("fuelStorageUnits", "", 0, fsuRows, "");
 
-  // Load the SELECT objects with the available options
-  var fscRows = <%- JSON.stringify(fuelStorageConditionCategoriesDDL.rows) %>;
-  loadSelectOptionsList("storageCondition", "(Not Selected)", 0, fscRows);
+  // Is a fuel storage unit being edited?
+  <% if ( fuelStorageUnitIDRequested != '' ) { %>
 
+    // Load the SELECT objects with the available options
+    var fscRows = <%- JSON.stringify(fuelStorageConditionCategoriesDDL.rows) %>;
+    loadSelectOptionsList("storageCondition", "(Not Selected)", 0, fscRows);
+    var fstRows = <%- JSON.stringify(fuelStorageTypeCategoriesDDL.rows) %>;
+    loadSelectOptionsList("storageType", "(Not Selected)", 0, fstRows);
+    var fsgRows = <%- JSON.stringify(fuelStorageFuelGradeCategoriesDDL.rows) %>;
+    loadSelectOptionsList("fuelGrade", "(Not Selected)", 0, fsgRows);
 
+    // Load the data from the selected record
+    document.getElementById('constructionDate').value = "<%- fuelStorageUnits.rows[0].FuelStorageConstructionDate %>";
+    document.getElementById('constructionCost').value = "<%- fuelStorageUnits.rows[0].FuelStorageConstructionCost %>";
+    document.getElementById('storageCondition').value = "<%- fuelStorageUnits.rows[0].FuelStorageCondition %>";
+    document.getElementById('storageType').value = "<%- fuelStorageUnits.rows[0].FuelStorageType %>";
+    document.getElementById('fuelGrade').value = "<%- fuelStorageUnits.rows[0].FuelStorageFuelGrade %>";
+    document.getElementById('storageCapacity').value = "<%- fuelStorageUnits.rows[0].FuelStorageCapacity %>";
 
+  <% } else { %> // no fuel storage unit requested - disable all controls
 
-  // Is an aiport being edited?
-  <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
-
-// #1
-
-
-
-
-
+    document.getElementById('constructionDate').disabled = true;
+    document.getElementById('constructionCost').disabled = true;
+    document.getElementById('storageCondition').disabled = true;
+    document.getElementById('storageType').disabled = true;
+    document.getElementById('fuelGrade').disabled = true;
+    document.getElementById('storageCapacity').disabled = true;
+    document.getElementById('saveChanges').disabled = true;
 
   <% } %>
 
@@ -182,5 +190,21 @@
     return dataAreValid;
 
   };
+
+  //////////////////////////////////////////////////////////////////////
+  // Redirect the user to the Fuel Storage Unit selected
+  //////////////////////////////////////////////////////////////////////
+  function loadFuelStorageUnit(selectedFuelStorageUnitID) {
+    var newURL = '';
+    newURL = 'switchboard?' +
+             'airportid=' + document.getElementById('searchAISLFID').value +
+             '&aiscontenttype=801006' +
+             '&fuelstorageunitid=' + selectedFuelStorageUnitID +
+             '&searchairportid=' + document.getElementById('searchAISLFID').value +
+             '&searchairportname=';
+    location.href=newURL;
+  }
+
+
 
 </script>

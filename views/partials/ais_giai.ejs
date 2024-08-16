@@ -18,7 +18,7 @@
       <label class="data-mgmt-col-title" id="airportInformationBlock">Airport Information</label></span><br>
 
       <!-- Airport Name -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="airportName" class="data-mgmt">Airport Name (FAA):</label>
         </div>
@@ -26,13 +26,17 @@
           <label for="airportName" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="airportName" name="airportName" class="data-mgmt-text-half"><br>
+          <input type="text" id="airportName" name="airportName" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#airportNameHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="airportNameHx" name="airportNameHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="airportNameErrors"></span>
         </div>
       </div><br>
 
       <!-- Airport Address -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="airportAddress" class="data-mgmt">Street Address (FAA):</label>
         </div>
@@ -40,13 +44,17 @@
           <label for="airportAddress" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="airportAddress" name="airportAddress" class="data-mgmt-text-half"><br>
+          <input type="text" id="airportAddress" name="airportAddress" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#airportAddressHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="airportAddressHx" name="airportAddressHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="airportAddressErrors"></span>
         </div>
       </div><br>
 
       <!-- Airport City/State/Zip -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="airportCSZ" class="data-mgmt">City / State / Zip (FAA):</label>
         </div>
@@ -54,13 +62,17 @@
           <label for="airportCSZ" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="airportCSZ" name="airportCSZ" class="data-mgmt-text-half"><br>
+          <input type="text" id="airportCSZ" name="airportCSZ" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#airportAddressCSZHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="airportAddressCSZHx" name="airportAddressCSZHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="airportCSZErrors"></span>
         </div>
       </div><br>
 
       <!-- Airport Website -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="airportWebsite" class="data-mgmt">Website:</label>
         </div>
@@ -74,7 +86,7 @@
       </div><br>
 
       <!-- Airport Email -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="airportEmail" class="data-mgmt">Email:</label>
         </div>
@@ -88,7 +100,7 @@
       </div><br>
 
       <!-- Airport Notes -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="airportNotes" class="data-mgmt">Notes:</label>
         </div>
@@ -105,7 +117,7 @@
       <label class="data-mgmt-col-title" id="ownerInformationBlock">Sponsor (Owner) Information</label></span><br>
 
       <!-- Sponsor Name -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorName" class="data-mgmt">Sponsor Name (FAA):</label>
         </div>
@@ -113,13 +125,17 @@
           <label for="sponsorName" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="sponsorName" name="sponsorName" class="data-mgmt-text-half"><br>
+          <input type="text" id="sponsorName" name="sponsorName" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#ownerNameHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="ownerNameHx" name="ownerNameHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="sponsorNameErrors"></span>
         </div>
       </div><br>
 
       <!-- Sponsor Address -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorAddress" class="data-mgmt">Street Address (FAA):</label>
         </div>
@@ -127,27 +143,35 @@
           <label for="sponsorAddress" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="sponsorAddress" name="sponsorAddress" class="data-mgmt-text-half"><br>
+          <input type="text" id="sponsorAddress" name="sponsorAddress" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#ownerAddressHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="ownerAddressHx" name="ownerAddressHx" class="data-mgmt-hx-text-half" multiple></select>
           <span class="data-mgmt-error" id="sponsorAddressErrors"></span>
         </div>
       </div><br>
 
       <!-- Sponsor City/State/Zip -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
-          <label for="sponsorCSZ" class="data-mgmt">City / State / Zip (FAA):</label>
+          <label for="sponsorAddressCSZ" class="data-mgmt">City / State / Zip (FAA):</label>
         </div>
         <div class="col-1 data-mgmt-required-col">
-          <label for="sponsorCSZ" class="data-mgmt-required"></label>
+          <label for="sponsorAddressCSZ" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="sponsorCSZ" name="sponsorCSZ" class="data-mgmt-text-half"><br>
-          <span class="data-mgmt-error" id="sponsorCSZErrors"></span>
+          <input type="text" id="sponsorAddressCSZ" name="sponsorAddressCSZ" class="data-mgmt-text-half">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#ownerAddressCSZHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="ownerAddressCSZHx" name="ownerAddressCSZHx" class="data-mgmt-hx-text-half" multiple></select>
+          <span class="data-mgmt-error" id="sponsorAddressCSZErrors"></span>
         </div>
       </div><br>
 
       <!-- Sponsor Telephone -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorTelephone" class="data-mgmt">Telephone (FAA):</label>
         </div>
@@ -155,13 +179,17 @@
           <label for="sponsorTelephone" class="data-mgmt-required"></label>
         </div>
         <div class="col-8 data-mgmt-value-col">
-          <input type="text" id="sponsorTelephone" name="sponsorTelephone" class="data-mgmt-text-third"><br>
+          <input type="text" id="sponsorTelephone" name="sponsorTelephone" class="data-mgmt-text-third">
+          <button type="button" class="btn btn-default button-normal"
+          onclick="toggleBlockShowHide('', document.querySelector('#ownerPhoneHx'),
+                       '', '', '', '')">Ext. Hx</button><br>
+          <select id="ownerPhoneHx" name="ownerPhoneHx" class="data-mgmt-hx-text-third" multiple></select>
           <span class="data-mgmt-error" id="sponsorTelephoneErrors"></span>
         </div>
       </div><br>
 
       <!-- Sponsor Fax -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorFax" class="data-mgmt">Fax:</label>
         </div>
@@ -175,7 +203,7 @@
       </div><br>
 
       <!-- Sponsor Email -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorEmail" class="data-mgmt">Email:</label>
         </div>
@@ -189,7 +217,7 @@
       </div><br>
 
       <!-- Sponsor Type -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorType" class="data-mgmt">Type:</label>
         </div>
@@ -203,7 +231,7 @@
       </div><br>
 
       <!-- Sponsor Logo Filename -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorLogoFilename" class="label-data-mgmt">Logo (File Location):</label>
         </div>
@@ -221,7 +249,7 @@
       </div><br>
 
       <!-- Sponsor Notes -->
-      <div class="data-mgmt-row row">
+      <div class="data-mgmt-row">
         <div class="col-3 data-mgmt-sublabel-col">
           <label for="sponsorNotes" class="data-mgmt">Notes:</label>
         </div>
@@ -259,6 +287,36 @@
   var owtRows = <%- JSON.stringify(lfOwnerTypeCategoriesDDL.rows) %>;
   loadSelectOptionsList("sponsorType", "(Not Selected)", 0, owtRows);
 
+  // Load the Hx SELECT objects
+  var airportHxRows = <%- JSON.stringify(lfAirportNameHx.rows) %>;
+    loadSelectOptionsList("airportNameHx", "", 0, airportHxRows);
+    document.getElementById('airportNameHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#airportNameHx'), '', 'hide', '', '');
+  var airportAddressHxRows = <%- JSON.stringify(lfAirportAddressHx.rows) %>;
+    loadSelectOptionsList("airportAddressHx", "", 0, airportAddressHxRows);
+    document.getElementById('airportAddressHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#airportAddressHx'), '', 'hide', '', '');
+  var airportAddressCSZHxRows = <%- JSON.stringify(lfAirportAddressCSZHx.rows) %>;
+    loadSelectOptionsList("airportAddressCSZHx", "", 0, airportAddressCSZHxRows);
+    document.getElementById('airportAddressCSZHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#airportAddressCSZHx'), '', 'hide', '', '');
+  var ownerNameHxRows = <%- JSON.stringify(lfOwnerNameHx.rows) %>;
+    loadSelectOptionsList("ownerNameHx", "", 0, ownerNameHxRows);
+    document.getElementById('ownerNameHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#ownerNameHx'), '', 'hide', '', '');
+  var ownerAddressHxRows = <%- JSON.stringify(lfOwnerAddressHx.rows) %>;
+    loadSelectOptionsList("ownerAddressHx", "", 0, ownerAddressHxRows);
+    document.getElementById('ownerAddressHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#ownerAddressHx'), '', 'hide', '', '');
+  var ownerAddressCSZHxRows = <%- JSON.stringify(lfOwnerAddressCSZHx.rows) %>;
+    loadSelectOptionsList("ownerAddressCSZHx", "", 0, ownerAddressCSZHxRows);
+    document.getElementById('ownerAddressCSZHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#ownerAddressCSZHx'), '', 'hide', '', '');
+  var ownerPhoneHxRows = <%- JSON.stringify(lfOwnerPhoneHx.rows) %>;
+    loadSelectOptionsList("ownerPhoneHx", "", 0, ownerPhoneHxRows);
+    document.getElementById('ownerPhoneHx').disabled = true;
+    toggleBlockShowHide('', document.querySelector('#ownerPhoneHx'), '', 'hide', '', '');
+
   // Is an aiport being edited?
   <% if ( actionRequested === 'editairport' ) { %>  // "Edit Airport"
     // Set the current values
@@ -276,8 +334,8 @@
     document.getElementById('sponsorName').disabled = true;
     document.getElementById('sponsorAddress').value = "<%- selectedAirport.LFOwnerAddress_FAA %>";
     document.getElementById('sponsorAddress').disabled = true;
-    document.getElementById('sponsorCSZ').value = "<%- selectedAirport.LFOwnerAddressCSZ_FAA %>";
-    document.getElementById('sponsorCSZ').disabled = true;
+    document.getElementById('sponsorAddressCSZ').value = "<%- selectedAirport.LFOwnerAddressCSZ_FAA %>";
+    document.getElementById('sponsorAddressCSZ').disabled = true;
     document.getElementById('sponsorTelephone').value = "<%- selectedAirport.LFOwnerPhone_FAA %>";
     document.getElementById('sponsorTelephone').disabled = true;
     document.getElementById('sponsorFax').value = "<%- selectedAirport.LFOwnerFax %>";
