@@ -1,6 +1,6 @@
 <div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
     <span class="bodylayout1col2title">
-      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+      <label class="data-mgmt-col-title" id="fuelStorageUnitInstructions"></label></span><br>
     <hr class="bodycol2break">
     <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
 
@@ -11,16 +11,20 @@
     <% } %>
 
     <!-- The data entry form container -->
-    <form action="/switchboard/airportupdateinfs?_method=PUT" method="POST" id="airportINFSData">
+    <form action="/switchboard/fuelstorageunitadd" method="POST" id="airportINFSData">
 
-      <input type="hidden" id="airportIDToUpdate" name="airportIDToUpdate"><br>
+      <input type="hidden" id="fuelStorageUnitIDToUpdate" name="fuelStorageUnitIDToUpdate"><br>
+      <input type="hidden" id="airportIDForUpdate" name="airportIDForUpdate" value="<%- airportID %>">
 
       <label class="data-mgmt-col-title" id="airportInformationBlock">Fuel Storage</label></span><br>
 
       <!-- Fuel Storage Unit List -->
       <div class="data-mgmt-row">
           <div class="col-3 data-mgmt-sublabel-col">
-            <label for="fuelStorageUnits" class="data-mgmt-label">Select a Storage Unit:</label>
+            <label for="fuelStorageUnits" class="data-mgmt-label">Select a Storage Unit:</label><br><br><br>
+ <!-- TODO: Add check for permissions (currently all users have full permissions). -->
+            <button id="createNewFuelStorageUnit" name="createNewFuelStorageUnit" class="data-mgmt" form=""
+              onclick="createNewFSU();">Create New</button>
           </div>
           <div class="col-1 data-mgmt-required-col">
             <label for="fuelStorageUnits" class="data-mgmt-required"></label>
@@ -117,8 +121,18 @@
 
     </form>
     <div><br>
-      <% if ( selectedAirportID !== '' && userCanUpdateAirport ) { %>
+      <% if ( fuelStorageUnitIDRequested !== '' ) { %> 
+        <form form action="/switchboard/fuelstorageunitdelete?_method=DELETE"
+                   method="POST" id="fuelStorageUnitDelete">
+          <input type="hidden" id="fuelStorageUnitIDToDelete" name="fuelStorageUnitIDToDelete" value="<%- fuelStorageUnitIDRequested %>">
+          <input type="hidden" id="airportIDForConfirmation" name="airportIDForConfirmation" value="<%- airportID %>">
+        </form>
+      <% } %>
+      <% if ( (fuelStorageUnitIDRequested !== '' && userCanUpdateAirport) || actionRequested === 'addfuelstorageunit' ) { %>
         <button id="saveChanges" class="data-mgmt" form="airportINFSData" onclick="return validateData();">Save Changes</button>&nbsp;&nbsp;&nbsp;&nbsp;
+      <% } %>
+      <% if ( fuelStorageUnitIDRequested !== '' ) { %>
+        <button class="data-mgmt" form="fuelStorageUnitDelete" onclick=" return deleteFuelStorageUnit();">Delete This Fuel Storage Unit</button>
       <% } %>
     </div><br><br>
     <hr class="bodycol2break">
@@ -128,61 +142,173 @@
   //////////////////////////////////////////////////////////////////////
   // Configure the page
   //////////////////////////////////////////////////////////////////////
-  // Set the browser tab name (i.e., title)
-  document.title = "AMCG - AIS";
-  // Set the page title
-  document.getElementById("pageTitle").innerText = "Switchboard - Fuel Storage Information";
-  // Set the instructions
-  document.getElementById('airportInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
 
   // Load the Fuel Storage Units for the requested Airport
   var fsuRows = <%- JSON.stringify(fuelStorageUnits.rows) %>;
   loadSelectOptionsList("fuelStorageUnits", "", 0, fsuRows, "");
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Load the SELECT objects with the available options
+  var fscRows = <%- JSON.stringify(fuelStorageConditionCategoriesDDL.rows) %>;
+  loadSelectOptionsList("storageCondition", "(Not Selected)", 0, fscRows);
+  var fstRows = <%- JSON.stringify(fuelStorageTypeCategoriesDDL.rows) %>;
+  loadSelectOptionsList("storageType", "(Not Selected)", 0, fstRows);
+  var fsgRows = <%- JSON.stringify(fuelStorageFuelGradeCategoriesDDL.rows) %>;
+  loadSelectOptionsList("fuelGrade", "(Not Selected)", 0, fsgRows);
 
-  // Is a fuel storage unit being edited?
-  <% if ( fuelStorageUnitIDRequested != '' ) { %>
+  // Change the configuration of the page according to the CRUD operation requested
+  <% if ( actionRequested === 'addfuelstorageunit' ) { %>  // "Add Fuel Storage Unit"
 
-    // Load the SELECT objects with the available options
-    var fscRows = <%- JSON.stringify(fuelStorageConditionCategoriesDDL.rows) %>;
-    loadSelectOptionsList("storageCondition", "(Not Selected)", 0, fscRows);
-    var fstRows = <%- JSON.stringify(fuelStorageTypeCategoriesDDL.rows) %>;
-    loadSelectOptionsList("storageType", "(Not Selected)", 0, fstRows);
-    var fsgRows = <%- JSON.stringify(fuelStorageFuelGradeCategoriesDDL.rows) %>;
-    loadSelectOptionsList("fuelGrade", "(Not Selected)", 0, fsgRows);
+    // Set the page title
+    document.getElementById("pageTitle").innerText = "AMCG - Add Fuel Storage Unit";
+    // Set the instructions
+    document.getElementById('fuelStorageUnitInstructions').innerText = "Add the information for the new Fuel Storage Unit below, and click 'Save Changes'.";
+    // Disable the "Create New" button
+    document.getElementById('createNewFuelStorageUnit').disabled = true;
 
+  <% } else if ( fuelStorageUnitIDRequested !== '' ) { %>  // "Read/Update/Delete Fuel Storage Unit"
+
+    // Set the page title
+    document.getElementById("pageTitle").innerText = "AMCG - Fuel Storage Information";
+    // Set the instructions
+    document.getElementById('fuelStorageUnitInstructions').innerText = "Edit the entries below, and click 'Save Changes'.";
+    // LOAD RecordID into Hidden "...ToUpdate" field!
+    document.getElementById('fuelStorageUnitIDToUpdate').value = "<%- fuelStorageUnitIDRequested %>";
+    // Change the form action configuration to "update" from default "add"
+    document.getElementById('airportINFSData').action = "/switchboard/airportupdateinfs?_method=PUT";
+    document.getElementById('airportINFSData').method = "POST";
     // Load the data from the selected record
-    document.getElementById('constructionDate').value = "<%- fuelStorageUnits.rows[0].FuelStorageConstructionDate %>";
-    document.getElementById('constructionCost').value = "<%- fuelStorageUnits.rows[0].FuelStorageConstructionCost %>";
-    document.getElementById('storageCondition').value = "<%- fuelStorageUnits.rows[0].FuelStorageCondition %>";
-    document.getElementById('storageType').value = "<%- fuelStorageUnits.rows[0].FuelStorageType %>";
-    document.getElementById('fuelGrade').value = "<%- fuelStorageUnits.rows[0].FuelStorageFuelGrade %>";
-    document.getElementById('storageCapacity').value = "<%- fuelStorageUnits.rows[0].FuelStorageCapacity %>";
-
-  <% } else { %> // no fuel storage unit requested - disable all controls
-
-    document.getElementById('constructionDate').disabled = true;
-    document.getElementById('constructionCost').disabled = true;
-    document.getElementById('storageCondition').disabled = true;
-    document.getElementById('storageType').disabled = true;
-    document.getElementById('fuelGrade').disabled = true;
-    document.getElementById('storageCapacity').disabled = true;
-    document.getElementById('saveChanges').disabled = true;
+    document.getElementById('constructionDate').value = "<%- fuelStorageUnitSelected.rows[0].FuelStorageConstructionDate %>";
+    document.getElementById('constructionCost').value = "<%- fuelStorageUnitSelected.rows[0].FuelStorageConstructionCost %>";
+    document.getElementById('storageCondition').value = "<%- fuelStorageUnitSelected.rows[0].FuelStorageCondition %>";
+    document.getElementById('storageType').value = "<%- fuelStorageUnitSelected.rows[0].FuelStorageType %>";
+    document.getElementById('fuelGrade').value = "<%- fuelStorageUnitSelected.rows[0].FuelStorageFuelGrade %>";
+    document.getElementById('storageCapacity').value = "<%- fuelStorageUnitSelected.rows[0].FuelStorageCapacity %>";
 
   <% } %>
 
+  
   //////////////////////////////////////////////////////////////////////
   // Validate the data before submitting the form
   //////////////////////////////////////////////////////////////////////
   function validateData() {
     var dataAreValid = true;  // test for errors below
 
-// #2
+    //////////////////////////////////////////////////
+    // Construction Date
+    //////////////////////////////////////////////////
+    var constructionDate = document.getElementById("constructionDate").value;
+    var constructionDateErrors = document.getElementById("constructionDateErrors");
+    constructionDateErrors.innerText = '';  // reset value
+    // Date is required
+    if ( constructionDate.length == 0 ) {
+      constructionDateErrors.innerText += "Construction Date is required. ";
+    };
+    // Were errors found?
+    if ( constructionDateErrors.innerText.length === 0 ) {
+      constructionDateErrors.style.display = "none";
+    } else {
+      constructionDateErrors.style.display = "block";
+      dataAreValid = false;
+    };
 
+    //////////////////////////////////////////////////
+    // Construction Cost
+    //////////////////////////////////////////////////
+    var constructionCost = document.getElementById("constructionCost").value;
+    var constructionCostErrors = document.getElementById("constructionCostErrors");
+    constructionCostErrors.innerText = '';  // reset value
+    // Cost is required
+    if ( constructionCost.length == 0 ) {
+      constructionCostErrors.innerText += "Construction Cost is required. ";
+    } else {
+      if ( !/^[0-9.]*$/.test(constructionCost) ) {
+        constructionCostErrors.innerText += "Construction Cost must be a number. ";
+      };
+    };
+    // Were errors found?
+    if ( constructionCostErrors.innerText.length === 0 ) {
+      constructionCostErrors.style.display = "none";
+    } else {
+      constructionCostErrors.style.display = "block";
+      dataAreValid = false;
+    };
 
+    //////////////////////////////////////////////////
+    // Storage Condition
+    //////////////////////////////////////////////////
+    var storageCondition = document.getElementById('storageCondition').value;
+    var storageConditionErrors = document.getElementById("storageConditionErrors");
+    storageConditionErrors.innerText = '';  // reset value
+    // Storage Condition is required
+    if ( storageCondition == "0" ) {
+      storageConditionErrors.innerText += "Condition is required. ";
+    }
+    // Were errors found?
+    if ( storageConditionErrors.innerText.length === 0 ) {
+      storageConditionErrors.style.display = "none";
+    } else {
+      storageConditionErrors.style.display = "block";
+      dataAreValid = false;
+    };
 
+    //////////////////////////////////////////////////
+    // Storage Type
+    //////////////////////////////////////////////////
+    var storageType = document.getElementById('storageType').value;
+    var storageTypeErrors = document.getElementById("storageTypeErrors");
+    storageTypeErrors.innerText = '';  // reset value
+    // Storage Type is required
+    if ( storageType == "0" ) {
+      storageTypeErrors.innerText += "Type is required. ";
+    }
+    // Were errors found?
+    if ( storageTypeErrors.innerText.length === 0 ) {
+      storageTypeErrors.style.display = "none";
+    } else {
+      storageTypeErrors.style.display = "block";
+      dataAreValid = false;
+    };
 
+    //////////////////////////////////////////////////
+    // Fuel Grade
+    //////////////////////////////////////////////////
+    var fuelGrade = document.getElementById('fuelGrade').value;
+    var fuelGradeErrors = document.getElementById("fuelGradeErrors");
+    fuelGradeErrors.innerText = '';  // reset value
+    // Fuel Grade is required
+    if ( fuelGrade == "0" ) {
+      fuelGradeErrors.innerText += "Fuel Grade is required. ";
+    }
+    // Were errors found?
+    if ( fuelGradeErrors.innerText.length === 0 ) {
+      fuelGradeErrors.style.display = "none";
+    } else {
+      fuelGradeErrors.style.display = "block";
+      dataAreValid = false;
+    };
 
-
+    //////////////////////////////////////////////////
+    // Storage Capacity
+    //////////////////////////////////////////////////
+    var storageCapacity = document.getElementById("storageCapacity").value;
+    var storageCapacityErrors = document.getElementById("storageCapacityErrors");
+    storageCapacityErrors.innerText = '';  // reset value
+    // Storage Capacity is required
+    if ( storageCapacity.length == 0 ) {
+      storageCapacityErrors.innerText += "Storage Capacity is required. ";
+    } else {
+      if ( !/^[0-9.]*$/.test(storageCapacity) ) {
+        storageCapacityErrors.innerText += "Storage Capacity must be a number. ";
+      };
+    };
+    // Were errors found?
+    if ( storageCapacityErrors.innerText.length === 0 ) {
+      storageCapacityErrors.style.display = "none";
+    } else {
+      storageCapacityErrors.style.display = "block";
+      dataAreValid = false;
+    };
 
     //////////////////////////////////////////////////
     // If no errors, submit the changes
@@ -205,6 +331,23 @@
     location.href=newURL;
   }
 
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // Confirm the user wants to delete this Fuel Storage Unit, and process accordingly
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  function deleteFuelStorageUnit() {
+    var answer = confirm('Are you sure you want to delete this Fuel Storage Unit?');
+    if (answer !== true) {
+      return false;
+    };
+  };
 
+  //////////////////////////////////////////////////////////////////////
+  // Redirect the user to the Create New FSU page
+  //////////////////////////////////////////////////////////////////////
+  function createNewFSU() {
+    var newURL = '';
+    newURL = "/switchboard?actionrequested=addfuelstorageunit&searchairportid=<%- airportID %>&airportid=<%- airportID %>&aiscontenttype=801006";
+    location.href=newURL;
+  };
 
 </script>

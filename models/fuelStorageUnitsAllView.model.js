@@ -4,6 +4,7 @@
 
 module.exports = (sequelize, DataTypes) => {
     const FuelStorageUnitsAllView = sequelize.define('vwFuelStorageUnits', {
+        RecordID:                     DataTypes.STRING,
         LFLocationID:                 DataTypes.STRING,
         FuelStorageUnitID:            DataTypes.STRING,
         FuelStorageConstructionDate:  DataTypes.STRING,

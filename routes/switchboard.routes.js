@@ -18,7 +18,7 @@ const { check, validationResult, body } = require('express-validator');
 ///////////////////////////////////////////////////////////////////////////////////
 const { AirportsTable, AirportsCurrent, AirportsHx, AISContentTypeCategories, LFOwnerTypeCategories,
         NationalRegions, FuelStorageConditionCategories, FuelStorageTypeCategories, FuelStorageFuelGradeCategories,
-        FuelStorageUnitsAll
+        FuelStorageUnitsAll, FuelStorageUnitsTable, RunwaysCurrent
     } = require('../models/sequelize_portal.js');
 const { UsersTable, UsersAllView,
         UserPermissionsTable, UserPermissionsActive, UserPermissionsAllView, UserPermissionCategoriesAllDDL
@@ -87,7 +87,7 @@ router.get('/', requiresAuth(), async (req, res) => {
         ////////////////////////////////////////////////////
         let errorCode = 0;
         const actionRequestedValues = [
-            'editairport', 'adduser', 'edituser', 'adduserpermission', 'edituserpermission'
+            'adduser', 'edituser', 'adduserpermission', 'edituserpermission', 'addfuelstorageunit', 'editfuelstorageunit'
         ];
         let statusMessage = '';
         let logEventResult = '';
@@ -117,13 +117,17 @@ router.get('/', requiresAuth(), async (req, res) => {
         let userIDRequested = '';
         let userPermissionIDRequested = '';
         let fuelStorageUnitIDRequested = '';
-        let fuelStorageUnitIDExists = false;
+//        let fuelStorageUnitIDExists = false;
+        let fuelStorageUnitSelected = [];
+        let runwayIDRequested = '';
+        let runwaySelected = [];
         // Airport Data Mgmt DDLs and ExtHx Listboxs
         let lfOwnerTypeCategoriesDDL = [];
         let fuelStorageUnits = [];
         let fuelStorageConditionCategoriesDDL = [];
         let fuelStorageTypeCategoriesDDL = [];
         let fuelStorageFuelGradeCategoriesDDL = [];
+        let runways = [];
         // Airport Data Mgmt ExtHx Listboxs
         let lfAirportNameHx = [];
         let lfAirportAddressHx = [];
@@ -151,17 +155,19 @@ router.get('/', requiresAuth(), async (req, res) => {
         let lfAcreageHx = [];
         let lfLandSFHx = [];
 
-// Test
 /*
-console.log('Before sending test email.');
-let emailResult = await commonFx.sendEmail(process.env.EMAIL_WEBMASTER_LIST, 'Test Email - Switchboard Route',
-   'This is a test email from the AMCG switchboard.', 'This is a test email from the AMCG switchboard.');
-console.log(`emailResult: ${emailResult}`);
-console.log('After sending test email.');
-//Test
-logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
-0, 0, 0, process.env.EMAIL_WEBMASTER_LIST);
+    // Email Test Block - only needed if email carrier or configuration/library changes
+    console.log('Before sending test email.');
+    let emailResult = await commonFx.sendEmail(process.env.EMAIL_WEBMASTER_LIST, 'Test Email - Switchboard Route',
+       'This is a test email from the AMCG switchboard.', 'This is a test email from the AMCG switchboard.');
+    console.log(`emailResult: ${emailResult}`);
+    console.log('After sending test email.');
+    //Test
+    logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0, 'Success', 'Test Event Logged',
+        0, 0, 0, process.env.EMAIL_WEBMASTER_LIST);
 */
+
+        console.log(`URL requested: ${req.originalUrl}`);
         ////////////////////////////////////////////////////
         // Get the current user's profile and permissions
         ////////////////////////////////////////////////////
@@ -190,10 +196,11 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
         // Check to see if the current User is a "Data Admin" (AMCG web manager)
         userIsDataAdmin = await commonFx.checkUserPermission(currentUserID, '923010', 'CanRead');
 
+
         ////////////////////////////////////////////////////
         // Validate any query string parameters
         //   - client-side validation already occurred before form submittal
-        //   - this step only validates value formats for changes post-submittal
+        //   - this step only validates value formats for changes post-submittal (e.g., interception)
         //   - authorization verification and domain checking will occur in a subsequent step
         ////////////////////////////////////////////////////
 
@@ -320,27 +327,61 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
             fuelStorageUnitIDRequested = req.query['fuelstorageunitid'].toUpperCase();
             console.log(`querystring['fuelstorageunitid']: ${fuelStorageUnitIDRequested}`);
             if ( fuelStorageUnitIDRequested !== '' ) {  // querystring is present
-                if ( !/^[A-Za-z0-9 \-]*$/.test(fuelStorageUnitIDRequested) ) {  // Airport ID contains invalid characters
+                if ( !/^[0-9]*$/.test(fuelStorageUnitIDRequested) ) {  // Airport ID contains invalid characters
                     // Log the event
                     logEventResult = await commonFx.logEvent('Fuel Storage Unit ID Validation', '', 908, 'Failure',
                         `Fuel Storage Unit ID contains invalid characters (${fuelStorageUnitIDRequested})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
                     // Intercept this request to the generic switchboard page
                     res.redirect('/switchboard');
+                } else {  // Value is in a valid format; check to see if it exists in the database
+                    fuelStorageUnitSelected = await FuelStorageUnitsAll.findAndCountAll( { where: { RecordID: fuelStorageUnitIDRequested } } );
+                    if ( fuelStorageUnitSelected.count == 0 ) {
+                        errorCode = 941; // Non-existant ID
+                        // Log the event
+                        logEventResult = await commonFx.logEvent('FuelStorageUnitID Validation', '', 0, 'Failure',
+                            `FuelStorageUnitID does not exist (${FuelStorageUnitID})`,
+                            0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                        // Redirect the user to the error screen
+                        return res.render( 'error', {
+                            errorCode: errorCode,
+                            userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                        });
+                    };
                 };
-            } else {  // Value is in a valid format; check to see if it exists in the database
-                fuelStorageUnitIDExists = await FuelStorageUnitsAll.findAndCountAll( { where: { FuelStorageUnitID: fuelStorageUnitIDRequested } } );
-                if ( fuelStorageUnitIDExists.count == 0 ) {
-                    errorCode = 941; // Non-existant ID
+            };
+        };
+
+        // Validate the "Runway ID" search parameter, if present
+//        console.log(`req.query['runwayid']: ${req.query['runwayid']}`);
+        if ( req.query['runwayid'] !== undefined ) {
+            runwayIDRequested = req.query['runwayid'].toUpperCase();
+//            console.log(`querystring['runwayid']: ${runwayIDRequested}`);
+            if ( runwayIDRequested !== '' ) {  // querystring is present
+//                console.log(`runwaySelected.count (2-pre)`);
+                if ( !/^[0-9]*$/.test(runwayIDRequested) ) {  // Runway ID contains invalid characters
                     // Log the event
-                    logEventResult = await commonFx.logEvent('FuelStorageUnitID Validation', '', 0, 'Failure',
-                        `FuelStorageUnitID does not exist (${FuelStorageUnitID})`,
+                    logEventResult = await commonFx.logEvent('Runway ID Validation', '', 916, 'Failure',
+                        `Runway ID contains invalid characters (${runwayIDRequested})`,
                         0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
-                    // Redirect the user to the error screen
-                    return res.render( 'error', {
-                        errorCode: errorCode,
-                        userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
-                    });
+                    // Intercept this request to the generic switchboard page
+                    res.redirect('/switchboard');
+                } else {  // Value is in a valid format; check to see if it exists in the database
+//                    console.log(`runwaySelected.count (1-pre)`);
+                    runwaySelected = await RunwaysCurrent.findAndCountAll( { where: { RecordID: runwayIDRequested } } );
+//                    console.log(`runwaySelected.count (1): ${runwaySelected.count}`);
+                    if ( runwaySelected.count == 0 ) {
+                        errorCode = 942; // Non-existant ID
+                        // Log the event
+                        logEventResult = await commonFx.logEvent('Runway ID Validation', '', 0, 'Failure',
+                            `RunwayID does not exist (${runwayIDRequested})`,
+                            0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
+                        // Redirect the user to the error screen
+                        return res.render( 'error', {
+                            errorCode: errorCode,
+                            userName: ( req.oidc.user == null ? '' : req.oidc.user.email )
+                        });
+                    };
                 };
             };
         };
@@ -433,6 +474,12 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
         if ( req.query['status'] != undefined ) {
             if ( req.query['status'] === 'airportupdatesuccess' ) {
                 statusMessage = 'Airport was updated.';
+            } else if ( req.query['status'] === 'fuelstorageunitupdatesuccess' ) {
+                statusMessage = 'Fuel Storage Unit was updated.';
+            } else if ( req.query['status'] === 'fuelstorageunitdeletesuccess' ) {
+                statusMessage = 'Fuel Storage Unit was deleted.';
+            } else if ( req.query['status'] === 'fuelstorageunitcreatesuccess' ) {
+                statusMessage = 'Fuel Storage Unit was created.';
             } else if ( req.query['status'] === 'usercreatesuccess' ) {
                 statusMessage = 'User was created.';
             } else if ( req.query['status'] === 'userupdatesuccess' ) {
@@ -524,17 +571,15 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
                     '&searchairportcity=' + req.query['searchairportcity'] +
                     '&searchairportnationalregion=' + searchAirportNationalRegion);
             };
-            console.log(`matching Airports: ${matchingAirports.count}`);
-            console.log(`matchingAirportID: ${selectedAirportID}`);
         };
         
         // If a specific airport was requested, process it
         if ( selectedAirportID !== "" ) {  // a requested aiport was submitted (and validated)
             selectedAirport = airportDetails[0];
-            actionRequested = 'editairport';
+            if ( actionRequested == "" ) { // if no other action is requested, default to "edit airport"
+                actionRequested = 'editairport';
+            };
         };
-        console.log(`selectedAirportID: ${selectedAirportID}`);
-        console.log(`selectedAirport: ${selectedAirport}`);
 
 
         ////////////////////////////////////////////////////
@@ -579,10 +624,10 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
             };
         }; // END: Can the Current User see the Website Users' DDL?
 
+
         ////////////////////////////////////////////////////
         //  Website User Permissions Permissions / Details (DDL, Add Permission, Default Permission, etc.)
         ////////////////////////////////////////////////////
-//        console.log(`Checking Website User Permission Permissions for Current User (${currentUserID})`);
         const { userCanReadUserPermissionsDDL, userCanCreateUserPermissions, userPermissionsAllowedDDL,
                 userPermissionDetails, doesUserPermissionExist,
                 userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission
@@ -592,7 +637,6 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
         if ( userCanReadUserPermissionsDDL && userIDRequested.length > 0 && userPermissionIDRequested.toString().length > 0 ) {
 
             // Does the requested User Permission exist (if requested)?  If not, skip error processing
-//            console.log(`doesUserPermissionExist: (${doesUserPermissionExist})`);
             if ( !doesUserPermissionExist ) {  // User ID does not exist
                 errorCode = 938;  // Unknown User Permission
                 // Log the event
@@ -759,6 +803,25 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
                 fuelStorageConditionCategoriesDDL = await FuelStorageConditionCategories.findAndCountAll({});
                 fuelStorageTypeCategoriesDDL = await FuelStorageTypeCategories.findAndCountAll({});
                 fuelStorageFuelGradeCategoriesDDL = await FuelStorageFuelGradeCategories.findAndCountAll({});
+                console.log(`FSU actionrequested: ${actionRequested}; and FSU ID: ${req.query['fuelstorageunitid']}`);
+                if ( req.query['fuelstorageunitid'] == undefined && actionRequested !== 'addfuelstorageunit') {
+                    console.log('processing default FSU');
+                    // no Fuel Storage Unit ID requested and a new Fuel Storage unit is not being added, default to the first
+                    fuelStorageUnitSelected = fuelStorageUnits; // default to the first runway listed for the airport
+                    fuelStorageUnitIDRequested = fuelStorageUnits.rows[0].RecordID;
+                }
+                console.log(`fuelStorageUnitSelected.count: ${fuelStorageUnitSelected.count}`);
+                console.log(`fuelStorageUnitIDRequested: ${fuelStorageUnitIDRequested}`);
+                break;
+
+            case '801008': // Infrastructure - Runways
+                runways = await RunwaysCurrent.findAndCountAll({
+                    where: { LFLocationID: searchAirportID },
+                    order: [['optiontext', 'ASC']]});
+                if ( req.query['runwayid'] == undefined ) { // no Runway ID requested
+                    runwaySelected = runways; // default to the first runway listed for the airport
+                }
+                console.log(`runwaySelected.count: ${runwaySelected.count}`);
                 break;
         };
 
@@ -777,7 +840,6 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
         console.log('Rendering Switchboard');
         return res.render('switchboard', {
             // Admin data
-//             errorCode,
             actionRequested,
             statusMessage,
             // User data
@@ -794,7 +856,6 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
             userCanReadUserPermissionsDDL,
             userCanCreateUserPermissions,
             userPermissionsAllowedDDL,
-//            userPermissionID,
             // Search criteria
             searchAirportID,
             searchAirportName,
@@ -814,9 +875,12 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
             // Data Mgmt DDLs
             lfOwnerTypeCategoriesDDL,
             fuelStorageUnits,
+            fuelStorageUnitSelected,
             fuelStorageConditionCategoriesDDL,
             fuelStorageTypeCategoriesDDL,
             fuelStorageFuelGradeCategoriesDDL,
+            runways,
+            runwaySelected,
             // Data Mgmt Hx
             lfAirportNameHx,
             lfAirportAddressHx,
@@ -844,7 +908,7 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
             lfAcreageHx,
             lfLandSFHx,
             // Airport CRUD Information
-            airportID, // Used???
+            airportID,
             // Website User CRUD Information
             userID: userIDRequested.toString(),
             userIDRequested,
@@ -871,6 +935,50 @@ logEventResult = await commonFx.logEvent('Switchboard Test', 'Log Test Event', 0
 ////////////////////////////////////////////////////////////
 
 ///////////////////////////////
+// Fuel Storage Unit (Insert)
+///////////////////////////////
+router.post('/fuelstorageunitadd', requiresAuth(),
+    [
+    ],
+
+    async (req, res) => {
+
+    // Validate the input
+    const validationErrors = validationResult(req);
+
+    // If invalid data, return errors to client
+    if ( !validationErrors.isEmpty() ) {
+
+// ToDo:  Replicate the GET render code above, including parameters prep work
+
+        return res.status(400).json(validationErrors.array());
+
+    } else {
+        // Add the new data to the database in a new record, and return the newly-generated [UserID] value
+        const newFuelStorageUnit = new FuelStorageUnitsTable( {
+            LFLocationID: req.body.airportIDForUpdate,
+            FuelStorageConstructionDate: req.body.constructionDate,
+            FuelStorageCondition: req.body.storageCondition,
+            FuelStorageType: req.body.storageType,
+            FuelStorageFuelGrade: req.body.fuelGrade,
+            FuelStorageCapacity: req.body.storageCapacity,
+            FuelStorageConstructionCost: req.body.constructionCost
+        });
+        await newFuelStorageUnit.save();
+
+// TODO: Trap "save" errors
+
+        res.redirect(`/switchboard?fuelstorageunitid=${newFuelStorageUnit.RecordID}` +
+                     `&status=fuelstorageunitcreatesuccess` +
+                     `&actionrequested=editfuelstorageunit` +
+                     `&airportid=` + req.body.airportIDForUpdate +
+                     `&aiscontenttype=801006` +
+                     `&searchairportid=` + req.body.airportIDForUpdate +
+                     `&searchairportname=`);
+    };
+});
+
+///////////////////////////////
 // User (Insert)
 ///////////////////////////////
 router.post('/useradd', requiresAuth(),
@@ -890,12 +998,6 @@ router.post('/useradd', requiresAuth(),
 // ToDo:  Replicate the GET render code above, including parameters prep work
 
         return res.status(400).json(validationErrors.array());
-
-
-
-
-
-
 
     } else {
         // Add the new data to the database in a new record, and return the newly-generated [UserID] value
@@ -947,12 +1049,6 @@ router.post('/userpermissionadd', requiresAuth(),
 
         return res.status(400).json(validationErrors.array());
 
-
-
-
-
-
-
     } else {
         // Add the new data to the database in a new record, and return the newly-generated [WebsiteUserPermissionID] value
         console.log(`userID to save user permission: ${req.body.userID}`);
@@ -969,7 +1065,6 @@ router.post('/userpermissionadd', requiresAuth(),
             });
         await newUserPermission.save();
 
-// ToDo:  Error Checking
         res.redirect(`/switchboard?userpermissionid=${newUserPermission.WebsiteUserPermissionID}` +
                      `&status=userpermissioncreatesuccess` +
                      `&actionrequested=edituserpermission` +
@@ -1144,6 +1239,36 @@ router.put('/airportupdateinli', requiresAuth(), async (req, res) => {
     });
 });
 
+///////////////////////////////
+// Fuel Storage Unit (Update)
+///////////////////////////////
+router.put('/airportupdateinfs', requiresAuth(), async (req, res) => {
+
+    //ToDo: Add server-side verification
+    
+        // Get a pointer to the current record
+        const fuelStorageUnitsTableRecord = await FuelStorageUnitsTable.findOne( {
+            where: { RecordID: req.body.fuelStorageUnitIDToUpdate }
+        });
+    
+        // Update the database record with the new data
+        await fuelStorageUnitsTableRecord.update( {
+            FuelStorageConstructionDate: req.body.constructionDate,
+            FuelStorageConstructionCost: req.body.constructionCost,
+            FuelStorageCondition: req.body.storageCondition,
+            FuelStorageType: req.body.storageType,
+            FuelStorageFuelGrade: req.body.fuelGrade,
+            FuelStorageCapacity: req.body.storageCapacity,
+
+        }).then( () => {
+            res.redirect(`/switchboard?fuelstorageunitid=${fuelStorageUnitsTableRecord.RecordID}` +
+                         `&status=fuelstorageunitupdatesuccess` +
+//                         `&actionrequested=editfuelstorageunit` +
+                         `&searchairportid=` + req.body.airportIDForUpdate +
+                         `&airportid=` + req.body.airportIDForUpdate +
+                         `&aiscontenttype=801006`);
+        });
+    });
 
 ///////////////////////////////
 // User (Update)
@@ -1229,6 +1354,26 @@ router.put('/userpermissionupdate', requiresAuth(), async (req, res) => {
 ////////////////////////////////////////////////////////////
 
 ///////////////////////////////
+// Fuel Storage Unit (Delete)
+///////////////////////////////
+router.delete('/fuelstorageunitdelete', requiresAuth(), async (req, res) => {
+
+    // Get a pointer to the current record
+    const fuelStorageUnitRecord = await FuelStorageUnitsTable.findOne( {
+        where: { RecordID: req.body.fuelStorageUnitIDToDelete }
+    });
+
+    // Delete the record, based on the Record ID
+    await fuelStorageUnitRecord.destroy().then( () => {
+//        console.log(`deleting fsu: ${req.body.fuelStorageUnitIDToDelete} for airport: ${req.body.airportIDForConfirmation}`);
+        res.redirect(`/switchboard?status=fuelstorageunitdeletesuccess` +
+            `&searchairportid=` + req.body.airportIDForConfirmation +
+            `&airportid=` + req.body.airportIDForConfirmation +
+            `&aiscontenttype=801006`);
+    });
+});
+
+///////////////////////////////
 // User (Delete)
 ///////////////////////////////
 router.delete('/userdelete', requiresAuth(), async (req, res) => {
@@ -1250,14 +1395,11 @@ router.delete('/userdelete', requiresAuth(), async (req, res) => {
 router.delete('/userpermissiondelete', requiresAuth(), async (req, res) => {
 
     // Get a pointer to the current record
-//    console.log(`body.userPermissionIDToDelete: ${req.body.userPermissionIDToDelete}`);
     const userPermissionRecord = await UserPermissionsTable.findOne( {
         where: { WebsiteUserPermissionID: req.body.userPermissionIDToDelete }
     });
-//    console.log(`userPermissionRecord: ${userPermissionRecord.WebsiteUserPermissionID}`);
 
     // Delete the record
-//    console.log(`userID to redirect to after user permission deletion: ${req.body.userIDOfPermission}`)
     await userPermissionRecord.destroy().then( () => {
         res.redirect(`/switchboard?status=userpermissiondeletesuccess` +
                      `&userid=${req.body.userIDOfPermission}`);

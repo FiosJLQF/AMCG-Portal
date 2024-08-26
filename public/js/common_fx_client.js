@@ -48,9 +48,6 @@ function toggleBlockShowHide(elIcon, elBlock, elInput, statusToSet, upIconName, 
     // Get the current style properties for the Block
     const cssStyles = window.getComputedStyle(elBlock, null);
 
-//    console.log(`Changing block display for ${elBlock.id}.`);
-//    console.log(`statustoSet: ${statusToSet}`);
-
     // if the current display is hidden and the forced statusToSet <> "hide", then show
     if (statusToSet !== "hide" && cssStyles.getPropertyValue("display") !== "block"
        ) {

@@ -22,7 +22,6 @@
     <div id="filterAISInputBlock" class="filter-input-subblock">
       <div class="searchInstructions">&nbsp;&nbsp;&nbsp;(Enter criteria and click "Search".)</div>
       <span class="data-mgmt-error" id="searchAISGeneralErrors"></span>
-<!--      <form action="/switchboard/searchAIS" method="POST" id="searchAIS"> -->
         <div class="col-3 data-mgmt-label">
           <label for="searchAISLFID" class="data-mgmt-mainmenu">Airport ID:</label>
         </div>
@@ -60,7 +59,6 @@
         </div>
         <select id="searchAISContentTypeCategories" name="searchAISContentTypeCategories" class="filter-select"
             onchange="gotoAISContentType(this.value)"></select><br>
-<!--      </form> -->
   </div>
   <% } %>  <!-- End AIS menu block -->
 
@@ -129,9 +127,7 @@
   <% if ( userCanReadAISMenu ) { %>
       var regRows = <%- JSON.stringify(nationalRegionsDDL.rows) %>;
       loadSelectOptionsList("searchAISNationalRegion", "(Not Selected)", 0, regRows, "");
-//alert('National Region: ' + '<%= searchAirportNationalRegion %>');
       document.getElementById('searchAISNationalRegion').value = '<%= searchAirportNationalRegion %>';
-//alert('National Region DDL: ' + document.getElementById('searchAISNationalRegion'));
   <% } %> 
 
   // Matching Airports SELECT configuration (If the user can use the AIS)
@@ -143,7 +139,6 @@
         document.getElementById("searchAISMatchingAirportsCount").innerText = "(<%= matchingAirportsCount %> matches)";
       <% } %>      
       var lfsRows = <%- JSON.stringify(matchingAirports.rows) %>;
-//    var lfsCount = <%= matchingAirportsCount %>;
       loadSelectOptionsList("searchAISMatches", "(Not Selected)", 0, lfsRows, "");
       // if a particular airport was selected, load it
       <% if ( selectedAirportID !== '' ) { %>
@@ -317,7 +312,6 @@
     //////////////////////////////////////////////////
     // Return the validation results
     //////////////////////////////////////////////////
-//    alert('dataAreValid: ' + dataAreValid);
     return dataAreValid;
 
   };

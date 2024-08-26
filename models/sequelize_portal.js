@@ -70,6 +70,13 @@ const FuelStorageUnitsAllModel = require('./fuelStorageUnitsAllView.model');
 const FuelStorageUnitsAll = FuelStorageUnitsAllModel(sequelize, DataTypes);
 FuelStorageUnitsAll.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
 
+const RunwaysCurrentModel = require('./runwaysCurrentView.model');
+const RunwaysCurrent = RunwaysCurrentModel(sequelize, DataTypes);
+RunwaysCurrent.removeAttribute('id');  // this is an non-updatable view and does not have a PK defined
+
+const FuelStorageUnitsTableModel = require('./fuelStorageUnitsTable.model');
+const FuelStorageUnitsTable = FuelStorageUnitsTableModel(sequelize, DataTypes);
+FuelStorageUnitsTable.removeAttribute('id');  // a different, auto-populated primary key is used in the DB
 
 /**************************************************************************************************
   Export objects
@@ -85,5 +92,7 @@ module.exports = {
   FuelStorageConditionCategories,
   FuelStorageTypeCategories,
   FuelStorageFuelGradeCategories,
-  FuelStorageUnitsAll
+  FuelStorageUnitsAll,
+  FuelStorageUnitsTable,
+  RunwaysCurrent
 };

@@ -31,11 +31,8 @@ async function logEvent(processName, eventObject, eventCode, eventStatus, eventD
     eventRows, eventUserID, sendEmailTo, eventObjectID) {
 
     let logEventResult = false;
-//    console.log('Logging event now...');
 
-    //    async (req, res) => {
     try {
-//        console.log('Writing event to log...');
         const newEventLog = new EventLogsTable( {
             EventDate: Date().toString(),
             ProcessName: processName,
@@ -142,7 +139,7 @@ async function checkForNewUser( usernameToCheck ) {
                 0, 0, newUserID, '');
         }); // END: Create new User Profile
 
-    // ToDo: Send email notification
+    // Send email notification to AMCG for follow-up
     let emailResultError = sendEmail(
         process.env.EMAIL_WEBMASTER_LIST,
         `New User Account Created`,
@@ -280,16 +277,7 @@ async function getWebsiteUserPermissionsForCurrentUser( currentUserID, userIDReq
             };
         };
     }; // End: Retrieve Requested Website User profile
-/*
-    console.log(`currentUserID: ${currentUserID}`);
-    console.log(`userIDRequested: ${userIDRequested}`);
-    console.log(`userCanReadUsersDDL: ${userCanReadUsersDDL}`);
-    console.log(`userAllowedToCurrentUser: ${usersAllowedToCurrentUser}`);
-    console.log(`usersAllowedDDL.count: ${usersAllowedDDL.count}`);
-    console.log(`userCanReadUser: ${userCanReadUser}`);
-    console.log(`userCanUpdateUser: ${userCanUpdateUser}`);
-    console.log(`userCanDeleteUser: ${userCanDeleteUser}`);
-*/
+
     return { userCanReadUsersDDL, userCanCreateUsers, usersAllowedDDL,
              userDetails, doesUserExist, userCanReadUser, userCanUpdateUser, userCanDeleteUser };
 };
@@ -394,18 +382,6 @@ async function getWebsiteUserPermissionPermissionsForCurrentUser( currentUserID,
         };
     }; // End: Retrieve Requested Website User Permission details
 */
-    console.log(`currentUserID: ${currentUserID}`);
-    console.log(`userIDRequested: ${userIDRequested}`);
-    console.log(`userPermissionIDRequested: ${userPermissionIDRequested}`);
-    console.log(`userCanReadUserPermissionsDDL: ${userCanReadUserPermissionsDDL}`);
-    console.log(`userPermissionsAllowedToCurrentUser: ${userPermissionsAllowedToCurrentUser}`);
-    console.log(`userPermissionsAllowedDDL.count: ${userPermissionsAllowedDDL.count}`);
-    console.log(`userCanReadUserPermission: ${userCanReadUserPermission}`);
-    console.log(`userCanUpdateUserPermission: ${userCanUpdateUserPermission}`);
-    console.log(`userCanDeleteUserPermission: ${userCanDeleteUserPermission}`);
-    console.log(`doesUserPermissionExist: ${doesUserPermissionExist}`)
-    console.log(`userPermissionDetails[0]: ${userPermissionDetails[0]}`)
-
     return { userCanReadUserPermissionsDDL, userCanCreateUserPermissions, userPermissionsAllowedDDL,
              userPermissionDetails, doesUserPermissionExist,
              userCanReadUserPermission, userCanUpdateUserPermission, userCanDeleteUserPermission
@@ -460,10 +436,6 @@ async function sendEmail(emailRecipient, emailSubject, emailBody, emailBodyHTML)
             `Airport ID contains invalid characters (${searchAirportID})`,
             0, 0, currentUserID, process.env.EMAIL_WEBMASTER_LIST);
 */
-
-
-
-
         } else {
             console.log(`Email sent: ${info.response}`);
             result = `Email sent: ${info.response}`;

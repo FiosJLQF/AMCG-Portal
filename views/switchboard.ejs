@@ -29,7 +29,9 @@
         <%- include('partials/ais_inli') %>
       <% } else if ( selectedAISContentType === '801006' ) { %>
         <%- include('partials/ais_infs') %>
-      <% } else { %>  <!-- no specific AIS Content requested, so show the "home" page -->
+      <% } else if ( selectedAISContentType === '801008' ) { %>
+          <%- include('partials/ais_inrw') %>
+        <% } else { %>  <!-- no specific AIS Content requested, so show the "home" page -->
         <%- include('partials/ais_giai') %>
       <% } %>
     <% } else if ( actionRequested === 'edituser' || actionRequested === 'adduser') { %>

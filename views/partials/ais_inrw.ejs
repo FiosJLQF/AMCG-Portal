@@ -1,0 +1,295 @@
+<div class="col-9 bodylayout1col2-datamgmt" id="searchresultscolumn">
+    <span class="bodylayout1col2title">
+      <label class="data-mgmt-col-title" id="airportInstructions"></label></span><br>
+    <hr class="bodycol2break">
+    <label class="data-mgmt-instruction">&nbsp;&nbsp;&nbsp;<span style="color: red;">*</span> indicates a required entry</label><br><br>
+
+    <% if ( statusMessage !== '' ) { %>
+      <div>
+        <label id="statusMessage" class="form-status"><%= statusMessage %></label>
+      </div>
+    <% } %>
+
+    <!-- The data entry form container -->
+    <form action="/switchboard/airportupdateinrw?_method=PUT" method="POST" id="airportINRWData">
+
+      <input type="hidden" id="runwayIDToUpdate" name="runwayIDToUpdate"><br>
+
+      <label class="data-mgmt-col-title" id="airportInformationBlock">Runways</label></span><br><br>
+
+      <!-- Runways List -->
+      <div class="data-mgmt-row">
+          <div class="col-3 data-mgmt-sublabel-col">
+            <label for="runways" class="data-mgmt-label">Select a Runway:</label>
+          </div>
+          <div class="col-1 data-mgmt-required-col">
+            <label for="runways" class="data-mgmt-required"></label>
+          </div>
+          <div class="col-8 data-mgmt-value-col">
+            <select id="runways" name="runways" class="data-mgmt-select-multiple" multiple onchange="loadRunway(this.value);"></select><br>
+            <span class="data-mgmt-span-error" id="runwaysErrors"></span>
+          </div>
+      </div><br>
+
+      <!-- Runway ID -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayID" class="data-mgmt">Runway ID (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayID" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayID" name="runwayID" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayIDErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Runway Length -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayLength" class="data-mgmt">Length (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayLength" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayLength" name="runwayLength" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayLengthErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Runway Width -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayWidth" class="data-mgmt">Width (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayWidth" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayWidth" name="runwayWidth" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayWidthErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Runway Surface Type -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwaySurfaceType" class="data-mgmt">Surface Type (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwaySurfaceType" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwaySurfaceType" name="runwaySurfaceType" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwaySurfaceTypeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Runway Surface Treatment -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwaySurfaceTreatment" class="data-mgmt">Surface Treatment (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwaySurfaceTreatment" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwaySurfaceTreatment" name="runwaySurfaceTreatment" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwaySurfaceTreatmentErrors"></span>
+        </div>
+      </div><br>
+
+      <label class="data-mgmt-col-title" id="weightBearingCapacityBlock">&nbsp;&nbsp;Weight Bearing Capacity</label></span><br><br>
+
+      <!-- Pavement Class -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayPavementClass" class="data-mgmt">&nbsp;Pavement Class (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayPavementClass" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayPavementClass" name="runwayPavementClass" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayPavementClassErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Single Wheel -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwaySingleWheel" class="data-mgmt">&nbsp;Single Wheel (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwaySingleWheel" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwaySingleWheel" name="runwaySingleWheel" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwaySingleWheelErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Dual Wheel -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayDualWheel" class="data-mgmt">&nbsp;Dual Wheel (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayDualWheel" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayDualWheel" name="runwayDualWheel" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayDualWheelErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Dual Tandem Tandem Wheel -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayDualTandemWheel" class="data-mgmt">&nbsp;Dual Tandem Wheel (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayDualTandemWheel" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayDualTandemWheel" name="runwayDualTandemWheel" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayDualTandemWheelErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- Double Dual Tandem Tandem Tandem Wheel -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayDblDualTandemWheel" class="data-mgmt">&nbsp;Dbl Dual Tandem Wheel (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayDblDualTandemWheel" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayDblDualTandemWheel" name="runwayDblDualTandemWheel" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayDblDualTandemWheelErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- ILS #1 Runway End -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayILS1End" class="data-mgmt">ILS #1 Runway End (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayILS1End" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayILS1End" name="runwayILS1End" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayILS1EndErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- ILS #1 Runway Type -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayILS1Type" class="data-mgmt">ILS #1 Runway Type (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayILS1Type" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayILS1Type" name="runwayILS1Type" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayILS1TypeErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- ILS #2 Runway End -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayILS2End" class="data-mgmt">ILS #2 Runway End (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayILS2End" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayILS2End" name="runwayILS2End" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayILS2EndErrors"></span>
+        </div>
+      </div><br>
+
+      <!-- ILS #2 Runway Type -->
+      <div class="data-mgmt-row">
+        <div class="col-3 data-mgmt-sublabel-col">
+          <label for="runwayILS2Type" class="data-mgmt">ILS #2 Runway Type (FAA):</label>
+        </div>
+        <div class="col-1 data-mgmt-required-col">
+          <label for="runwayILS2Type" class="data-mgmt-required"></label>
+        </div>
+        <div class="col-8 data-mgmt-value-col">
+          <input type="text" id="runwayILS2Type" name="runwayILS2Type" class="data-mgmt-text-quarter"><br>
+          <span class="data-mgmt-error" id="runwayILS2TypeErrors"></span>
+        </div>
+      </div><br>
+
+    </form><br><br>
+    <hr class="bodycol2break">
+
+<script>
+
+  //////////////////////////////////////////////////////////////////////
+  // Configure the page
+  //////////////////////////////////////////////////////////////////////
+  // Set the browser tab name (i.e., title)
+  document.title = "AMCG - AIS";
+  // Set the page title
+  document.getElementById("pageTitle").innerText = "Switchboard - Runways";
+
+  // Load the Runways for the requested Airport
+  var rwyRows = <%- JSON.stringify(runways.rows) %>;
+  loadSelectOptionsList("runways", "", 0, rwyRows, "");
+
+  // Load the data from the selected Runway
+  document.getElementById('runwayID').value = "<%- runwaySelected.rows[0].RWID %>";
+  document.getElementById('runwayLength').value = "<%- runwaySelected.rows[0].RWLength %>";
+  document.getElementById('runwayWidth').value = "<%- runwaySelected.rows[0].RWWidth %>";
+  document.getElementById('runwaySurfaceType').value = "<%- runwaySelected.rows[0].RWSurfaceType %>";
+  document.getElementById('runwaySurfaceTreatment').value = "<%- runwaySelected.rows[0].RWSurfaceTreatment %>";
+  document.getElementById('runwayPavementClass').value = "<%- runwaySelected.rows[0].RWPavementClass %>";
+  document.getElementById('runwaySingleWheel').value = "<%- runwaySelected.rows[0].RWWBCSingle %>";
+  document.getElementById('runwayDualWheel').value = "<%- runwaySelected.rows[0].RWWBCDual %>";
+  document.getElementById('runwayDualTandemWheel').value = "<%- runwaySelected.rows[0].RWWBCDualTandem %>";
+  document.getElementById('runwayDblDualTandemWheel').value = "<%- runwaySelected.rows[0].RWWBCDblDualTandem %>";
+  document.getElementById('runwayILS1End').value = "<%- runwaySelected.rows[0].ILS1End %>";
+  document.getElementById('runwayILS1Type').value = "<%- runwaySelected.rows[0].ILS1Type %>";
+  document.getElementById('runwayILS2End').value = "<%- runwaySelected.rows[0].ILS2End %>";
+  document.getElementById('runwayILS2Type').value = "<%- runwaySelected.rows[0].ILS2Type %>";
+
+  // Disable all controls
+  document.getElementById('runwayID').disabled = true;
+  document.getElementById('runwayLength').disabled = true;
+  document.getElementById('runwayWidth').disabled = true;
+  document.getElementById('runwaySurfaceType').disabled = true;
+  document.getElementById('runwaySurfaceTreatment').disabled = true;
+  document.getElementById('runwayPavementClass').disabled = true;
+  document.getElementById('runwaySingleWheel').disabled = true;
+  document.getElementById('runwayDualWheel').disabled = true;
+  document.getElementById('runwayDualTandemWheel').disabled = true;
+  document.getElementById('runwayDblDualTandemWheel').disabled = true;
+  document.getElementById('runwayILS1End').disabled = true;
+  document.getElementById('runwayILS1Type').disabled = true;
+  document.getElementById('runwayILS2End').disabled = true;
+  document.getElementById('runwayILS2Type').disabled = true;
+
+  //////////////////////////////////////////////////////////////////////
+  // Redirect the user to the Runway selected
+  //////////////////////////////////////////////////////////////////////
+  function loadRunway(selectedRunwayID) {
+    var newURL = '';
+    newURL = 'switchboard?' +
+             'airportid=' + document.getElementById('searchAISLFID').value +
+             '&aiscontenttype=801008' +
+             '&runwayid=' + selectedRunwayID +
+             '&searchairportid=' + document.getElementById('searchAISLFID').value +
+             '&searchairportname=';
+    location.href=newURL;
+  }
+
+</script>
