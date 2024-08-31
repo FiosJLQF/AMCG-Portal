@@ -24,7 +24,7 @@
     "express-session": "^1.18.0",
     "express-validator": "^7.1.0",
     "heroku": "^8.1.9",
-    "heroku-cli": "^6.11.10",
+    "heroku-cli": "^7.0.9",
     "html-entities": "^2.5.2",
     "i": "^0.3.7",
     "jquery": "^3.7.1",
